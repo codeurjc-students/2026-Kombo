@@ -1,6 +1,6 @@
-# 2026-Kombo : Una aplicación Web para gestión de pedidos, caja e inventario 
+# 2026-Kombo : Una aplicación web para gestión de pedidos, caja e inventario 
 
-**Kombo** es una aplicación web de punto de venta (TPV) y pedidos para un restaurante de comida rápida. Los clientes, registrados y anónimos, pueden consultar la carta, personalizar sus productos y hacer el pedido para coomer en el local, llevar o recibir a domicilio. Los empleaos atienden en el mostrados con el mismo catálogo, siguen la cola de pedidos pendientes y finalizados, consultan el stock y hacen el cierre de caja. El administrador gestiona la carta, el inventaeio, los empleados y las estadísticas de ventas. Cada pedido descuenta automáticamente del inventario los ingredientes consumidos, el carrito recomienda productos y cada pedido genera un ticket en pdf. 
+**Kombo** es una aplicación web de punto de venta (TPV) y pedidos para un restaurante de comida rápida. Los clientes, registrados y anónimos, pueden consultar la carta, personalizar sus productos y hacer el pedido para comer en el local, llevar o recibir a domicilio. Los empleados atienden en el mostrador con el mismo catálogo, siguen la cola de pedidos pendientes y finalizados, consultan el stock y hacen el cierre de caja. El administrador gestiona la carta, el inventario, los empleados y las estadísticas de ventas. Cada pedido descuenta automáticamente del inventario los ingredientes consumidos, el carrito recomienda productos y cada pedido genera un ticket en PDF. 
 
 
 
@@ -17,7 +17,7 @@
 
 3. **Pantalla de carrito**
 ![Cart Page](images/cartPage.png)
-> Página accesible para usuarios anónimos, clientes registrados y empleados. Desde aquí se podrá acceder a la página de checkout y a a la de detalle de los productos recomendados. 
+> Página accesible para usuarios anónimos, clientes registrados y empleados. Desde aquí se podrá acceder a la página de checkout y a la de detalle de los productos recomendados. 
 
 4. **Pantalla de checkout**
 ![Checkout Page](images/checkout.png)
@@ -40,7 +40,7 @@
 > Pantalla de inventario que será accesible para empleados. Se podrá navegar a la página principal, a la de panel de pedidos y al cierre de caja. 
 
 9. **Pantalla de cierre de caja**
-![End of dat balancing Page](images/eodBalancingPage.png)
+![End of day balancing Page](images/eodBalancingPage.png)
 > Pantalla de cierre de caja que será accesible para empleados. Se podrá navegar a la página principal, a la de inventario y al panel de pedidos. 
 
 10. **Pantalla de dashboard general**
@@ -49,7 +49,7 @@
 
 11. **Pantalla de gestión de productos**
 ![Product management Page](images/productManagePage.png)
-> Pantalla de gesntión de productos que solo será accesible por el administrador. Se podrá navegar a la página de dashboard general, de gestión de inventario y de gestión de usuarios. 
+> Pantalla de gestión de productos que solo será accesible por el administrador. Se podrá navegar a la página de dashboard general, de gestión de inventario y de gestión de usuarios. 
  
 12. **Pantalla de gestión de inventario**
 ![Product Management Page](images/productManagePage.png)
@@ -61,7 +61,7 @@
 
 **Flujo de navegación**
 ![General Flow](images/GeneralFlow.png)
-> Diagrama de navegación de la aplicación, en el que se muestran las páginas a las que puede acceder cada tipo de usuario. El azul representa el flujo de los usuarios anónimos, el verde el de los clientes registrados y el naranja el de los empleados. Los clieentes registrados y los empleados también pueden realizar el flujo de los usuarios anónimos, y los empleados pueden realizar además el de los clientes registrados. 
+> Diagrama de navegación de la aplicación, en el que se muestran las páginas a las que puede acceder cada tipo de usuario. El azul representa el flujo de los usuarios anónimos, el verde el de los clientes registrados y el naranja el de los empleados. Los clientes registrados y los empleados también pueden realizar el flujo de los usuarios anónimos, y los empleados pueden realizar además el de los clientes registrados. 
 
 ![Admin Flow](images/AdminFlow.png)
 > Diagrama de navegación de los administradores. 
@@ -77,11 +77,11 @@
 #### **Objetivos funcionales**
 - **OF1.** Permitir a cualquier usuario, incluso anónimo, consultar la carta por categorías, con buscador y filtros, y ver el detalle de cada producto. 
 
-- **OF2.** Permitir montar un pedido con carrito, personalizar productos (quitando o añadiendo ingredientes), elegir si se come en el local, se lleva o se recibe a domicilio y financiarlo con un checkout con pago simulado. 
+- **OF2.** Permitir montar un pedido con carrito, personalizar productos (quitando ingredientes), elegir si se come en el local, se lleva o se recibe a domicilio y finalizarlo con un checkout con pago simulado. 
 
-- **OF3.** Ofrecer a los clientes registrados un perfil con datos personales, direcciones guardadas, historial de pedidos y la opcion de repetir el último pedido.
+- **OF3.** Ofrecer a los clientes registrados un perfil con datos personales, direcciones guardadas, historial de pedidos y la opción de repetir el último pedido.
 
-- **OF4.** Ofrecer a los empleados la toma de pedidos en mostrador, un panel de pedidos pendiente y finalizados, la consulta de inventario con avisos de bajo stock y el cierre de caja con desglose por tarjeta y efectivo. 
+- **OF4.** Ofrecer a los empleados la toma de pedidos en mostrador, un panel de pedidos pendientes y finalizados, la consulta de inventario con avisos de bajo stock y el cierre de caja con desglose por tarjeta y efectivo. 
 
 - **OF5.** Permitir al administrador gestionar productos y combos, ingredientes, entradas de proveedor y empleados. 
 
@@ -96,25 +96,25 @@
 
 #### **Objetivos técnicos**
 
-- **OT1.** Desarrollar una API Rest con Spring Boot que exponga todos los recursos y aplique la lógica de negocio. 
+- **OT1.** Desarrollar una API REST con Spring Boot que exponga todos los recursos y aplique la lógica de negocio. 
 
 - **OT2.** Desarrollar una SPA con React que consuma la API y adapte la interfaz según el rol del usuario. 
 
-- **OT3.** Persistir los datos en MySQL (incluidas las fotos) con un modelo realcional normalizado. 
+- **OT3.** Persistir los datos en MySQL (incluidas las fotos) con un modelo relacional normalizado. 
 
 - **OT4.** Implementar autenticación y autorización por roles y control de acceso por propietario de los datos. 
 
 - **OT5.** Integrar las tecnologías complementarias: generación de tickets descargables en PDF y envío de correo electrónico al crear una cuenta. 
 
-- **OT6.** Automatizar la construcción y las pruebas con Github Actionas y contenerizar la aplicación con DOcker. 
+- **OT6.** Automatizar la construcción y las pruebas con Github Actions y contenerizar la aplicación con Docker. 
 
-- **OT7.** Aplicaar análisis estático de código con SonarQube integrado en el pipeline de integración continua. 
+- **OT7.** Aplicar análisis estático de código con SonarQube integrado en el pipeline de integración continua. 
 
 - **OT8.** Escribir pruebas automatizadas sobre la lógica de negocio y la API. 
 
 ### Metodología
 
-El desarrollo se organiza en cinco fases con entrega final aproximada el 10 de enero. Las fases de implementación siguen el orden de las funcionaliades: primero las básicas, después las intermedias y por último las avanzadas. 
+El desarrollo se organiza en cinco fases con entrega final aproximada el 10 de enero. Las fases de implementación siguen el orden de las funcionalidades: primero las básicas, después las intermedias y por último las avanzadas. 
 
 <!-- TODO: las fechas de las fases 2-5 son una propuesta; ajústalas con tu tutor -->
 | Fase | Descripción | Fechas |
@@ -173,13 +173,13 @@ gantt
 **Usuario anónimo**
 - Ver la carta por categorías en la página principal. 
 
-- Ver el detalle de los productos de un producto o combo.
+- Ver el detalle de un producto o combo.
 
 - Añadir productos al carrito y ver el carrito con cantidades, subtotal, gastos de envío y total. 
 
 - Elegir si el pedido es para comer en el local, para llevar o a domicilio. 
 
-- Realizar el checkout rellenando un formulario de ocontacto (con dirección y datos personales).
+- Realizar el checkout rellenando un formulario de contacto (con dirección y datos personales).
 
 - Pagar mediante pago simulado (tarjeta o efectivo) y ver la confirmación con el número de pedido. 
 
@@ -188,7 +188,7 @@ gantt
 **Usuario registrado**
 - Todas las funcionalidades del usuario anónimo, pero sin rellenar el formulario de checkout dado que se usan los datos guardados. 
 
-- Perfil básico: datos persinales, cambio de contraseña y direcciones guardadas. 
+- Perfil básico: datos personales, cambio de contraseña y direcciones guardadas. 
 
 - Consultar el historial de pedidos.
 
@@ -198,8 +198,8 @@ gantt
 
 - Toma de pedidos en mostrador. 
 
-**Administración**
-- Gestión de productos y comboos: CRUD básico. 
+**Administrador**
+- Gestión de productos y combos: CRUD básico. 
 - Gestión de usuarios: CRUD básico de empleados. 
 
 
@@ -217,9 +217,9 @@ gantt
 
 - Barra lateral desplegable para ver el pedido actual sin salir de la página. 
 
-- Descarga del ticker de pedido en PDF.
+- Descarga del ticket de pedido en PDF.
 
-**Cliente registrado**
+**Usuario registrado**
 - Repetir el último pedido desde el perfil. 
 
 **Empleado**
@@ -250,7 +250,7 @@ gantt
 4. **Entidad 4**: Producto. 
 5. **Entidad 5**: Imagen. 
 
-- Usuarios - Pedido (1:N) : un usuario puede realizar varios pedidos, pero un pedido pertenece a un usuario (los pedidos anónimos no tendrán usuario). 
+- Usuario - Pedido (1:N) : un usuario puede realizar varios pedidos, pero un pedido pertenece a un usuario (los pedidos anónimos no tendrán usuario). 
 
 - Pedido - Producto (N:N) : un pedido está formado por N productos y un producto puede pertenecer a N pedidos. 
 
@@ -258,7 +258,7 @@ gantt
 
 - Imagen - Usuario (1:1) : cada usuario tiene asociada una imagen y una imagen pertenece a un usuario. 
 
-- Imagen - Producto (1:1) : cada producto tiene asociada una imagen y una imagen pertece a un producto. 
+- Imagen - Producto (1:1) : cada producto tiene asociada una imagen y una imagen pertenece a un producto. 
 
 #### Atributos de las entidades
 **Usuario**
@@ -341,13 +341,13 @@ gantt
 - **Envío de emails** a los usuarios cuando se registren en la web. 
 
 
-### Algoritmo de consulta avanza 
-- **Recomendaciones del carrito**: se recomendará a los usuarios pedidos que pueden comprar según cuales son los productos más comprados junto con los que ya hay en el carrito. 
+### Algoritmo de consulta avanzada 
+- **Recomendaciones del carrito**: se recomendará a los usuarios productos que pueden comprar según cuales son los productos más comprados junto con los que ya hay en el carrito. 
 
 
 ### Gráficos
 - **Gráfico de ventas diarias**: será un gráfico de barras en el que se mostrará el número de pedidos vendidos por hora.
-- **Gráfico de productos más vendidos**: será un gráfico de sectores en el que se mostrará los produtos más vendidos ese mes.
+- **Gráfico de productos más vendidos**: será un gráfico de sectores en el que se mostrará los productos más vendidos ese mes.
 
 ## 🤖 **Uso de Herramientas de IA**
 
