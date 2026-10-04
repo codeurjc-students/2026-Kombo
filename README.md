@@ -311,7 +311,7 @@ gantt
 | :----- | :-----: | :-----: | :------: | :-----------: |
 | Consultar la carta, el detalle de producto y las recomendaciones | X | X | X | X |
 | Registrarse | X | | | |
-| Iniciar sesión | | X | | |
+| Iniciar sesión | | X | X | X |
 | Crear un pedido y pagarlo (pago simulado) | X | X | X | |
 | Hacer el checkout sin rellenar el formulario de datos | | X | | |
 | Descargar el ticket PDF de su propio pedido | X | X | | |
