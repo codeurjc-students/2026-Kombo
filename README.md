@@ -361,7 +361,7 @@ Resumen de las herramientas de IA utilizadas en cada una de las fases del proyec
 | Fase 4: Funcionalidades avanzadas | Pendiente | | |
 | Fase 5: Cierre | Pendiente | | |
 
-> El fichero [AI_USAGE.md](AI_USAGE.md) contiene información detallada sobre cada uso: fecha, fase, objetivo, herramienta, versión, configuración, forma de uso, complementos y ficheros de contexto.
+> El fichero [AI_USAGE.md](docs/AI_USAGE.md) contiene información detallada sobre cada uso: fecha, fase, objetivo, herramienta, versión, configuración, forma de uso, complementos y ficheros de contexto.
 
 
 ## Autor 
