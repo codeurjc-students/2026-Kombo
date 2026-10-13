@@ -1,0 +1,17 @@
+# AI Usage Log
+
+This document records the use of artificial intelligence tools during the development of this Final Degree Project. Each entry states the date, phase, tool and version, configuration and how it was used. All AI-generated content has been reviewed, adapted and validated by the author, who is responsible for the final result.
+
+| Date | Phase | Tool | Version | Configuration | How it was used |
+| :--- | :---- | :--- | :------ | :------------ | :-------------- |
+| 2026-09-29 | Phase 1 | Claude (Anthropic) | Claude Sonnet 5.5 | — | Restructuring of the format and order of README.md. |
+| 2026-10-01 | Phase 1 | Claude (Anthropic) | Claude Sonnet 5.5 | Same session | Formal rewording of the "Author" section. Rewrite of the permissions section as a table. |
+| 2026-10-04 | Phase 1 | Claude (Anthropic) | Claude Sonnet 5.5 | Same session | Descriptions of the screen mockups and of the navigation diagram. Gantt chart of the project schedule. |
+| 2026-10-07 | Phase 2 | Claude (Anthropic) | claude-opus-5-5 | Claude app chat with agentic mode (file reading and code execution), inside a Claude Project containing the TFG guide | **Objective:** understand the Phase 2 requirements and plan the work. The repository and the TFG guide were shared, and the AI explained what Phase 2 requires and proposed an ordered task plan. The author kept her own schedule and phase dates. **Context files:** TFG guide (PDF), repository (zip). |
+| 2026-10-13 | Phase 2 | Claude (Anthropic) | claude-opus-5-5 | Same configuration | **Objective:** create the Phase 2 GitHub issues and set up the database and backend skeleton. The AI proposed the list of GitHub issues, which the author created and organised in the project board. Errors were diagnosed by pasting the console output: a typo in the compose file, a port 3306 conflict with a local MySQL server and VS Code not loading the Maven project. **Context files:** same as above. |
+
+
+
+## Mantenimiento
+
+Este registro se actualiza en cada sesión de trabajo en la que se utilice IA.

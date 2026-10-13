@@ -1,0 +1,15 @@
+name: kombo
+services:
+  db:
+    image: mysql:8.4
+    container_name: kombo-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: kombo
+    ports:
+      - "3306:3306"
+    volumes:
+      - kombo-db-data:/var/lib/mysql
+
+volumes:
+  kombo-db-data:
