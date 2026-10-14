@@ -1,0 +1,40 @@
+openapi: 3.1.0
+info:
+  title: Kombo REST API
+  description: "REST API for Kombo, a web application for fast food restaurant orders,\
+    \ cash register and inventory management."
+  version: 0.0.1
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /api/v1/products:
+    get:
+      tags:
+      - product-controller
+      operationId: getProducts
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
