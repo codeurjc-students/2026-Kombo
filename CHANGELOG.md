@@ -14,6 +14,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - REST endpoint `GET /api/v1/products` to list all products.
 - OpenAPI documentation of the REST API with Swagger UI (`/swagger-ui.html`).
 - OpenAPI specification and HTML documentation in `docs/api/`.
+- React frontend project in `frontend/`, created with Vite. 
+- Home page that lists the products returned by the REST API. 
+
 
 ## Phase 1 - 2026-10-04
 
