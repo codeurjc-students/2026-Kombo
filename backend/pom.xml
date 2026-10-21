@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<selenium.version>4.49.0</selenium.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -75,6 +76,12 @@
 			<version>6.2.0</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>${selenium.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -115,7 +122,28 @@
 					</execution>
 				</executions>
 			</plugin>
-					</plugins>
+		</plugins>
 	</build>
+
+	<profiles>
+    <!-- UI system tests with Selenium: .\mvnw verify -Pe2e
+         Requires the backend (port 8080) and the frontend (port 5173) running -->
+    	<profile>
+			<id>e2e</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-failsafe-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*E2E.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>

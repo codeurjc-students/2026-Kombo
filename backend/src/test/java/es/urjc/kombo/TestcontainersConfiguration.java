@@ -10,7 +10,7 @@ import org.testcontainers.utility.DockerImageName;
 // Test configuration for a real MysQL databse temporary Docker container
 // for integration and system tests
 @TestConfiguration(proxyBeanMethods = false)
-public class TestcontainersConfigurationn {
+public class TestcontainersConfiguration {
     @Bean
     @ServiceConnection 
     MySQLContainer mysqlContainer() {
