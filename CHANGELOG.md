@@ -18,6 +18,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Home page that lists the products returned by the REST API. 
 - Backend automated tests: unit test of the product service, integration test with TestContainers and REST API system test with Rest Assured.
 - Backend test coverage report with JaCoCo.
+- Frontend automated tests with Vitest and Testint Library: unit and integration tests of the product list. 
+- Frontend test coverage report.
+- UI system test with Selenium, run with the 'e2e' Maven profile.
+
+### Changed
+- - The frontend product service accepts a configurable API base URL (`VITE_API_URL`) for the tests.
 
 ### Removed
 - Default Spring Boot context test, replaced by the REST API system test. 
