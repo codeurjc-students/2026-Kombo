@@ -16,6 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - OpenAPI specification and HTML documentation in `docs/api/`.
 - React frontend project in `frontend/`, created with Vite. 
 - Home page that lists the products returned by the REST API. 
+- Backend automated tests: unit test of the product service, integration test with TestContainers and REST API system test with Rest Assured.
+
+### Removed
+- Default Spring Boot contect test, replaced by the REST API system test. 
 
 
 ## Phase 1 - 2026-10-04
