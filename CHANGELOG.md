@@ -17,9 +17,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - React frontend project in `frontend/`, created with Vite. 
 - Home page that lists the products returned by the REST API. 
 - Backend automated tests: unit test of the product service, integration test with TestContainers and REST API system test with Rest Assured.
+- Backend test coverage report with JaCoCo.
 
 ### Removed
-- Default Spring Boot contect test, replaced by the REST API system test. 
+- Default Spring Boot context test, replaced by the REST API system test. 
 
 
 ## Phase 1 - 2026-10-04

@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
-import es.urjc.kombo.TestcontainersConfigurationn;
+import es.urjc.kombo.TestcontainersConfiguration;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ProductRepository;
 
 @SpringBootTest 
-@Import (TestcontainersConfigurationn.class)
+@Import (TestcontainersConfiguration.class)
 public class ProductServiceIT {
     @Autowired 
     private ProductService productService;
@@ -32,7 +32,7 @@ public class ProductServiceIT {
     }
 
     @Test 
-    void findAllReturnsPrductsSortedInDatabase(){
+    void findAllReturnsProductsStoredInDatabase(){
         List<Product> result = productService.findAll();
 
         assertThat(result).extracting(Product::getName).containsExactlyInAnyOrder("Test Burger", "Test Drink");

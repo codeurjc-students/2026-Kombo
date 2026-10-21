@@ -8,7 +8,6 @@ import java.util.List;
 
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ProductRepository;
-import org.hibernate.annotations.Changelog.Timestamp;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,9 +25,9 @@ class ProductServiceTest {
     private ProductService productService;
 
     @Test 
-    void finalAllReturnsAllProductsFromRepository(){
+    void findAllReturnsAllProductsFromRepository(){
         List<Product> products = List.of(new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers"),
-                                new  Product("Test Drink", new BigDecimal("2.70"), "Test description", "Burgers"));
+                                new  Product("Test Drink", new BigDecimal("2.70"), "Test description", "Drinks"));
         when(productRepository.findAll()).thenReturn(products);
 
         List<Product> result = productService.findAll();
