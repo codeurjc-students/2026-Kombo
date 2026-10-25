@@ -8,8 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.testcontainers.utility.TestcontainersConfiguration;
-
+import es.urjc.kombo.TestcontainersConfiguration;
 import io.restassured.RestAssured;
 
 @SpringBootTest (webEnvironment = WebEnvironment.RANDOM_PORT)
