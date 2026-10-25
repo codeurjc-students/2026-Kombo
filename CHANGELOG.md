@@ -21,6 +21,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Frontend automated tests with Vitest and Testint Library: unit and integration tests of the product list. 
 - Frontend test coverage report.
 - UI system test with Selenium, run with the 'e2e' Maven profile.
+- Basic CI workflow with GitHub Actions: build, lint and unit tests on every push to a feature branch.
+- Full CI workflow with GitHub Actions: all tests on every pull request to `main`.
 
 ### Changed
 - - The frontend product service accepts a configurable API base URL (`VITE_API_URL`) for the tests.
