@@ -1,0 +1,152 @@
+# Full quality control: runs on every pull request to main.
+# Runs all the tests (unit, integration and system) of backend and frontend.
+# main is protected so a pull request cannot be merged if this workflow fails.
+name: Full quality control
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  backend:
+    name: Full - Backend all tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Make Maven wrapper executable
+        run: chmod +x mvnw
+
+      # "verify" runs unit tests (*Test) and integration/system tests (*IT).
+      # Testcontainers uses the Docker engine of the GitHub runner.
+      - name: Run all backend tests
+        run: ./mvnw -B verify
+
+      - name: Upload backend coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco
+
+  frontend:
+    name: Full - Frontend build and unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Run unit tests
+        run: npm test
+
+  e2e:
+    name: Full - Frontend integration and UI system tests
+    runs-on: ubuntu-latest
+    # MySQL database for the backend, same configuration as docker-compose-db.yml
+    services:
+      db:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: kombo
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -ppassword"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Make Maven wrapper executable
+        working-directory: backend
+        run: chmod +x mvnw
+
+      # The jar is copied out of target/ so the next Maven run cannot overwrite it
+      - name: Build backend
+        working-directory: backend
+        run: |
+          ./mvnw -B package -DskipTests
+          cp target/kombo-*.jar "$RUNNER_TEMP/kombo.jar"
+
+      - name: Start backend
+        run: |
+          nohup java -jar "$RUNNER_TEMP/kombo.jar" > "$RUNNER_TEMP/backend.log" 2>&1 &
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8080/api/v1/products > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Backend did not start" && cat "$RUNNER_TEMP/backend.log" && exit 1
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      # Vitest "integration" project: real component against the real REST API
+      - name: Run frontend integration tests
+        working-directory: frontend
+        run: npm run test:integration
+
+      - name: Start frontend
+        working-directory: frontend
+        run: |
+          nohup npm run dev > "$RUNNER_TEMP/frontend.log" 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5173 > /dev/null && exit 0
+            sleep 2
+          done
+          echo "Frontend did not start" && cat "$RUNNER_TEMP/frontend.log" && exit 1
+
+      # Selenium test (*E2E) with headless Chrome, preinstalled on the runner
+      - name: Run UI system tests
+        working-directory: backend
+        run: ./mvnw -B verify -Pe2e
+
+      - name: Show backend log
+        if: failure()
+        run: cat "$RUNNER_TEMP/backend.log"
