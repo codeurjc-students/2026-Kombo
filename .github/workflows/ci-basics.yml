@@ -91,7 +91,7 @@ jobs:
         working-directory: backend
         run: |
           chmod +x mvnw
-          ./mvnw -B test jacoco:report
+          ./mvnw -B verify
 
       # lcov coverage of the frontend unit tests
       - name: Frontend unit tests with coverage
