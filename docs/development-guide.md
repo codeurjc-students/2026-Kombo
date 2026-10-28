@@ -9,6 +9,8 @@
   - [Deployment](#deployment)
   - [REST API](#rest-api)
 - [Quality control](#quality-control)
+  - [Automated tests](#automated-tests)
+  - [Static code analysis](#static-code-analysis)
 - [Development process](#development-process)
   - [Task management](#task-management)
   - [Git](#git)
@@ -28,7 +30,7 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 | **Type** | Web SPA with REST API |
 | **Technologies** | Java, Spring Boot, MySQL, JavaScript, React |
 | **Tools** | Visual Studio Code, Maven, Node.js and npm, Vite, Git, GitHub, Docker, Postman |
-| **Quality control** | Unit, integration and system tests of server and client (JUnit, Mockito, Testcontainers, Rest Assured, Selenium, Vitest and Testing Library), test coverage (JaCoCo and Vitest) and continuous integration (GitHub Actions) |
+| **Quality control** | Unit, integration and system tests of server and client (JUnit, Mockito, Testcontainers, Rest Assured, Selenium, Vitest and Testing Library), test coverage (JaCoCo and Vitest), static code analysis (SonarQube Cloud) and continuous integration (GitHub Actions) |
 | **Deployment** | The application is not packaged yet. During development, the database runs in a Docker container |
 | **Development process** | Iterative and incremental, Git with GitHub Flow, task management with GitHub Issues and GitHub Projects, continuous integration with GitHub Actions |
 
@@ -51,6 +53,7 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 - **Postman**: used to make requests to the REST API. https://www.postman.com
 - **Redocly CLI**: generates the HTML documentation of the REST API from the OpenAPI specification. https://redocly.com/docs/cli
 - **ESLint**: checks the JavaScript code of the client. https://eslint.org
+- **SonarQube Cloud**: static code analysis service that detects bugs, vulnerabilities, code smells and duplicated code, and shows the test coverage. https://sonarcloud.io
 
 ## Architecture
 
@@ -74,6 +77,8 @@ flowchart LR
 The documentation of the REST API, generated with OpenAPI, can be seen here: [REST API documentation](https://raw.githack.com/codeurjc-students/2026-Kombo/main/docs/api/api-docs.html).
 
 ## Quality control
+
+### Automated tests
 
 The server and the client have unit, integration and system tests. In this phase, the only feature implemented is a minimal version of *View the menu by category on the home page* (basic features, anonymous user): the home page shows the list of sample products. All the tests check this feature:
 
@@ -101,6 +106,27 @@ Statistics:
 
 ![Client coverage](images/coverage-frontend.png)
 
+### Static code analysis
+
+The code is analysed with [SonarQube Cloud](https://sonarcloud.io/project/overview?id=codeurjc-students_2026-Kombo) on every push, in the basic quality control workflow. The analysis includes the coverage of all the server tests and of the client unit tests (the client integration and system tests need the server running, so they are not included). The configuration is in `sonar-project.properties`.
+
+| Security | Reliability | Maintainability | Security hotspots reviewed | Coverage | Duplications |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| A (0 issues) | A (0 issues) | A (0 issues) | 100 % | 70.7 % | 0.0 % |
+
+![SonarQube Cloud analysis](images/sonar-overview.png)
+
+Code size (lines of code, without blank lines and comments, measured by SonarQube Cloud):
+
+<!-- TODO: update with the values of SonarQube Cloud -->
+| Language | Lines of code |
+| :--- | :---: |
+| Java | 120 |
+| JavaScript | 55 |
+| **Total** | **175** |
+
+![SonarQube Cloud code size](images/sonar-size.png)
+
 ## Development process
 
 The development follows an iterative and incremental process, which follows the principles of the Agile Manifesto and is supported by some of the good practices of Extreme Programming (XP) and Kanban.
@@ -126,7 +152,7 @@ The code is stored in a Git repository on GitHub. The branching strategy is GitH
 
 The continuous integration is done with two GitHub Actions workflows:
 
-- **Basic quality control** (`.github/workflows/ci-basics.yml`): runs on every commit to a feature branch. It builds the server and runs its unit tests, and builds the client, checks it with ESLint and runs its unit tests.
+- **Basic quality control** (`.github/workflows/ci-basics.yml`): runs on every commit to a feature branch (and also on `main`, so that SonarQube Cloud analyses the main branch). It builds the server and runs its unit tests, builds the client, checks it with ESLint and runs its unit tests, and analyses the code with SonarQube Cloud.
 - **Full quality control** (`.github/workflows/ci-full.yml`): runs when a pull request to `main` is opened or updated. It runs the unit, integration and system tests of the server and the client. The `main` branch is protected so that the pull request cannot be merged if this workflow fails.
 
 ## Running and editing the code
