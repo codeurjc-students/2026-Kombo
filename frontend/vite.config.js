@@ -16,6 +16,7 @@ export default defineConfig({
     coverage: {
       include: ['src/**/*.{js,jsx}'],
       exclude: ['src/main.jsx', 'src/setupTests.js', 'src/**/*.test.{js,jsx}'],
+      reporter: ['text', 'html', ['lcov', { projectRoot: '..' }]],
     },
     // Two groups of tests, so CI can run them separately:
     // - unit: *.test.jsx, no backend needed

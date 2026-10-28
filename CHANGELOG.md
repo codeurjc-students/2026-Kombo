@@ -25,7 +25,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Full CI workflow with GitHub Actions: all tests on every pull request to `main`.
 
 ### Changed
-- - The frontend product service accepts a configurable API base URL (`VITE_API_URL`) for the tests.
+- The frontend product service accepts a configurable API base URL (`VITE_API_URL`) for the tests.
+- Fixed one of the imports in the `ProductApiIT` file.
+
 
 ### Removed
 - Default Spring Boot context test, replaced by the REST API system test. 
