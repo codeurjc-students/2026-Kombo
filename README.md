@@ -1,371 +1,101 @@
-# 2026-Kombo : Una aplicación web para gestión de pedidos, caja e inventario 
+# 2026-Kombo: A web application for order, cash register and inventory management
 
-**Kombo** es una aplicación web de punto de venta (TPV) y pedidos para un restaurante de comida rápida. Los clientes, registrados y anónimos, pueden consultar la carta, personalizar sus productos y hacer el pedido para comer en el local, llevar o recibir a domicilio. Los empleados atienden en el mostrador con el mismo catálogo, siguen la cola de pedidos pendientes y finalizados, consultan el stock y hacen el cierre de caja. El administrador gestiona la carta, el inventario, los empleados y las estadísticas de ventas. Cada pedido descuenta automáticamente del inventario los ingredientes consumidos, el carrito recomienda productos y cada pedido genera un ticket en PDF. 
+**Kombo** is a point of sale (POS) and ordering web application for a fast food restaurant. Customers, both registered and anonymous, can browse the menu, customise their products and place the order to eat in, take away or have it delivered. Employees serve at the counter with the same catalogue, follow the queue of pending and finished orders, check the stock and close the cash register. The administrator manages the menu, the inventory, the employees and the sales statistics. Each order automatically deducts the ingredients used from the inventory, the cart recommends products and each order generates a PDF ticket.
 
 
 
-**Bocetos de pantalla**
-1. **Pantalla de inicio**
+**Screen mockups**
+1. **Home screen**
 ![Main Page](images/mainPage.png)
-> Página principal accesible para usuarios anónimos, clientes registrados y empleados. Desde aquí se podrá acceder a la página de inicio de sesión, a la de perfil, a la de detalle de producto y a la de carrito. 
+> Home page accessible to anonymous users, registered customers and employees. From here users can access the login page, the profile page, the product detail page and the cart page.
 
 
-2. **Pantalla de detalle de producto**
+2. **Product detail screen**
 ![Detail Page](images/detailPage.png)
 
-> Página de detalle de producto que será accesible para usuarios anónimos, clientes registrados y empleados. Se podrá navegar a la página principal, a la de carrito y a la del perfil de usuario. 
+> Product detail page that will be accessible to anonymous users, registered customers and employees. Users can navigate to the home page, the cart page and the user profile page.
 
-3. **Pantalla de carrito**
+3. **Cart screen**
 ![Cart Page](images/cartPage.png)
-> Página accesible para usuarios anónimos, clientes registrados y empleados. Desde aquí se podrá acceder a la página de checkout y a la de detalle de los productos recomendados. 
+> Page accessible to anonymous users, registered customers and employees. From here users can access the checkout page and the detail page of the recommended products.
 
-4. **Pantalla de checkout**
+4. **Checkout screen**
 ![Checkout Page](images/checkout.png)
-> Página de checkout que es accesible para usuarios anónimos, registrados y empleados. Desde aquí se podrá navegar a la página de inicio o volver al carrito. 
+> Checkout page that is accessible to anonymous users, registered users and employees. From here users can navigate to the home page or go back to the cart.
 
-5. **Pantalla de Log-in**
+5. **Log-in screen**
 ![Log in Page](images/loginPage.png)
-> Página de log in o registro, a la cual accederán los usuarios anónimos. Desde aquí se podrá volver a la página de inicio. 
+> Log in or sign up page, which will be accessed by anonymous users. From here users can go back to the home page.
 
-6. **Pantalla de perfil**
+6. **Profile screen**
 ![Profile Page](images/profilePage.png)
-> Página de perfil que será accesible para clientes registrados y empleados. Se podrá navegar a la página de inicio y a la de carrito. 
+> Profile page that will be accessible to registered customers and employees. Users can navigate to the home page and the cart page.
 
-7. **Pantalla de panel de pedidos**
+7. **Order dashboard screen**
 ![Order dashboard Page](images/orderDashboardPage.png)
-> Pantalla de panel de pedidos que será accesible para empleados. Se podrá navegar a la página principal, a la de inventario y al cierre de caja. 
+> Order dashboard screen that will be accessible to employees. Employees can navigate to the home page, the inventory page and the cash register closing page.
 
-8. **Pantalla de inventario**
+8. **Inventory screen**
 ![Inventory Page](images/inventoryPage.png)
-> Pantalla de inventario que será accesible para empleados. Se podrá navegar a la página principal, a la de panel de pedidos y al cierre de caja. 
+> Inventory screen that will be accessible to employees. Employees can navigate to the home page, the order dashboard page and the cash register closing page.
 
-9. **Pantalla de cierre de caja**
+9. **Cash register closing screen**
 ![End of day balancing Page](images/eodBalancingPage.png)
-> Pantalla de cierre de caja que será accesible para empleados. Se podrá navegar a la página principal, a la de inventario y al panel de pedidos. 
+> Cash register closing screen that will be accessible to employees. Employees can navigate to the home page, the inventory page and the order dashboard page.
 
-10. **Pantalla de dashboard general**
+10. **General dashboard screen**
 ![General dashboard Page](images/dashboardPage.png)
-> Pantalla de dashboard general que solo será accesible por el administrador. Se podrá navegar a la página de gestión de productos, de gestión de inventario y de gestión de usuarios. 
+> General dashboard screen that will only be accessible to the administrator. The administrator can navigate to the product management page, the inventory management page and the user management page.
 
-11. **Pantalla de gestión de productos**
+11. **Product management screen**
 ![Product management Page](images/productManagePage.png)
-> Pantalla de gestión de productos que solo será accesible por el administrador. Se podrá navegar a la página de dashboard general, de gestión de inventario y de gestión de usuarios. 
- 
-12. **Pantalla de gestión de inventario**
+> Product management screen that will only be accessible to the administrator. The administrator can navigate to the general dashboard page, the inventory management page and the user management page.
+
+12. **Inventory management screen**
 ![Product Management Page](images/productManagePage.png)
-> Pantalla de gestión de inventario que solo será accesible por el administrador. Se podrá navegar a la página de gestión de productos, de dashboard general y de gestión de usuarios. 
+> Inventory management screen that will only be accessible to the administrator. The administrator can navigate to the product management page, the general dashboard page and the user management page.
 
-13. **Pantalla de gestión de usuarios**
+13. **User management screen**
 ![User management Page](images/userManagePage.png)
-> Pantalla de gestión de usuarios que solo será accesible por el administrador. Se podrá navegar a la página de gestión de productos, de gestión de inventario y de dashboard general.
+> User management screen that will only be accessible to the administrator. The administrator can navigate to the product management page, the inventory management page and the general dashboard page.
 
-**Flujo de navegación**
+**Navigation flow**
 ![General Flow](images/GeneralFlow.png)
-> Diagrama de navegación de la aplicación, en el que se muestran las páginas a las que puede acceder cada tipo de usuario. El azul representa el flujo de los usuarios anónimos, el verde el de los clientes registrados y el naranja el de los empleados. Los clientes registrados y los empleados también pueden realizar el flujo de los usuarios anónimos, y los empleados pueden realizar además el de los clientes registrados. 
+> Navigation diagram of the application, showing the pages each type of user can access. Blue represents the flow of anonymous users, green the flow of registered customers and orange the flow of employees. Registered customers and employees can also follow the flow of anonymous users, and employees can also follow the flow of registered customers.
 
 ![Admin Flow](images/AdminFlow.png)
-> Diagrama de navegación de los administradores. 
+> Navigation diagram of the administrators.
 
 
 > [!WARNING]
-> **Estado del proyecto: solo están definidos los objetivos.** En esta fase (Fase 1) únicamente se han realizado el diseño y la documentación. **Todavía no hay ninguna implementación**: ni código, ni base de datos, ni despliegue.
+> **Project status: only the functional and technical objectives of the application have been defined, and development has started, but the implementation is not functional yet.**
 
 
-## **Fase 1: Definición del proyecto**
-### **Objetivos**
+## Index
 
-#### **Objetivos funcionales**
-- **OF1.** Permitir a cualquier usuario, incluso anónimo, consultar la carta por categorías, con buscador y filtros, y ver el detalle de cada producto. 
+- [Objectives](docs/objectives.md)
+- [Methodology](docs/methodology.md)
+- [Detailed features](docs/features.md)
+- [Analysis](docs/analysis.md)
+- [Tracking](docs/tracking.md)
+- [Author](docs/author.md)
+- [Development guide](docs/development-guide.md)
+- [Use of AI tools](#-use-of-ai-tools)
+- [Changelog](CHANGELOG.md)
 
-- **OF2.** Permitir montar un pedido con carrito, personalizar productos (quitando ingredientes), elegir si se come en el local, se lleva o se recibe a domicilio y finalizarlo con un checkout con pago simulado. 
 
-- **OF3.** Ofrecer a los clientes registrados un perfil con datos personales, direcciones guardadas, historial de pedidos y la opción de repetir el último pedido.
+## 🤖 **Use of AI tools**
 
-- **OF4.** Ofrecer a los empleados la toma de pedidos en mostrador, un panel de pedidos pendientes y finalizados, la consulta de inventario con avisos de bajo stock y el cierre de caja con desglose por tarjeta y efectivo. 
+Summary of the AI tools used in each phase of the project:
 
-- **OF5.** Permitir al administrador gestionar productos y combos, ingredientes, entradas de proveedor y empleados. 
+| Phase | Status | Tool | Use |
+| :---- | :----- | :--- | :-- |
+| Phase 1: Definition of features and screens | Completed | Claude Sonnet 5.5 (Anthropic) | Conversion of the documentation to Markdown, writing and structuring of the README, proposal of the mockup descriptions and Gantt chart. The mockups and the design decisions are the author's |
+| Phase 2: Repository, tests and CI | In progress | Claude (Anthropic), claude-opus-5-5 | Phase planning, GitHub issues proposal, guidance and initial code for the backend, frontend, automated tests and CI workflows, error diagnosis and documentation drafting |
+| Phase 3: Version 0.1 - Basic features and Docker | Pending | | |
+| Phase 4: Version 0.2 - Intermediate features and deployment | Pending | | |
+| Phase 5: Version 1.0 - Advanced features | Pending | | |
+| Phase 6: Report | Pending | | |
+| Phase 7: Defence | Pending | | |
 
-- **OF6.** Mantener el inventario de ingredientes actualizado automáticamente con cada pedido y no ofrecer los productos que no se puedan preparar por falta de stock. 
-
-- **OF7.** Recomendar en el carrito productos que suelen comprarse junto a los que ya contiene. 
-
-- **OF8.** Mostrar al administrador estadísticas de ventas mediante gráficos (ventas diarias, productos más vendidos, ...), junto con el ticket medio y las horas pico, y permitir reportes exportables. 
-
-- **OF9.** Generar el ticket de cada pedido, con su número de pedido, en formato PDF. 
-
-
-#### **Objetivos técnicos**
-
-- **OT1.** Desarrollar una API REST con Spring Boot que exponga todos los recursos y aplique la lógica de negocio. 
-
-- **OT2.** Desarrollar una SPA con React que consuma la API y adapte la interfaz según el rol del usuario. 
-
-- **OT3.** Persistir los datos en MySQL (incluidas las fotos) con un modelo relacional normalizado. 
-
-- **OT4.** Implementar autenticación y autorización por roles y control de acceso por propietario de los datos. 
-
-- **OT5.** Integrar las tecnologías complementarias: generación de tickets descargables en PDF y envío de correo electrónico al crear una cuenta. 
-
-- **OT6.** Automatizar la construcción y las pruebas con Github Actions y contenerizar la aplicación con Docker. 
-
-- **OT7.** Aplicar análisis estático de código con SonarQube integrado en el pipeline de integración continua. 
-
-- **OT8.** Escribir pruebas automatizadas sobre la lógica de negocio y la API. 
-
-### Metodología
-
-El desarrollo se organiza en cinco fases con entrega final aproximada el 10 de enero. Las fases de implementación siguen el orden de las funcionalidades: primero las básicas, después las intermedias y por último las avanzadas. 
-
-<!-- TODO: las fechas de las fases 2-5 son una propuesta; ajústalas con tu tutor -->
-| Fase | Descripción | Fechas |
-|:---:|---|---|
-| **1** | Definición de funcionalidades y pantallas (wireframes, modelo de entidades, algoritmo, tecnología complementaria, README) | 28 sep – 4 oct 2026 |
-| **2** | Funcionalidades básicas (MVP). Arquitectura inicial, CI con GitHub Actions, Docker y Sonar configurados | 5 oct – 8 nov 2026 |
-| **3** | Funcionalidades intermedias (búsqueda, personalización, recomendaciones, ticket PDF, inventario, cierre de caja) | 9 nov – 6 dic 2026 |
-| **4** | Funcionalidades avanzadas, gráficos, corrección de incidencias de Sonar y refuerzo de pruebas | 7 dic – 27 dic 2026 |
-| **5** | Cierre: documentación final, memoria y revisión general | 28 dic 2026 – 10 ene 2027 |
-
-```mermaid
-gantt
-    title Planificación del TFG 1 (28 sep 2026 - 10 ene 2027)
-    dateFormat YYYY-MM-DD
-    axisFormat %d/%m
-    tickInterval 1week
-
-    section Fase 1 - Definición
-    Wireframes de pantallas                          :done,   f1a, 2026-09-28, 3d
-    Modelo de entidades y permisos                   :done,   f1b, 2026-10-01, 2d
-    Algoritmo y tecnología complementaria            :done,   f1c, 2026-10-03, 2d
-    README y documentación de la fase                :active, f1d, 2026-10-03, 2d
-
-    section Fase 2 - Funcionalidades básicas (MVP)
-    Configuración inicial de Spring Boot y React     :f2a, 2026-10-05, 5d
-    Docker y MySQL                                   :f2b, after f2a, 2d
-    Integración continua con GitHub Actions y Sonar  :f2c, 2026-10-10, 4d
-    Entidades y API REST base                        :f2d, 2026-10-14, 5d
-    Registro inicio de sesión y roles                :f2e, 2026-10-19, 6d
-    Carta detalle carrito y checkout simulado        :f2f, 2026-10-25, 9d
-    Panel de pedidos perfil y CRUD de productos      :f2g, 2026-11-03, 6d
-
-    section Fase 3 - Funcionalidades intermedias
-    Buscador filtros y personalización               :f3a, 2026-11-09, 7d
-    Barra lateral del pedido y repetir pedido        :f3b, 2026-11-16, 4d
-    Algoritmo de recomendaciones                     :f3c, 2026-11-20, 5d
-    Ticket del pedido en PDF                         :f3d, 2026-11-25, 4d
-    Inventario y descuento automático de stock       :f3e, 2026-11-29, 4d
-    Cierre de caja                                   :f3f, 2026-12-03, 4d
-
-    section Fase 4 - Funcionalidades avanzadas
-    Dashboard y gráficos                             :f4a, 2026-12-07, 7d
-    Estimación de stock y reportes exportables       :f4b, 2026-12-14, 7d
-    Corrección de Sonar y pruebas                    :f4c, 2026-12-21, 7d
-
-    section Fase 5 - Cierre
-    Memoria y documentación final                    :f5a, 2026-12-28, 9d
-    Revisión general                                 :f5b, 2027-01-06, 5d
-    Entrega del TFG 1                                :milestone, m1, 2027-01-10, 0d
-```
-
-### **Funcionalidades**
-
-#### **Funcionaldades básicas (MVP)**
-
-**Usuario anónimo**
-- Ver la carta por categorías en la página principal. 
-
-- Ver el detalle de un producto o combo.
-
-- Añadir productos al carrito y ver el carrito con cantidades, subtotal, gastos de envío y total. 
-
-- Elegir si el pedido es para comer en el local, para llevar o a domicilio. 
-
-- Realizar el checkout rellenando un formulario de contacto (con dirección y datos personales).
-
-- Pagar mediante pago simulado (tarjeta o efectivo) y ver la confirmación con el número de pedido. 
-
-- Registrarse e iniciar sesión. 
-
-**Usuario registrado**
-- Todas las funcionalidades del usuario anónimo, pero sin rellenar el formulario de checkout dado que se usan los datos guardados. 
-
-- Perfil básico: datos personales, cambio de contraseña y direcciones guardadas. 
-
-- Consultar el historial de pedidos.
-
-
-**Empleado**
-- Panel de pedidos: pedidos pendientes y finalizados, ordenados por antigüedad, con posibilidad de cambiar el estado y de marcar como cobrados los pedidos en efectivo.
-
-- Toma de pedidos en mostrador. 
-
-**Administrador**
-- Gestión de productos y combos: CRUD básico. 
-- Gestión de usuarios: CRUD básico de empleados. 
-
-
-#### **Funcionalidades intermedias**
-
-**Usuario anónimo y registrado**
-
-- Buscador y filtros en la carta. 
-
-- Personalización del producto (quitar ingredientes).
-
-- Apartado de recomendaciones del carrito. 
-
-- Lógica de checkout: ocultar el pago en efectivo si el pedido es a domicilio.
-
-- Barra lateral desplegable para ver el pedido actual sin salir de la página. 
-
-- Descarga del ticket de pedido en PDF.
-
-**Usuario registrado**
-- Repetir el último pedido desde el perfil. 
-
-**Empleado**
-- Consulta de inventario, con los ingredientes resaltados en rojo si queda bajo stock. 
-
-- Cierre de caja. 
-
-- Impresión o descarga del ticket en PDF de cualquier pedido. 
-
-**Administrador** 
-- Gestión de productos: asociación de cada producto a su lista de ingredientes con cantidades. 
-- Gestión de inventario: CRUD de ingredientes y umbrales de alerta. 
-- Dashboard básico: gráfico de ventas diarias.
-
-
-#### **Funcionalidades avanzadas**
-
-**Administrador**
-- Dashboard completo: gráfico de productos más vendidos, vista diaria o mensual de las ventas, ticket medio y horas pico. 
-- Estimación del stock restante según el consumo histórico. 
-
-
-
-### Entidades 
-1. **Entidad 1**: Usuario.
-2. **Entidad 2**: Ingrediente. 
-3. **Entidad 3**: Pedido. 
-4. **Entidad 4**: Producto. 
-5. **Entidad 5**: Imagen. 
-
-- Usuario - Pedido (1:N) : un usuario puede realizar varios pedidos, pero un pedido pertenece a un usuario (los pedidos anónimos no tendrán usuario). 
-
-- Pedido - Producto (N:N) : un pedido está formado por N productos y un producto puede pertenecer a N pedidos. 
-
-- Producto - Ingrediente (N:N) : un producto contiene N ingredientes y un ingrediente puede estar en N productos. 
-
-- Imagen - Usuario (1:1) : cada usuario tiene asociada una imagen y una imagen pertenece a un usuario. 
-
-- Imagen - Producto (1:1) : cada producto tiene asociada una imagen y una imagen pertenece a un producto. 
-
-#### Atributos de las entidades
-**Usuario**
-- Id : identificador. 
-- Nombre completo. 
-- Email.
-- Teléfono.
-- Imagen. 
-- Contraseña. 
-- Rol. 
-- Direcciones.
-- Último pedido.
-
-**Producto**
-- Id : identificador. 
-- Nombre. 
-- Imagen. 
-- Precio. 
-- Descripción. 
-- Categoría. 
-- Activo : booleano para saber si se muestra a los usuarios. 
-
-**Ingrediente**
-- Id : identificador. 
-- Nombre.
-- Unidad de medida. 
-- Stock actual. 
-- Umbral de alerta. 
-
-**Pedido**
-- Id : identificador. 
-- Número pedido. 
-- Usuario. 
-- Tipo de entrega : comer en local, para llevar o a domicilio. 
-- Dirección entrega. 
-- Estado : en preparación, listo, entregado o cancelado. 
-- Fecha de creación. 
-- Fecha de entrega. 
-- Precio. 
-
-**Imagen**
-- Id : identificador. 
-- Texto. 
-
-
-
-### Permisos de usuario
-
-| Acción | Anónimo | Cliente | Empleado | Administrador |
-| :----- | :-----: | :-----: | :------: | :-----------: |
-| Consultar la carta, el detalle de producto y las recomendaciones | X | X | X | X |
-| Registrarse | X | | | |
-| Iniciar sesión | | X | X | X |
-| Crear un pedido y pagarlo (pago simulado) | X | X | X | |
-| Hacer el checkout sin rellenar el formulario de datos | | X | | |
-| Descargar el ticket PDF de su propio pedido | X | X | | |
-| Consultar su historial de pedidos y repetir el último | | X | | |
-| Gestionar su perfil | | X | X | |
-| Gestionar sus direcciones guardadas | | X | | |
-| Consultar todos los pedidos | | | X | X |
-| Cambiar el estado de un pedido y marcar como cobrado el pago en efectivo | | | X | |
-| Descargar el ticket PDF de cualquier pedido | | | X | X |
-| Consultar el inventario de ingredientes | | | X | X |
-| Consultar el cierre de caja | | | X | X |
-| Gestionar productos (crear, editar, eliminar, foto) | | | | X |
-| Gestionar ingredientes y reponer stock | | | | X |
-| Gestionar empleados | | | | X |
-| Consultar el dashboard y los reportes de ventas | | | | X |
-
-
-### Entidades que tendrán imágenes asociadas
-- **Usuario**: fotografía de perfil. Al crear el usuario se pondrá una por defecto, teniendo el usuario la posibilidad de cambiarla en configuraciones. 
-
-- **Producto**: fotografía del producto. 
-
-
-### Tecnología complementaria 
-- **Generación del ticket de pedido en PDF**: se generará el ticket de cada pedido en un PDF. Contendrá el nombre del local, el número del pedido, los productos del pedido y el precio pagado. 
-
-- **Envío de emails** a los usuarios cuando se registren en la web. 
-
-
-### Algoritmo de consulta avanzada 
-- **Recomendaciones del carrito**: se recomendará a los usuarios productos que pueden comprar según cuales son los productos más comprados junto con los que ya hay en el carrito. 
-
-
-### Gráficos
-- **Gráfico de ventas diarias**: será un gráfico de barras en el que se mostrará el número de pedidos vendidos por hora.
-- **Gráfico de productos más vendidos**: será un gráfico de sectores en el que se mostrará los productos más vendidos ese mes.
-
-## 🤖 **Uso de Herramientas de IA**
-
-Resumen de las herramientas de IA utilizadas en cada una de las fases del proyecto:
-
-| Fase | Estado | Herramienta | Uso |
-| :--- | :----- | :---------- | :-- |
-| Fase 1: Definición de funcionalidades y pantallas | Completada | Claude Sonnet 5.5 (Anthropic) | Conversión a Markdown de la documentación, redacción y estructuración del README, propuesta de descripciones de los bocetos y diagrama de Gantt. Los bocetos y las decisiones de diseño son de la autora |
-| Fase 2: Funcionalidades básicas (MVP) | Pendiente | | |
-| Fase 3: Funcionalidades intermedias | Pendiente | | |
-| Fase 4: Funcionalidades avanzadas | Pendiente | | |
-| Fase 5: Cierre | Pendiente | | |
-
-> El fichero [AI_USAGE.md](docs/AI_USAGE.md) contiene información detallada sobre cada uso: fecha, fase, objetivo, herramienta, versión, configuración, forma de uso, complementos y ficheros de contexto.
-
-
-## Autor 
-El presente Trabajo de Fin de Grado ha sido desarrollado por **Delia Martínez López**, alumna del Doble Grado en Ingeniería Informática e Ingeniería del Software de la Escuela Técnica Superior de Ingeniería Informática (ETSII) de la Universidad Rey Juan Carlos, bajo la tutoría de **Óscar Soto Sánchez**.
-
-- **Curso académico:** 2026-2027
-- **Fecha de entrega del TFG 1:** 10 de enero de 2027
+> The [AI_USAGE.md](docs/AI_USAGE.md) file contains detailed information about each use: date, phase, objective, tool, version, configuration, how it was used, add-ons and context files.
