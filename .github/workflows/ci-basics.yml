@@ -1,4 +1,4 @@
-# Basic quality control: runs on every push to a feature branch.
+# Basic quality control: runs on every push to a any branch.
 # Builds backend and frontend, runs their unit tests (no Docker or backend needed)
 # and analyses the code with SonarQube Cloud.
 
@@ -6,8 +6,6 @@ name: Basic quality control
 
 on:
   push:
-    branches-ignore:
-      - main
   workflow_dispatch:
 
 jobs:
