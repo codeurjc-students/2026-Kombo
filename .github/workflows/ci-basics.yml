@@ -1,4 +1,4 @@
-# Basic quality control: runs on every push to a any branch.
+# Basic quality control: runs on every push to any branch.
 # Builds backend and frontend, runs their unit tests (no Docker or backend needed)
 # and analyses the code with SonarQube Cloud.
 
@@ -86,8 +86,9 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      # Compiled classes and JaCoCo coverage (XML) of the backend unit tests
-      - name: Backend unit tests with coverage
+      # Compiled classes and JaCoCo coverage (XML) of all the backend tests
+      # (unit, integration and system; Testcontainers uses the runner's Docker)
+      - name: Backend tests with coverage
         working-directory: backend
         run: |
           chmod +x mvnw

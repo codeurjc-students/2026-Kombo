@@ -1,0 +1,39 @@
+{
+  "info": {
+    "name": "Kombo REST API",
+    "description": "Example requests for every operation of the Kombo REST API. Set the baseUrl variable to the address of the backend.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get all products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "products"]
+            },
+            "description": "Returns all the products of the menu."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
