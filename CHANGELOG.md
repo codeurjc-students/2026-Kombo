@@ -25,6 +25,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Full CI workflow with GitHub Actions: all tests on every pull request to `main`.
 - Static code analysis with SonarQube Cloud in the basic CI workflow, including the coverage of the backend tests and the frontend unit tests.
 - Development guide and Postman collection of the REST API in `docs/`.
+- `.gitattributes` to normalize line endings to LF.
+- Domain model entities: `User`, `Image`, `Ingredient`, `Product`, `Combo`, `Order` and `OrderLine`.
+- `Combo` entity that extends `Product` and groups several products with their quantities.
+- Ingredients of each product with their quantities, and calculation of the ingredients used by a product or combo.
+- Spring Data repositories for users, images, ingredients, products, combos and orders.
+- `ProductDTO` and `ProductMapper` with MapStruct.
 
 ### Changed
 
@@ -35,6 +41,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Documentation split into several files in `docs/` and translated into English.
 - Methodology updated to the seven phases of the Final Degree Project guide, with the new dates.
 - AI usage log updated with the Phase 2 sessions.
+- `GET /api/v1/products` returns DTOs instead of the `Product` entity (the JSON fields do not change).
+- AI usage log updated with the Phase 3 sessions.
+
 
 ### Fixed
 

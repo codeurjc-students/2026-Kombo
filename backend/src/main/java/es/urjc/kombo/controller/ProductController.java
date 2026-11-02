@@ -3,7 +3,8 @@ package es.urjc.kombo.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.urjc.kombo.model.Product;
+import es.urjc.kombo.dto.ProductDTO;
+import es.urjc.kombo.dto.ProductMapper;
 import es.urjc.kombo.service.ProductService;
 
 import java.util.List;
@@ -17,16 +18,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
-    public ProductController(ProductService productService){
+    public ProductController(ProductService productService, ProductMapper productMapper) {
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     @GetMapping("")
-    public List<Product> getProducts() {
-        return productService.findAll();
+    public List<ProductDTO> getProducts() {
+        return productMapper.toBasicDTOs(productService.findAll());
     }
-    
+        
     
     
 }
