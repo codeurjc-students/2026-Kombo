@@ -31,6 +31,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Ingredients of each product with their quantities, and calculation of the ingredients used by a product or combo.
 - Spring Data repositories for users, images, ingredients, products, combos and orders.
 - `ProductDTO` and `ProductMapper` with MapStruct.
+- `CLAUDE.md` with the project context and working rules for AI assistants.
+- Domain model section in the development guide, with a class diagram of the entities.
 
 ### Changed
 
@@ -43,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - AI usage log updated with the Phase 2 sessions.
 - `GET /api/v1/products` returns DTOs instead of the `Product` entity (the JSON fields do not change).
 - AI usage log updated with the Phase 3 sessions.
+- Analysis updated with all the entities of the code (Combo and OrderLine added) and their current attributes and relations.
 
 
 ### Fixed
