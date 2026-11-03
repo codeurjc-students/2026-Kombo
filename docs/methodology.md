@@ -25,26 +25,29 @@ gantt
     Screen wireframes                                :done, f1a, 2026-09-28, 3d
     Entity model and permissions                     :done, f1b, 2026-10-01, 2d
     Algorithm and complementary technology           :done, f1c, 2026-10-03, 2d
-    README and phase documentation                   :done, f1d, 2026-10-03, 2d
+    README and phase documentation                   :done, f1d, 2026-09-29, 6d
 
     section Phase 2 - Repository, tests and CI
     Phase planning and GitHub issues                 :done, f2a, 2026-10-07, 7d
     MySQL database and Spring Boot backend           :done, f2b, 2026-10-13, 1d
     OpenAPI documentation                            :done, f2c, 2026-10-14, 1d
     React frontend                                   :done, f2d, 2026-10-19, 1d
-    Backend automated tests                          :done, f2e, 2026-10-19, 3d
+    Backend automated tests                          :done, f2e, 2026-10-21, 1d
     Frontend automated tests                         :done, f2f, 2026-10-21, 1d
     Continuous integration with GitHub Actions       :done, f2g, 2026-10-25, 1d
-    Static code analysis with SonarQube Cloud        :active, f2h, 2026-10-25, 2d
-    Phase 2 documentation                            :active, f2i, 2026-10-25, 2d
+    Static code analysis with SonarQube Cloud        :done, f2h, 2026-10-25, 5d
+    Phase 2 documentation                            :done, f2i, 2026-10-25, 5d
 
     section Phase 3 - Version 0.1
-    Sign up, log in and roles                        :f3a, 2026-10-27, 5d
-    Menu and product detail                          :f3b, after f3a, 3d
-    Cart, checkout and simulated payment             :f3c, after f3b, 5d
-    Profile and order history                        :f3d, after f3c, 3d
-    Order dashboard and product and user management  :f3e, after f3d, 5d
-    Docker, continuous delivery and release 0.1      :f3f, after f3e, 4d
+    Line endings and domain model                    :done, f3m, 2026-11-02, 1d
+    AI context file and domain model documentation   :done, f3n, 2026-11-03, 1d
+    DTOs, paginated products API and error handling  :active, f3o, 2026-11-03, 1d
+    Sign up, log in and roles                        :f3a, 2026-11-04, 4d
+    Menu and product detail                          :f3b, after f3a, 2d
+    Cart, checkout and simulated payment             :f3c, after f3b, 4d
+    Profile and order history                        :f3d, after f3c, 2d
+    Order dashboard and product and user management  :f3e, after f3d, 4d
+    Docker, continuous delivery and release 0.1      :f3f, after f3e, 3d
 
     section Phase 4 - Version 0.2
     Search, filters and customisation                :f4a, 2026-11-23, 5d

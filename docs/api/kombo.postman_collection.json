@@ -15,7 +15,7 @@
       "name": "Products",
       "item": [
         {
-          "name": "Get all products",
+          "name": "Get products (first page)",
           "request": {
             "method": "GET",
             "header": [
@@ -26,10 +26,164 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "products"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ]
             },
-            "description": "Returns all the products of the menu."
+            "description": "Returns the first page of active products of the menu (10 per page by default). The response has the products in `content` and the page information in `page`."
+          },
+          "response": []
+        },
+        {
+          "name": "Get products by page and size",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products?page=0&size=2&sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "2"
+                },
+                {
+                  "key": "sort",
+                  "value": "name"
+                }
+              ]
+            },
+            "description": "Returns a page of active products. `page` starts at 0, `size` is the number of products per page and `sort` is the property used to sort them."
+          },
+          "response": []
+        },
+        {
+          "name": "Get products by category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products?category=Burgers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Burgers"
+                }
+              ]
+            },
+            "description": "Returns the active products of a category (case insensitive), paginated."
+          },
+          "response": []
+        },
+        {
+          "name": "Get product detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "1"
+              ]
+            },
+            "description": "Returns the detail of a product or combo: its ingredients with the quantity used and, for a combo, its products."
+          },
+          "response": []
+        },
+        {
+          "name": "Get product that does not exist (404)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "999999"
+              ]
+            },
+            "description": "Example of error: returns 404 Not Found in ProblemDetail format."
+          },
+          "response": []
+        },
+        {
+          "name": "Get product with invalid id (400)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/abc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "abc"
+              ]
+            },
+            "description": "Example of error: returns 400 Bad Request in ProblemDetail format."
           },
           "response": []
         }

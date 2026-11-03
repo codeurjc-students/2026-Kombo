@@ -31,6 +31,20 @@ Compared to the first version of the analysis, two entities have been added. **C
 
 - Image - Product (1:1): each product has an associated image and an image belongs to one product.
 
+The following diagram shows the entities and their relations. A combo is a product, so it also has the relations of Product (image, ingredients and order lines).
+
+```mermaid
+erDiagram
+    USER |o--o{ ORDER : places
+    USER ||--o| IMAGE : "profile picture"
+    ORDER ||--|{ ORDER_LINE : contains
+    ORDER_LINE }o--|| PRODUCT : refers
+    PRODUCT ||--o| IMAGE : picture
+    PRODUCT }o--o{ INGREDIENT : "uses (quantity)"
+    COMBO ||--|| PRODUCT : "is a"
+    COMBO }o--o{ PRODUCT : "includes (quantity)"
+```
+
 ### Entity attributes
 **User**
 - Id: identifier.
