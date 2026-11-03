@@ -6,16 +6,26 @@ The screen mockups and the navigation flow are in the [README](../README.md).
 
 ## Entities
 1. **Entity 1**: User.
-2. **Entity 2**: Ingredient.
-3. **Entity 3**: Order.
+2. **Entity 2**: Image.
+3. **Entity 3**: Ingredient.
 4. **Entity 4**: Product.
-5. **Entity 5**: Image.
+5. **Entity 5**: Combo.
+6. **Entity 6**: Order.
+7. **Entity 7**: OrderLine.
 
-- User - Order (1:N): a user can place several orders, but an order belongs to one user (anonymous orders will not have a user).
+Compared to the first version of the analysis, two entities have been added. **Combo** is a special type of product that groups several products, and **OrderLine** replaces the direct relation between Order and Product, so that each line of an order stores its quantity and the price paid.
 
-- Order - Product (N:N): an order is made up of N products and a product can belong to N orders.
+- User - Order (1:N): a user can place several orders, but an order belongs to one user (anonymous orders do not have a user).
 
-- Product - Ingredient (N:N): a product contains N ingredients and an ingredient can be in N products.
+- Order - OrderLine (1:N): an order is made up of N lines, and each line belongs to one order. The lines are created and deleted with their order.
+
+- OrderLine - Product (N:1): each line refers to one product (or combo), and a product can appear in N lines of different orders.
+
+- Product - Ingredient (N:N): a product contains N ingredients, each one with the quantity used, and an ingredient can be in N products.
+
+- Combo - Product (inheritance): a combo is a product, so it can be shown in the menu, added to the cart and ordered like any other product.
+
+- Combo - Product (N:N): a combo contains N products, each one with its quantity, and a product can be in N combos.
 
 - Image - User (1:1): each user has an associated image and an image belongs to one user.
 
@@ -24,14 +34,28 @@ The screen mockups and the navigation flow are in the [README](../README.md).
 ### Entity attributes
 **User**
 - Id: identifier.
-- Full name.
-- Email.
+- Name.
+- Surname.
+- Email: unique, used to log in.
 - Phone number.
-- Image.
 - Password.
-- Role.
-- Addresses.
-- Last order.
+- Role: customer, employee or administrator.
+- Addresses: list of saved addresses.
+- Image.
+
+The last order of a user is not stored as an attribute: it is obtained from the orders of the user, sorted by date.
+
+**Image**
+- Id: identifier.
+- Image: binary content, stored in the database.
+- Text: alternative text.
+
+**Ingredient**
+- Id: identifier.
+- Name.
+- Unit of measurement.
+- Current stock.
+- Alert limit: when the stock is equal to or lower than this value, the ingredient is shown as low stock.
 
 **Product**
 - Id: identifier.
@@ -41,28 +65,34 @@ The screen mockups and the navigation flow are in the [README](../README.md).
 - Description.
 - Category.
 - Active: boolean that indicates whether it is shown to users.
+- Ingredients: ingredients used and the quantity of each one.
 
-**Ingredient**
-- Id: identifier.
-- Name.
-- Unit of measurement.
-- Current stock.
-- Alert threshold.
+**Combo** (all the attributes of Product, plus)
+- Products: products included in the combo and the quantity of each one.
+
+The ingredients used by a combo are the sum of the ingredients of its products, multiplied by their quantities.
 
 **Order**
 - Id: identifier.
 - Order number.
-- User.
+- User: empty for anonymous orders.
+- Lines: products of the order (OrderLine).
 - Delivery type: eat in, take away or delivery.
 - Delivery address.
 - Status: in preparation, ready, delivered or cancelled.
+- Payment method: card or cash.
+- Paid: boolean that indicates whether the order has been paid.
+- Customer name, email and phone: data of the checkout form.
 - Creation date.
 - Delivery date.
-- Price.
+- Delivery cost.
+- Total price: sum of the lines plus the delivery cost.
 
-**Image**
+**OrderLine**
 - Id: identifier.
-- Text.
+- Product.
+- Quantity.
+- Unit price: price of the product at the time of the purchase, so that past orders do not change if the price changes.
 
 
 

@@ -6,6 +6,7 @@
 - [Technologies](#technologies)
 - [Tools](#tools)
 - [Architecture](#architecture)
+  - [Domain model](#domain-model)
   - [Deployment](#deployment)
   - [REST API](#rest-api)
 - [Quality control](#quality-control)
@@ -56,6 +57,83 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 - **SonarQube Cloud**: static code analysis service that detects bugs, vulnerabilities, code smells and duplicated code, and shows the test coverage. https://sonarcloud.io
 
 ## Architecture
+
+### Domain model
+
+The persistent entities of the server are in the package `es.urjc.kombo.model`. The [analysis](analysis.md) describes each attribute.
+
+```mermaid
+classDiagram
+    class User {
+        Long id
+        String name
+        String surname
+        String email
+        String phone
+        String password
+        Role role
+        List~String~ addresses
+    }
+    class Image {
+        Long id
+        Blob image
+        String text
+    }
+    class Ingredient {
+        Long id
+        String name
+        String unit
+        int stock
+        int alertLimit
+    }
+    class Product {
+        Long id
+        String name
+        BigDecimal price
+        String description
+        String category
+        boolean active
+        Map~Ingredient, Integer~ ingredients
+    }
+    class Combo {
+        Map~Product, Integer~ products
+    }
+    class Order {
+        Long id
+        Integer orderNumber
+        DeliveryType deliveryType
+        String deliveryAddress
+        OrderStatus status
+        PaymentMethod paymentMethod
+        boolean paid
+        String customerName
+        String customerEmail
+        String customerPhone
+        LocalDateTime createdAt
+        LocalDateTime deliveredAt
+        BigDecimal deliveryCost
+        BigDecimal total
+    }
+    class OrderLine {
+        Long id
+        int quantity
+        BigDecimal unitPrice
+    }
+
+    Product <|-- Combo
+    User "1" --> "0..1" Image
+    Product "1" --> "0..1" Image
+    Product "*" --> "*" Ingredient : quantity
+    Combo "*" --> "*" Product : quantity
+    Order "*" --> "0..1" User
+    Order "1" *-- "*" OrderLine
+    OrderLine "*" --> "1" Product
+```
+
+- **Combo extends Product** (single table inheritance), so a combo can be used wherever a product is expected. `getIngredientUsage()` returns the quantity of each ingredient used when one unit is sold; a combo overrides it to add up the ingredients of its products.
+- **OrderLine** stores the unit price at the time of the purchase, so past orders and the cash register closing do not change if a price changes.
+- The enumerations are declared inside the entity that uses them (`User.Role`, `Order.DeliveryType`, `Order.OrderStatus` and `Order.PaymentMethod`) and are stored as text.
+- Images are stored in the database. They are loaded lazily, only when they are needed.
 
 ### Deployment
 
