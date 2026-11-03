@@ -13,18 +13,85 @@ paths:
       tags:
       - product-controller
       operationId: getProducts
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
       responses:
         "200":
           description: OK
           content:
             '*/*':
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Product"
+                $ref: "#/components/schemas/PagedModelProductDTO"
+  /api/v1/products/{id}:
+    get:
+      tags:
+      - product-controller
+      operationId: getProduct
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductDetailDTO"
 components:
   schemas:
-    Product:
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageMetadata:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int64
+        number:
+          type: integer
+          format: int64
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+    PagedModelProductDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+    ProductDTO:
       type: object
       properties:
         id:
@@ -38,3 +105,48 @@ components:
           type: string
         category:
           type: string
+    ComboItemDTO:
+      type: object
+      properties:
+        product:
+          $ref: "#/components/schemas/ProductDTO"
+        quantity:
+          type: integer
+          format: int32
+    ProductDetailDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
+        combo:
+          type: boolean
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductIngredientDTO"
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComboItemDTO"
+    ProductIngredientDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        unit:
+          type: string
+        quantity:
+          type: integer
+          format: int32

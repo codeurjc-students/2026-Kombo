@@ -33,6 +33,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `ProductDTO` and `ProductMapper` with MapStruct.
 - `CLAUDE.md` with the project context and working rules for AI assistants.
 - Domain model section in the development guide, with a class diagram of the entities.
+- DTOs (records) and MapStruct mappers for all the entities: products and combos, ingredients, images, users, orders and order lines.
+- REST endpoint `GET /api/v1/products/{id}` with the detail of a product or combo (ingredients and, for combos, their products).
+- Pagination (`page`, `size`, `sort`) and category filter (`category`) in `GET /api/v1/products`.
+- Uniform error responses of the REST API in ProblemDetail format (400 Bad Request and 404 Not Found).
+- Unit test of the frontend product service.
+- Entity relationship diagram in the analysis.
 
 ### Changed
 
@@ -46,7 +52,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `GET /api/v1/products` returns DTOs instead of the `Product` entity (the JSON fields do not change).
 - AI usage log updated with the Phase 3 sessions.
 - Analysis updated with all the entities of the code (Combo and OrderLine added) and their current attributes and relations.
-
+- `GET /api/v1/products` returns only active products, paginated (10 per page by default), in the format `{ content, page }`.
+- The products service returns DTOs instead of entities.
+- The frontend product service reads the products from the `content` of the page.
+- Backend tests adapted to the paginated API, the category filter, the product detail and the error responses.
+- Gantt chart of the methodology updated with the real dates of the work done.
+- OpenAPI specification and HTML documentation of the REST API regenerated in `docs/api/`.
 
 ### Fixed
 
