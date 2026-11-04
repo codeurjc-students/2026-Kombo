@@ -77,6 +77,7 @@ classDiagram
     class Image {
         Long id
         Blob image
+        String contentType
         String text
     }
     class Ingredient {
@@ -162,9 +163,11 @@ The server and the client have unit, integration and system tests. In this phase
 
 | Type | Part | Tool | Test | What it checks |
 | :--- | :--- | :--- | :--- | :------------- |
-| Unit | Server | JUnit and Mockito | `ProductServiceTest` | The service returns the list of products, with the database mocked |
-| Integration | Server | JUnit and Testcontainers | `ProductServiceIT` | The service returns the products previously stored in a real MySQL database |
-| System | Server | JUnit and Rest Assured | `ProductApiIT` | The REST API returns the sample products |
+| Unit | Server | JUnit and Mockito | `ProductServiceTest` | The service returns the pages of products, filters by category, returns the product image and fails when a product or its image does not exist, with the database mocked |
+| Integration | Server | JUnit and Testcontainers | `ProductServiceIT` | The service returns the active products, the pages, the detail of products and combos and the images stored in a real MySQL database (without sample data) |
+| Integration | Server | JUnit and Testcontainers | `SampleDataLoaderIT` | The sample data (products, combos, ingredients, users of each role with encoded passwords and orders) is loaded once |
+| Integration | Server | JUnit and Testcontainers | `SampleDataDisabledIT` | With `kombo.sample-data.enabled=false` no sample data is loaded |
+| System | Server | JUnit and Rest Assured | `ProductApiIT` | The REST API returns the pages of sample products, the category filter, the product detail, the product image and the 400 and 404 errors |
 | Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The component shows the list of products, with the service mocked and a virtual DOM |
 | Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API |
 | System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser |
@@ -266,6 +269,31 @@ cd 2026-Kombo
    ```
 
 4. Open the web application at http://localhost:5173.
+
+### Sample data
+
+When the server starts with an empty database, it loads sample data (class `SampleDataLoader`, in `es.urjc.kombo.config`):
+
+- 15 ingredients with their stock (bacon starts below its alert limit, to show a low stock ingredient).
+- 9 products in the categories *Burgers*, *Sides*, *Drinks* and *Desserts*, each one with its ingredients and quantities, and 3 combos (*Classic Menu*, *Chicken Menu* and *Family Menu*).
+- One user of each role, with the password encoded with BCrypt:
+
+  | Role | Email | Password |
+  | :--- | :--- | :--- |
+  | Customer | `customer@kombo.com` | `customer` |
+  | Employee | `employee@kombo.com` | `employee` |
+  | Administrator | `admin@kombo.com` | `admin` |
+
+- 4 orders, of the customer and of anonymous users, in every status.
+- The pictures of the products, read from `backend/src/main/resources/sample-images/` and stored in the database. The [README of that folder](../backend/src/main/resources/sample-images/README.md) lists the expected files; a product without its file is loaded without picture.
+
+The loading is controlled by the property `kombo.sample-data.enabled` (in `application.properties`), which is `true` by default. If the database already has products, nothing is loaded again. To run the server without loading the sample data, so that the database is not modified:
+
+```
+./mvnw spring-boot:run -Dspring-boot.run.arguments=--kombo.sample-data.enabled=false
+```
+
+When the application is run from the jar, the argument is `--kombo.sample-data.enabled=false`, and as an environment variable `KOMBO_SAMPLEDATA_ENABLED=false`.
 
 ### Using the tools
 

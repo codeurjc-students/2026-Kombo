@@ -50,6 +50,26 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ProductDetailDTO"
+  /api/v1/products/{id}/image:
+    get:
+      tags:
+      - product-controller
+      operationId: getProductImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
 components:
   schemas:
     Pageable:
