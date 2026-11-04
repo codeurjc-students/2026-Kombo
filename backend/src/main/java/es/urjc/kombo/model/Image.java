@@ -18,13 +18,17 @@ public class Image {
     @Lob
     private Blob image;
 
+    // MIME type of the image (for example image/jpeg), sent in the Content-Type header
+    private String contentType;
+
     private String text;
 
     public Image() {
     }
 
-    public Image(Blob image, String text) {
+    public Image(Blob image, String contentType, String text) {
         this.image = image;
+        this.contentType = contentType;
         this.text = text;
     }
 
@@ -38,6 +42,14 @@ public class Image {
 
     public void setImage(Blob image) {
         this.image = image;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public String getText() {
