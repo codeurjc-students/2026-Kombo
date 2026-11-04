@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.hibernate.engine.jdbc.proxy.BlobProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +21,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import es.urjc.kombo.dto.ImageFileDTO;
 import es.urjc.kombo.dto.ProductDTO;
 import es.urjc.kombo.dto.ProductMapper;
+import es.urjc.kombo.model.Image;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ProductRepository;
 
@@ -71,5 +75,27 @@ class ProductServiceTest {
         assertThatThrownBy(() -> productService.findById(99L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Product 99 not found");
+    }
+
+    @Test
+    void findImageReturnsTheImageOfTheProduct() throws IOException {
+        Product burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
+        burger.setImage(new Image(BlobProxy.generateProxy(new byte[] {7, 8, 9}), "image/jpeg", "Test Burger"));
+        when(productRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(burger));
+
+        ImageFileDTO image = productService.findImage(1L);
+
+        assertThat(image.contentType()).isEqualTo("image/jpeg");
+        assertThat(image.content().getContentAsByteArray()).containsExactly(7, 8, 9);
+    }
+
+    @Test
+    void findImageThrowsWhenTheProductHasNoImage() {
+        Product burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
+        when(productRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(burger));
+
+        assertThatThrownBy(() -> productService.findImage(1L))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Product 1 has no image");
     }
 }
