@@ -1,18 +1,26 @@
 package es.urjc.kombo.controller;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 
+import java.math.BigDecimal;
+
+import org.hibernate.engine.jdbc.proxy.BlobProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 
 import es.urjc.kombo.TestcontainersConfiguration;
+import es.urjc.kombo.model.Image;
+import es.urjc.kombo.model.Product;
+import es.urjc.kombo.repository.ProductRepository;
 import io.restassured.RestAssured;
 
 // System tests of the REST API: real server and database with the sample data
@@ -22,6 +30,9 @@ class ProductApiIT {
 
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     @BeforeEach
     void setUp() {
@@ -42,7 +53,7 @@ class ProductApiIT {
         given().queryParam("category", "Drinks")
                 .when().get("/api/v1/products")
                 .then().statusCode(200)
-                .body("content.name", contains("Cola"));
+                .body("content.name", contains("Cola", "Orange Soda", "Water"));
     }
 
     @Test
@@ -73,5 +84,31 @@ class ProductApiIT {
                 .then().statusCode(400)
                 .contentType("application/problem+json")
                 .body("status", equalTo(400));
+    }
+
+    @Test
+    void getProductImageReturnsTheImageWithItsContentType() {
+        byte[] content = {10, 20, 30};
+        Product product = new Product("Image Test Burger", new BigDecimal("5.00"), "Test description", "Test");
+        product.setImage(new Image(BlobProxy.generateProxy(content), "image/jpeg", "Image Test Burger"));
+        long id = productRepository.save(product).getId();
+
+        byte[] body = given().when().get("/api/v1/products/{id}/image", id)
+                .then().statusCode(200)
+                .contentType("image/jpeg")
+                .extract().asByteArray();
+
+        assertThat(body).containsExactly(content);
+    }
+
+    @Test
+    void getProductImageOfAProductWithoutImageReturns404() {
+        Product product = new Product("No Image Burger", new BigDecimal("5.00"), "Test description", "Test");
+        long id = productRepository.save(product).getId();
+
+        given().when().get("/api/v1/products/{id}/image", id)
+                .then().statusCode(404)
+                .contentType("application/problem+json")
+                .body("detail", equalTo("Product " + id + " has no image"));
     }
 }

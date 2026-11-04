@@ -136,6 +136,33 @@
           "response": []
         },
         {
+          "name": "Get product image",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "image/*"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/1/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "1",
+                "image"
+              ]
+            },
+            "description": "Returns the picture of the product as binary content, with its type (for example image/jpeg) in the Content-Type header. Returns 404 if the product does not exist or has no picture."
+          },
+          "response": []
+        },
+        {
           "name": "Get product that does not exist (404)",
           "request": {
             "method": "GET",

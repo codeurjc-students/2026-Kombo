@@ -1,11 +1,14 @@
 package es.urjc.kombo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hibernate.engine.jdbc.proxy.BlobProxy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +19,20 @@ import org.springframework.data.domain.PageRequest;
 
 import es.urjc.kombo.TestcontainersConfiguration;
 import es.urjc.kombo.dto.ComboItemDTO;
+import es.urjc.kombo.dto.ImageFileDTO;
 import es.urjc.kombo.dto.ProductDTO;
 import es.urjc.kombo.dto.ProductDetailDTO;
 import es.urjc.kombo.dto.ProductIngredientDTO;
 import es.urjc.kombo.model.Combo;
+import es.urjc.kombo.model.Image;
 import es.urjc.kombo.model.Ingredient;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ComboRepository;
 import es.urjc.kombo.repository.IngredientRepository;
 import es.urjc.kombo.repository.ProductRepository;
 
-@SpringBootTest
+// Without sample data: each test creates the products it needs
+@SpringBootTest(properties = "kombo.sample-data.enabled=false")
 @Import(TestcontainersConfiguration.class)
 class ProductServiceIT {
 
@@ -41,6 +47,8 @@ class ProductServiceIT {
 
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    private static final byte[] IMAGE_CONTENT = {1, 2, 3, 4};
 
     private Product burger;
     private Combo menu;
@@ -58,6 +66,7 @@ class ProductServiceIT {
         burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
         burger.addIngredient(bread, 1);
         burger.addIngredient(beef, 150);
+        burger.setImage(new Image(BlobProxy.generateProxy(IMAGE_CONTENT), "image/png", "Test Burger"));
         Product drink = new Product("Test Drink", new BigDecimal("1.50"), "Test description", "Drinks");
         Product hidden = new Product("Hidden Burger", new BigDecimal("6.00"), "Not shown in the menu", "Burgers");
         hidden.setActive(false);
@@ -115,5 +124,22 @@ class ProductServiceIT {
                 .extracting(ProductIngredientDTO::name, ProductIngredientDTO::quantity)
                 .containsExactly(tuple("Beef", 300),
                         tuple("Bread", 2));
+    }
+
+    @Test
+    void findImageReturnsTheContentAndTypeOfTheProductImage() throws IOException {
+        ImageFileDTO image = productService.findImage(burger.getId());
+
+        assertThat(image.contentType()).isEqualTo("image/png");
+        assertThat(image.content().getContentAsByteArray()).containsExactly(IMAGE_CONTENT);
+    }
+
+    @Test
+    void findImageThrowsWhenTheProductHasNoImage() {
+        long menuId = menu.getId();
+
+        assertThatThrownBy(() -> productService.findImage(menuId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Product " + menuId + " has no image");
     }
 }

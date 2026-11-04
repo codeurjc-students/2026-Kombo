@@ -62,6 +62,7 @@ The last order of a user is not stored as an attribute: it is obtained from the 
 **Image**
 - Id: identifier.
 - Image: binary content, stored in the database.
+- Content type: format of the image (for example JPEG or PNG).
 - Text: alternative text.
 
 **Ingredient**
