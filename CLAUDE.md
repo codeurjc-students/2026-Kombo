@@ -28,7 +28,7 @@ Runtimes: Java 21 and Node.js 22 (as in `.github/workflows`). Commands are in `b
 
 - Configuration: secrets only in environment variables or the git-ignored `.env` (copy `.env.example`); never in the code. Local HTTPS keystore in `backend/certs/` (command in the development guide).
 - Database, from root: `docker compose --env-file .env -f docker/docker-compose-db.yml up -d`. After changing entities, recreate it with `down -v` (`ddl-auto=update`).
-- Whole application with Docker, from root: `docker compose up -d` (image `0.1`) or `docker compose -f docker-compose-dev.yml up -d --build` (local code); https://localhost.
+- Whole application with Docker, from root: `docker compose --env-file .env -f docker/docker-compose.yml up -d` (image `0.1`) or `docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build` (local code); https://localhost.
 - Backend, from `backend/`: `./mvnw spring-boot:run` (https://localhost, port 443; Swagger UI at `/swagger-ui.html`); `./mvnw test` (unit); `./mvnw verify` (unit, integration and system tests and JaCoCo report, needs Docker); `./mvnw verify -Pe2e` (Selenium, needs database, backend, frontend and Chrome running).
 - Frontend, from `frontend/`: `npm run dev` (http://localhost:5173); `npm run lint`; `npm run build`; `npm test` (unit); `npm run test:integration` (needs the backend running).
 

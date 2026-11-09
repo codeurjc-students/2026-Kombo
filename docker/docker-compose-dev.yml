@@ -1,7 +1,7 @@
 # Kombo development version: image with the "dev" tag (the last commit of main, published by CI)
-# or built from the local code:
-#   docker compose -f docker-compose-dev.yml up -d            (uses the published dev image)
-#   docker compose -f docker-compose-dev.yml up -d --build    (builds the image from the local code)
+# or built from the local code. From the root of the repository (where the .env file is):
+#   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d            (published dev image)
+#   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build    (built from the local code)
 # The application is at https://localhost (self-signed certificate).
 name: kombo-dev
 
@@ -24,8 +24,9 @@ services:
 
   app:
     image: deliaml10/kombo:dev
+    # Paths relative to this file: the build context is the root of the repository
     build:
-      context: .
+      context: ..
       dockerfile: docker/Dockerfile
     restart: unless-stopped
     depends_on:

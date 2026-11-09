@@ -6,7 +6,7 @@ import { ADMIN, CUSTOMER, renderApp } from '../test-utils';
 vi.mock('../services/userService', () => ({ getUsers: vi.fn() }));
 
 describe('UsersPage', () => {
-  it('lists the users page by page', async () => {
+  it('lists 10 users and loads the next ones with "Más resultados"', async () => {
     getUsers
       .mockResolvedValueOnce({ content: [ADMIN], page: { number: 0, totalPages: 2 } })
       .mockResolvedValueOnce({ content: [CUSTOMER], page: { number: 1, totalPages: 2 } });
@@ -14,9 +14,11 @@ describe('UsersPage', () => {
 
     expect(await screen.findByText('admin@kombo.com')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Next', { selector: '.visually-hidden' }).closest('a, button'));
+    fireEvent.click(screen.getByRole('button', { name: 'Más resultados' }));
 
     expect(await screen.findByText('customer@kombo.com')).toBeInTheDocument();
+    expect(screen.getByText('admin@kombo.com')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Más resultados' })).not.toBeInTheDocument();
     expect(getUsers).toHaveBeenLastCalledWith({ page: 1 });
   });
 

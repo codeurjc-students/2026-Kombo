@@ -12,6 +12,6 @@ export function getUser(id) {
 }
 
 // Order history of a user, the most recent first
-export function getUserOrders(id, { page = 0, size = 5 } = {}) {
+export function getUserOrders(id, { page = 0, size = 10 } = {}) {
   return apiFetch(`${USERS_PATH}/${id}/orders?${new URLSearchParams({ page, size })}`);
 }

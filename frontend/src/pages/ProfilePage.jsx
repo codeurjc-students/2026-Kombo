@@ -85,7 +85,7 @@ function OrderHistory({ userId }) {
       </ListGroup>
       {hasMore && (
         <Button variant="outline-ink" className="mt-3" onClick={loadMore} disabled={loading}>
-          {loading ? 'Cargando…' : 'Ver pedidos anteriores'}
+          {loading ? 'Cargando…' : 'Más resultados'}
         </Button>
       )}
     </section>

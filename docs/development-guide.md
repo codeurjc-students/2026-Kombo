@@ -212,9 +212,11 @@ The client is a React SPA. Its code is in `frontend/src`:
 | `theme.css` | Design tokens: the palette, the typefaces and the Bootstrap variables, defined in a single place |
 | `context/` | `AuthContext` and `AuthProvider`: session state (`user`, `loading`, `login`, `logout`) shared by every page |
 | `services/` | `httpClient.js` (common HTTP client: `credentials: 'include'`, JSON and `ApiError` with the status and the `detail` of the ProblemDetail) and one service per resource: `authService`, `productService` and `userService` |
-| `hooks/` | `usePagedList`: loads the pages of a paginated resource, with loading, error, retry and "show more" |
+| `hooks/` | `usePagedList`: loads the pages of a paginated resource, with loading, error, retry and the *Más resultados* button |
 | `components/` | `Layout` (navigation bar, content, footer and confirmation messages), `AppNavbar`, `ProtectedRoute`, `ProductList`, `ProductCard`, `StatusPage`, `LoadingState` and `ErrorState` |
 | `pages/` | One component per page: `HomePage`, `LoginPage`, `ProfilePage`, `UsersPage`, `NotFoundPage` and `ErrorPage` |
+
+**Lists.** Lists with more than 10 items (menu, order history and users) show the first 10 and a *Más resultados* button that loads the next 10.
 
 **Session.** The JWT is in an httpOnly cookie that JavaScript cannot read, so when the application starts `AuthProvider` asks `GET /api/v1/auth/me` who the user is. `ProtectedRoute` only shows its pages to logged in users with an allowed role: anonymous users are sent to the log in page (and back to the page they wanted after logging in) and other roles see a 403 page. The server checks the same rules; the client only avoids showing pages that would fail.
 
@@ -262,7 +264,7 @@ The server and the client have unit, integration and system tests. The system te
 | Unit | Client | Vitest and Testing Library | `LoginPage.test.jsx`, `ProfilePage.test.jsx`, `UsersPage.test.jsx`, `StatusPages.test.jsx` | Log in with redirection by role and error messages, profile and order history, users list with pages, and the 404 and error pages |
 | Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API |
 | Integration | Client | Vitest | `authService.integration.test.js` | Log in with a sample user and 401 with a wrong password, against the real REST API |
-| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser |
+| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser, 10 at first and the rest after *Más resultados* |
 | System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 
 Statistics (9 November 2026; the screenshots below are from Phase 2):
@@ -448,14 +450,16 @@ Only Docker is needed (Docker Desktop on Windows and Mac). From the root of the 
 
    | File | Image | Use |
    | :--- | :--- | :--- |
-   | `docker-compose.yml` | `deliaml10/kombo:0.1` | Version 0.1, published in DockerHub |
-   | `docker-compose-dev.yml` | `deliaml10/kombo:dev` | Last version of `main`, published by CI, or built from the local code with `--build` |
+   | `docker/docker-compose.yml` | `deliaml10/kombo:0.1` | Version 0.1, published in DockerHub |
+   | `docker/docker-compose-dev.yml` | `deliaml10/kombo:dev` | Last version of `main`, published by CI, or built from the local code with `--build` |
 
    ```
-   docker compose up -d                                       # version 0.1
-   docker compose -f docker-compose-dev.yml up -d             # dev image from DockerHub
-   docker compose -f docker-compose-dev.yml up -d --build     # dev image built from the local code
+   docker compose --env-file .env -f docker/docker-compose.yml up -d
+   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d
+   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build
    ```
+
+   `--env-file .env` is needed because Docker Compose looks for the `.env` file in the folder of the Compose file (`docker/`), and the `.env` file is in the root of the repository.
 
 3. Open https://localhost: the client and the REST API (https://localhost/api/v1, Swagger UI at https://localhost/swagger-ui.html) are served by the same container. The certificate is self-signed, so the browser shows a warning the first time.
 
@@ -469,9 +473,9 @@ Each Compose file runs two services:
 Other useful commands:
 
 ```
-docker compose logs -f app       # logs of the application
-docker compose down              # stops and removes the containers (the data is kept)
-docker compose down -v           # also deletes the data and the certificate
+docker compose -f docker/docker-compose.yml logs -f app   # logs of the application (same -f for the next commands)
+docker compose -f docker/docker-compose.yml down      # stops and removes the containers (the data is kept)
+docker compose -f docker/docker-compose.yml down -v   # also deletes the data and the certificate
 docker build -f docker/Dockerfile -t deliaml10/kombo:dev .   # builds the image without Compose
 ```
 
