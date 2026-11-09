@@ -188,6 +188,19 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   margin-right: 0.4rem;
 }
 
+.nav-user {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-user-name {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 600;
+}
+
 .role-badge {
   background: var(--kombo-teal-soft);
   color: var(--kombo-teal);

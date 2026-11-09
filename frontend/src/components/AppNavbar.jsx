@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { ROLE_LABELS } from '../utils/format';
@@ -43,7 +43,7 @@ export default function AppNavbar() {
         <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
           <BrandLogo />
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="main-nav" aria-label="Abrir menú" />
+        <Navbar.Toggle aria-controls="main-nav" label="Abrir menú" />
         <Navbar.Collapse id="main-nav">
           <Nav className="me-auto ms-md-3 gap-1">
             {links.map((link) => (
@@ -59,21 +59,17 @@ export default function AppNavbar() {
                 Iniciar sesión
               </Button>
             )}
+            {/* The log out button is always visible (no dropdown menu): one click and easy to find */}
             {user && (
-              <NavDropdown
-                align="end"
-                title={
-                  <span className="d-inline-flex align-items-center">
-                    <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
-                    {user.name} <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
-                  </span>
-                }
-                id="user-menu"
-              >
-                <NavDropdown.ItemText className="small text-secondary">{user.email}</NavDropdown.ItemText>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout}>Cerrar sesión</NavDropdown.Item>
-              </NavDropdown>
+              <div className="nav-user">
+                <span className="nav-user-name" title={user.email}>
+                  <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
+                  {user.name} <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
+                </span>
+                <Button variant="outline-ink" size="sm" onClick={handleLogout}>
+                  Cerrar sesión
+                </Button>
+              </div>
             )}
           </Nav>
         </Navbar.Collapse>
