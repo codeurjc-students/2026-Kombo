@@ -164,6 +164,15 @@ jobs:
         working-directory: backend
         run: ./mvnw -B verify -Pe2e
 
+      # Screenshot and HTML of the page of every failed Selenium test (E2ETestSupport)
+      - name: Upload UI test failures
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-failures
+          path: backend/target/e2e-failures
+          if-no-files-found: ignore
+
       - name: Show backend log
         if: failure()
         run: cat "$RUNNER_TEMP/backend.log"
