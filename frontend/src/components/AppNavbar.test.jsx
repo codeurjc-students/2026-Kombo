@@ -1,6 +1,16 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { RouterProvider, createMemoryRouter } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
+import AuthProvider from '../context/AuthProvider';
+import { routes } from '../routes';
+import { getCurrentUser, logout } from '../services/authService';
 import { ADMIN, CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
+
+vi.mock('../services/authService', () => ({ getCurrentUser: vi.fn(), login: vi.fn(), logout: vi.fn() }));
+
+vi.mock('../services/userService', () => ({
+  getUserOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
+}));
 
 vi.mock('../services/productService', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -38,6 +48,26 @@ describe('AppNavbar', () => {
   it('shows the user management to the administrator', () => {
     renderApp('/', { user: ADMIN });
     expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios']);
+  });
+
+  // Real AuthProvider: the session really ends, so ProtectedRoute could redirect to the log in page
+  it('goes to the menu when logging out from a protected page', async () => {
+    getCurrentUser.mockResolvedValue(CUSTOMER);
+    logout.mockResolvedValue(null);
+    const router = createMemoryRouter(routes, { initialEntries: ['/profile'] });
+    render(
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>,
+    );
+
+    fireEvent.click(await screen.findByRole('button', { name: /Lucía/ }));
+    fireEvent.click(await screen.findByText('Cerrar sesión'));
+
+    expect(await screen.findByText('Has cerrado sesión.')).toBeInTheDocument();
+    await waitFor(() => expect(logout).toHaveBeenCalled());
+    expect(router.state.location.pathname).toBe('/');
+    expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toBeInTheDocument();
   });
 
   it('logs out and shows a confirmation', async () => {
