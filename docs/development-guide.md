@@ -265,12 +265,12 @@ The server and the client have unit, integration and system tests. The system te
 | System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser |
 | System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 
-Statistics:
+Statistics (9 November 2026; the screenshots below are from Phase 2):
 
 | | Server | Client | Total |
 | :--- | :---: | :---: | :---: |
-| Number of tests | 3 | 3 | 6 |
-| Line coverage | 95 % | 75 % | |
+| Number of tests | 70 (21 unit, 45 integration and REST API system, 4 Selenium) | 49 (46 unit, 3 integration) | 119 |
+| Line coverage | 83.9 % (JaCoCo, `./mvnw verify`) | 94.9 % (unit tests, `npm run test:coverage`) | |
 
 ![Server tests execution](images/tests-backend.png)
 
