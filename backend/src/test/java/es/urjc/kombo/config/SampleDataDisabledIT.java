@@ -10,12 +10,15 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import es.urjc.kombo.TestcontainersConfiguration;
+import es.urjc.kombo.model.Product;
 import es.urjc.kombo.model.User;
 import es.urjc.kombo.repository.ProductRepository;
 import es.urjc.kombo.repository.UserRepository;
 
 // With kombo.sample-data.enabled=false the loader is not created: the database only has the administrator,
-// which AdminInitializer always creates
+// which AdminInitializer always creates.
+// Spring reuses the context (and the database) of ProductServiceIT, which has the same configuration and
+// saves its own test products, so the checks look for the sample data instead of an empty database.
 @SpringBootTest(properties = "kombo.sample-data.enabled=false")
 @Import(TestcontainersConfiguration.class)
 class SampleDataDisabledIT {
@@ -35,7 +38,8 @@ class SampleDataDisabledIT {
     @Test
     void sampleDataIsNotLoaded() {
         assertThat(context.getBeansOfType(SampleDataLoader.class)).isEmpty();
-        assertThat(productRepository.count()).isZero();
+        assertThat(productRepository.findAll()).extracting(Product::getName)
+                .doesNotContain("Classic Burger", "Chicken Burger", "French Fries", "Cola", "Classic Menu");
     }
 
     @Test
