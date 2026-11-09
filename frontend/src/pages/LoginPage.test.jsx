@@ -45,7 +45,7 @@ describe('LoginPage', () => {
 
     fillAndSubmit();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('El email o la contraseña no son correctos.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('El correo electrónico o la contraseña no son correctos.');
   });
 
   it('shows a generic error when the server fails', async () => {

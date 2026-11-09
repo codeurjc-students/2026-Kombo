@@ -31,7 +31,7 @@ export default function LoginPage() {
     } catch (err) {
       setError(
         err instanceof ApiError && err.status === 401
-          ? 'El email o la contraseña no son correctos.'
+          ? 'El correo electrónico o la contraseña no son correctos.'
           : 'No hemos podido iniciar sesión. Inténtalo de nuevo en unos minutos.',
       );
       setSubmitting(false);

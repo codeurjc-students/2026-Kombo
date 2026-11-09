@@ -29,10 +29,12 @@ export default function AppNavbar() {
   const [expanded, setExpanded] = useState(false);
   const links = LINKS[user?.role ?? 'ANONYMOUS'];
 
+  // Goes to the menu first: if the session were closed while a protected page is shown,
+  // ProtectedRoute would send the user to the log in page instead
   async function handleLogout() {
     setExpanded(false);
-    await logout();
     navigate('/', { state: { message: 'Has cerrado sesión.' } });
+    await logout();
   }
 
   return (
