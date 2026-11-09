@@ -10,7 +10,7 @@ Implement the smallest complete change within the existing structure. Reuse the 
 
 ## Structure and conventions
 
-The Spring Boot backend lives in `backend/` and the React frontend in `frontend/`. Backend packages under `es.urjc.kombo`: `controller` → `service` → `repository`, plus `model` (JPA entities), `dto` (records and MapStruct mappers) and `config`. A controller never uses a repository. Frontend: `src/pages` (one component per page), `src/components` (UI), `src/context` (session), `src/hooks`, `src/services` (calls to the REST API through `httpClient.js`) and `src/utils`; routes in `src/routes.jsx` and the palette in `src/theme.css`. Tests mirror the production packages.
+The Spring Boot backend lives in `backend/` and the React frontend in `frontend/`. Backend packages under `es.urjc.kombo`: `controller` → `service` → `repository`, plus `model` (JPA entities), `dto` (records and MapStruct mappers), `security` (Spring Security, JWT cookie) and `config`. A controller never uses a repository. Frontend: `src/pages` (one component per page), `src/components` (UI), `src/context` (session), `src/hooks`, `src/services` (calls to the REST API through `httpClient.js`) and `src/utils`; routes in `src/routes.jsx` and the palette in `src/theme.css`. Tests mirror the production packages.
 
 Use four-space Java indentation, constructor injection and descriptive English names. Code and comments in English; Spanish only in texts shown in the user interface. Name API representations `*DTO`, mappers `*Mapper`, repositories `*Repository` and services `*Service`. Test classes: `*Test` (unit), `*IT` (integration and system, Testcontainers), `*E2E` (Selenium).
 
@@ -26,8 +26,10 @@ Rules from the TFG guide and the domain model:
 
 Runtimes: Java 21 and Node.js 22 (as in `.github/workflows`). Commands are in `backend/pom.xml`, `frontend/package.json` and the [development guide](docs/development-guide.md). On Windows PowerShell use `.\mvnw`.
 
-- Database, from root: `docker compose -f docker/docker-compose-db.yml up -d`. After changing entities, recreate it with `down -v` (`ddl-auto=update`).
-- Backend, from `backend/`: `./mvnw spring-boot:run` (http://localhost:8080, Swagger UI at `/swagger-ui.html`); `./mvnw test` (unit); `./mvnw verify` (unit, integration and system tests and JaCoCo report, needs Docker); `./mvnw verify -Pe2e` (Selenium, needs database, backend, frontend and Chrome running).
+- Configuration: secrets only in environment variables or the git-ignored `.env` (copy `.env.example`); never in the code. Local HTTPS keystore in `backend/certs/` (command in the development guide).
+- Database, from root: `docker compose --env-file .env -f docker/docker-compose-db.yml up -d`. After changing entities, recreate it with `down -v` (`ddl-auto=update`).
+- Whole application with Docker, from root: `docker compose up -d` (image `0.1`) or `docker compose -f docker-compose-dev.yml up -d --build` (local code); https://localhost.
+- Backend, from `backend/`: `./mvnw spring-boot:run` (https://localhost, port 443; Swagger UI at `/swagger-ui.html`); `./mvnw test` (unit); `./mvnw verify` (unit, integration and system tests and JaCoCo report, needs Docker); `./mvnw verify -Pe2e` (Selenium, needs database, backend, frontend and Chrome running).
 - Frontend, from `frontend/`: `npm run dev` (http://localhost:5173); `npm run lint`; `npm run build`; `npm test` (unit); `npm run test:integration` (needs the backend running).
 
 Each feature needs six tests: REST API e2e, UI e2e, server-database integration, client-REST API integration, server unit and client unit. A feature is not done until they pass. Coverage must reach at least 70% at the end of each phase. Before handing over, run `./mvnw verify`, `npm run lint`, `npm test` and `git diff --check`.

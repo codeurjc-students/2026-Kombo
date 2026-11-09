@@ -23,6 +23,7 @@
   - [Configuration (environment variables)](#configuration-environment-variables)
   - [HTTPS certificate](#https-certificate)
   - [Running the application](#running-the-application)
+  - [Running with Docker](#running-with-docker)
   - [Using the tools](#using-the-tools)
   - [Running the tests](#running-the-tests)
 
@@ -36,7 +37,7 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 | **Technologies** | Java, Spring Boot, MySQL, JavaScript, React |
 | **Tools** | Visual Studio Code, Maven, Node.js and npm, Vite, Git, GitHub, Docker, Postman |
 | **Quality control** | Unit, integration and system tests of server and client (JUnit, Mockito, Testcontainers, Rest Assured, Selenium, Vitest and Testing Library), test coverage (JaCoCo and Vitest), static code analysis (SonarQube Cloud) and continuous integration (GitHub Actions) |
-| **Deployment** | The application is not packaged yet. During development, the database runs in a Docker container |
+| **Deployment** | Docker image (client and server in one Spring Boot jar, over HTTPS) published in DockerHub, run with Docker Compose together with MySQL |
 | **Development process** | Iterative and incremental, Git with GitHub Flow, task management with GitHub Issues and GitHub Projects, continuous integration with GitHub Actions |
 
 ## Technologies
@@ -58,7 +59,7 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 - **Node.js and npm**: runtime and package manager of the client. https://nodejs.org
 - **Vite**: creates, runs and builds the client. In development, it forwards the requests to `/api` to the server. https://vite.dev
 - **Git and GitHub**: version control and code repository. https://github.com
-- **Docker**: runs the database in a container during development and the databases of the integration tests. https://www.docker.com
+- **Docker and Docker Compose**: build the image of the application and run it with its database; also run the database during development and the databases of the integration tests. https://www.docker.com
 - **Postman**: used to make requests to the REST API. https://www.postman.com
 - **keytool**: tool of the JDK that generates the self-signed certificate (keystore) used for HTTPS. https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html
 - **Redocly CLI**: generates the HTML documentation of the REST API from the OpenAPI specification. https://redocly.com/docs/cli
@@ -161,6 +162,19 @@ flowchart LR
 - The server only accepts HTTPS, with a self-signed certificate (see [HTTPS certificate](#https-certificate)).
 - The server accesses the MySQL database (port 3306) with JDBC. The database runs in a Docker container.
 
+
+With Docker, the client and the server are packaged in a single image (see [Running with Docker](#running-with-docker)):
+
+```mermaid
+flowchart LR
+    B["Browser"] -- "HTTPS :443" --> A["Container app<br/>Spring Boot: REST API + React client"]
+    A -- "JDBC :3306" --> D[("Container db<br/>MySQL")]
+```
+
+- The image is built in three stages (`docker/Dockerfile`): the React client is built with Node.js, its static files are copied into the Spring Boot jar, and the final image only contains the Java runtime (JRE) and the jar.
+- The server returns the client for `/` and for the client routes (`SpaConfig` returns `index.html` for any path that is not a file or `/api`), so the client and the REST API share the same origin and the session cookie works without CORS.
+- Inside the container the server listens on port 8443 (a non-root user cannot use ports below 1024) and Docker Compose publishes it as port 443.
+
 ### Security
 
 Users log in with their email and password. Passwords are stored encoded with BCrypt. Authentication is stateless: there is no HTTP session in the server.
@@ -237,6 +251,7 @@ The server and the client have unit, integration and system tests. The system te
 | Unit | Server | JUnit and Mockito | `OrderServiceTest` | A customer can only read their own orders; employees and the administrator can read any order |
 | Unit | Server | JUnit and Mockito | `AdminInitializerTest` | The administrator is created or updated with the BCrypt hash of the configuration, and a plain password is rejected |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AuthApiIT` | Log in (cookie `HttpOnly`, `Secure` and `SameSite=Strict`), wrong credentials (401), `me` with and without session, invalid token (401) and log out |
+| System | Server | JUnit and Rest Assured (HTTPS) | `SpaForwardingIT` | The server returns the client (`index.html`) for `/` and for the client routes, and keeps the 404 of unknown REST API endpoints and missing files |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AccessRulesApiIT` | 401 without login, 403 with a role that is not allowed, 403 when reading the profile, order history or orders of another user, and access of the owner, employees and administrator |
 | Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The menu shows the products and their prices, filters by category, loads more pages, shows errors with *Retry*, the empty state and the image fallback, with the service mocked and a virtual DOM |
 | Unit | Client | Vitest | `httpClient.test.js`, `authService.test.js`, `productService.test.js`, `userService.test.js` | The HTTP client sends the cookie (`credentials: 'include'`) and JSON and turns errors into `ApiError`; each service calls its endpoints |
@@ -390,6 +405,42 @@ On Linux and macOS, port 443 needs administrator permissions: use `sudo` or chan
    ```
 
 5. Open the web application at http://localhost:5173. Vite forwards `/api` to https://localhost (`KOMBO_BACKEND_URL` changes it).
+
+### Running with Docker
+
+Only Docker is needed (Docker Desktop on Windows and Mac). From the root of the repository:
+
+1. Create the `.env` file from `.env.example` (see [Configuration](#configuration-environment-variables)).
+2. Run the application with one of the two Compose files:
+
+   | File | Image | Use |
+   | :--- | :--- | :--- |
+   | `docker-compose.yml` | `deliaml10/kombo:0.1` | Version 0.1, published in DockerHub |
+   | `docker-compose-dev.yml` | `deliaml10/kombo:dev` | Last version of `main`, published by CI, or built from the local code with `--build` |
+
+   ```
+   docker compose up -d                                       # version 0.1
+   docker compose -f docker-compose-dev.yml up -d             # dev image from DockerHub
+   docker compose -f docker-compose-dev.yml up -d --build     # dev image built from the local code
+   ```
+
+3. Open https://localhost: the client and the REST API (https://localhost/api/v1, Swagger UI at https://localhost/swagger-ui.html) are served by the same container. The certificate is self-signed, so the browser shows a warning the first time.
+
+Each Compose file runs two services:
+
+- `db`: MySQL 8.4 with its data in a volume. Its *healthcheck* connects with the `mysql` client over TCP, so it only passes when the real server is ready (while MySQL creates the database it runs a temporary server without network), and `app` waits for it (`depends_on: condition: service_healthy`).
+- `app`: the Kombo image, configured only with environment variables taken from `.env`: `KOMBO_DB_PASSWORD`, `KOMBO_ADMIN_EMAIL`, `KOMBO_ADMIN_PASSWORD_HASH`, `KOMBO_JWT_SECRET`, `KOMBO_SSL_KEY_STORE_PASSWORD` and `KOMBO_SAMPLEDATA_ENABLED`. Compose stops with a clear message if a required variable is missing.
+
+**HTTPS certificate in Docker.** When the container starts, `docker/entrypoint.sh` generates a self-signed keystore with `keytool` if there is none, and keeps it in the `certs` volume, so no private key is stored in the image or in Git. To use your own certificate, mount a PKCS12 keystore with the alias `kombo` in `/app/certs/kombo-keystore.p12` (or point `KOMBO_SSL_KEY_STORE` to it).
+
+Other useful commands:
+
+```
+docker compose logs -f app       # logs of the application
+docker compose down              # stops and removes the containers (the data is kept)
+docker compose down -v           # also deletes the data and the certificate
+docker build -f docker/Dockerfile -t deliaml10/kombo:dev .   # builds the image without Compose
+```
 
 ### Sample data
 
