@@ -70,22 +70,8 @@ jobs:
         run: npm test
 
   e2e:
-    name: Full - Frontend integration and UI system tests
+    name: Full - Frontend integration and UI system tests (docker compose)
     runs-on: ubuntu-latest
-    # MySQL database for the backend, same configuration as docker-compose-db.yml
-    services:
-      db:
-        image: mysql:8.4
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: kombo
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h localhost -ppassword"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
     steps:
       - uses: actions/checkout@v7
 
@@ -103,67 +89,49 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Make Maven wrapper executable
-        working-directory: backend
-        run: chmod +x mvnw
-
-      # The jar is copied out of target/ so the next Maven run cannot overwrite it
-      - name: Build backend
-        working-directory: backend
+      # Test-only values, nothing secret. Every "$" of the BCrypt hash (of "admin") is written as "$$"
+      # because docker compose reads the .env file and would take "$2b" as a variable.
+      - name: Create the .env file
         run: |
-          ./mvnw -B package -DskipTests
-          cp target/kombo-*.jar "$RUNNER_TEMP/kombo.jar"
+          cat > .env <<'ENV'
+          KOMBO_DB_PASSWORD=ci-password
+          KOMBO_ADMIN_PASSWORD_HASH=$$2b$$10$$GfBhP7nNxexOinn7O4x0w.GfVoH.WobAAFbuerLEUfjiiP43QFFd6
+          KOMBO_JWT_SECRET=ci-secret-0123456789-0123456789-0123456789
+          KOMBO_SSL_KEY_STORE_PASSWORD=ci-password
+          ENV
 
-      # Throwaway self-signed certificate and test-only values: nothing secret is needed in CI.
-      # Port 8443 because a non-root process cannot listen on 443 in the runner.
-      - name: Start backend
-        env:
-          SERVER_PORT: 8443
-          KOMBO_SSL_KEY_STORE: file:${{ runner.temp }}/kombo-keystore.p12
-          KOMBO_SSL_KEY_STORE_PASSWORD: ci-password
-          KOMBO_DB_PASSWORD: password
-          KOMBO_JWT_SECRET: ci-secret-0123456789-0123456789-0123456789
-          # BCrypt hash of "admin" (only used in CI)
-          KOMBO_ADMIN_PASSWORD_HASH: $2b$10$GfBhP7nNxexOinn7O4x0w.GfVoH.WobAAFbuerLEUfjiiP43QFFd6
+      # The same image that is published, built from the code of the pull request (not pushed)
+      - name: Start the application with docker compose
         run: |
-          keytool -genkeypair -alias kombo -keyalg RSA -keysize 2048 -validity 30 -storetype PKCS12 \
-            -keystore "$RUNNER_TEMP/kombo-keystore.p12" -storepass ci-password \
-            -dname "CN=localhost" -ext "SAN=dns:localhost,ip:127.0.0.1"
-          nohup java -jar "$RUNNER_TEMP/kombo.jar" > "$RUNNER_TEMP/backend.log" 2>&1 &
+          docker compose -f docker-compose-dev.yml up -d --build
           for i in $(seq 1 60); do
-            curl -skf https://localhost:8443/api/v1/products > /dev/null && exit 0
-            sleep 2
+            curl -skf https://localhost/api/v1/products > /dev/null && exit 0
+            sleep 3
           done
-          echo "Backend did not start" && cat "$RUNNER_TEMP/backend.log" && exit 1
+          echo "The application did not start" && docker compose -f docker-compose-dev.yml logs && exit 1
 
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
-      # Vitest "integration" project: real component against the real REST API
+      # Vitest "integration" project: real services against the REST API of the container
       - name: Run frontend integration tests
         working-directory: frontend
         env:
-          KOMBO_BACKEND_URL: https://localhost:8443
+          KOMBO_BACKEND_URL: https://localhost
         run: npm run test:integration
 
-      - name: Start frontend
-        working-directory: frontend
-        env:
-          KOMBO_BACKEND_URL: https://localhost:8443
-        run: |
-          nohup npm run dev > "$RUNNER_TEMP/frontend.log" 2>&1 &
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:5173 > /dev/null && exit 0
-            sleep 2
-          done
-          echo "Frontend did not start" && cat "$RUNNER_TEMP/frontend.log" && exit 1
-
-      # Selenium test (*E2E) with headless Chrome, preinstalled on the runner
+      # Selenium tests (*E2E) with headless Chrome, preinstalled on the runner, against the container
       - name: Run UI system tests
         working-directory: backend
-        run: ./mvnw -B verify -Pe2e
+        run: |
+          chmod +x mvnw
+          ./mvnw -B verify -Pe2e -De2e.baseUrl=https://localhost
 
-      - name: Show backend log
+      - name: Show application logs
         if: failure()
-        run: cat "$RUNNER_TEMP/backend.log"
+        run: docker compose -f docker-compose-dev.yml logs
+
+      - name: Stop the application
+        if: always()
+        run: docker compose -f docker-compose-dev.yml down -v
