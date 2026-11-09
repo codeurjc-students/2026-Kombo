@@ -21,7 +21,6 @@ import es.urjc.kombo.TestcontainersConfiguration;
 import es.urjc.kombo.model.Image;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ProductRepository;
-import io.restassured.RestAssured;
 
 // System tests of the REST API: real server and database with the sample data
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -36,7 +35,7 @@ class ProductApiIT {
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
+        ApiTestSupport.configureHttps(port);
     }
 
     @Test

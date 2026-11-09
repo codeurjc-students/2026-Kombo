@@ -4,9 +4,15 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    // Forwards /api requests to the backend during development
+    // Forwards /api requests to the backend during development. The backend only listens on HTTPS
+    // with a self-signed certificate, so the proxy must not validate it (secure: false).
+    // KOMBO_BACKEND_URL changes the address, for example https://localhost:8443.
     proxy: {
-      '/api': 'http://localhost:8080',
+      '/api': {
+        target: process.env.KOMBO_BACKEND_URL ?? 'https://localhost',
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   test: {
@@ -35,6 +41,9 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['src/**/*.integration.test.{js,jsx}'],
+          // The tests call the backend directly over HTTPS; its certificate is self-signed,
+          // so Node.js is told not to validate it (only in these tests)
+          env: { NODE_TLS_REJECT_UNAUTHORIZED: '0' },
         },
       },
     ],

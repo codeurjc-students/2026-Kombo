@@ -2,12 +2,101 @@ openapi: 3.1.0
 info:
   title: Kombo REST API
   description: "REST API for Kombo, a web application for fast food restaurant orders,\
-    \ cash register and inventory management."
+    \ cash register and inventory management. Log in with POST /api/v1/auth/login:\
+    \ the session JWT is sent back in the httpOnly cookie kombo_token, which the browser\
+    \ sends in the next requests."
   version: 0.0.1
 servers:
-- url: http://localhost:8080
+- url: https://localhost
   description: Generated server url
 paths:
+  /api/v1/auth/logout:
+    post:
+      tags:
+      - auth-controller
+      operationId: logout
+      responses:
+        "200":
+          description: OK
+  /api/v1/auth/login:
+    post:
+      tags:
+      - auth-controller
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+  /api/v1/users:
+    get:
+      tags:
+      - user-controller
+      operationId: getUsers
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelUserDTO"
+  /api/v1/users/{id}:
+    get:
+      tags:
+      - user-controller
+      operationId: getUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+  /api/v1/users/{id}/orders:
+    get:
+      tags:
+      - user-controller
+      operationId: getUserOrders
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelOrderDTO"
   /api/v1/products:
     get:
       tags:
@@ -70,8 +159,70 @@ paths:
               schema:
                 type: string
                 format: binary
+  /api/v1/orders/{id}:
+    get:
+      tags:
+      - order-controller
+      operationId: getOrder
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderDTO"
+  /api/v1/auth/me:
+    get:
+      tags:
+      - auth-controller
+      operationId: me
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
 components:
   schemas:
+    LoginRequestDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum:
+          - CUSTOMER
+          - EMPLOYEE
+          - ADMIN
+        addresses:
+          type: array
+          items:
+            type: string
     Pageable:
       type: object
       properties:
@@ -102,13 +253,91 @@ components:
         totalPages:
           type: integer
           format: int64
-    PagedModelProductDTO:
+    PagedModelUserDTO:
       type: object
       properties:
         content:
           type: array
           items:
-            $ref: "#/components/schemas/ProductDTO"
+            $ref: "#/components/schemas/UserDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+    OrderDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        orderNumber:
+          type: integer
+          format: int32
+        userId:
+          type: integer
+          format: int64
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderLineDTO"
+        deliveryType:
+          type: string
+          enum:
+          - EAT_IN
+          - TAKE_AWAY
+          - DELIVERY
+        deliveryAddress:
+          type: string
+        status:
+          type: string
+          enum:
+          - IN_PREPARATION
+          - READY
+          - DELIVERED
+          - CANCELLED
+        paymentMethod:
+          type: string
+          enum:
+          - CARD
+          - CASH
+        paid:
+          type: boolean
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        deliveredAt:
+          type: string
+          format: date-time
+        deliveryCost:
+          type: number
+        total:
+          type: number
+    OrderLineDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        product:
+          $ref: "#/components/schemas/ProductDTO"
+        quantity:
+          type: integer
+          format: int32
+        unitPrice:
+          type: number
+        subtotal:
+          type: number
+    PagedModelOrderDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderDTO"
         page:
           $ref: "#/components/schemas/PageMetadata"
     ProductDTO:
@@ -125,6 +354,15 @@ components:
           type: string
         category:
           type: string
+    PagedModelProductDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
     ComboItemDTO:
       type: object
       properties:
@@ -170,3 +408,8 @@ components:
         quantity:
           type: integer
           format: int32
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      name: kombo_token
+      in: cookie

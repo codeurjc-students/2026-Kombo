@@ -1,3 +1,6 @@
+# Only the MySQL database, for local development (the backend and the frontend run outside Docker).
+# Run from the root of the repository so the .env file is found:
+#   docker compose --env-file .env -f docker/docker-compose-db.yml up -d
 name: kombo
 services:
   db:
@@ -5,7 +8,7 @@ services:
     container_name: kombo-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${KOMBO_DB_PASSWORD:?Set KOMBO_DB_PASSWORD in the .env file}
       MYSQL_DATABASE: kombo
     ports:
       - "3306:3306"

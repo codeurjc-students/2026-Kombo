@@ -34,6 +34,8 @@ import es.urjc.kombo.repository.UserRepository;
 // Loads representative sample data when the application starts and the database is empty.
 // It only exists when kombo.sample-data.enabled is true (the default value).
 @Component
+// Fully qualified because es.urjc.kombo.model.Order is also imported; runs after AdminInitializer
+@org.springframework.core.annotation.Order(2)
 @ConditionalOnProperty(name = "kombo.sample-data.enabled", havingValue = "true", matchIfMissing = true)
 public class SampleDataLoader implements CommandLineRunner {
 
@@ -125,7 +127,7 @@ public class SampleDataLoader implements CommandLineRunner {
                 Map.of("Classic Burger", 2, "Chicken Burger", 2, "French Fries", 4, "Cola", 4));
     }
 
-    // One user of each role; returns the customer, who places some of the sample orders
+    // A customer and an employee (the administrator is created by AdminInitializer); returns the customer, who places some of the sample orders
     private User createUsers() {
         User customer = new User("Lucía", "García", "customer@kombo.com", "600111222",
                 passwordEncoder.encode("customer"), User.Role.CUSTOMER);
@@ -133,8 +135,6 @@ public class SampleDataLoader implements CommandLineRunner {
         userRepository.save(customer);
         userRepository.save(new User("Carlos", "López", "employee@kombo.com", "600333444",
                 passwordEncoder.encode("employee"), User.Role.EMPLOYEE));
-        userRepository.save(new User("Ana", "Martín", "admin@kombo.com", "600555666",
-                passwordEncoder.encode("admin"), User.Role.ADMIN));
         return customer;
     }
 
