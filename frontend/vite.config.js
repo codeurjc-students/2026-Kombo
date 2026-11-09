@@ -21,7 +21,7 @@ export default defineConfig({
     setupFiles: './src/setupTests.js',
     coverage: {
       include: ['src/**/*.{js,jsx}'],
-      exclude: ['src/main.jsx', 'src/setupTests.js', 'src/**/*.test.{js,jsx}'],
+      exclude: ['src/main.jsx', 'src/setupTests.js', 'src/test-utils.jsx', 'src/**/*.test.{js,jsx}'],
       reporter: ['text', 'html', ['lcov', { projectRoot: '..' }]],
     },
     // Two groups of tests, so CI can run them separately:

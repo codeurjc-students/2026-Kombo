@@ -1,10 +1,13 @@
-import ProductList from './components/ProductList';
+import { RouterProvider, createBrowserRouter } from 'react-router';
+import AuthProvider from './context/AuthProvider';
+import { routes } from './routes';
+
+const router = createBrowserRouter(routes);
 
 export default function App() {
   return (
-    <main>
-      <h1>Kombo</h1>
-      <ProductList />
-    </main>
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   );
 }
