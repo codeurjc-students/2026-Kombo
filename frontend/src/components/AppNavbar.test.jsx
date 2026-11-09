@@ -27,6 +27,20 @@ describe('AppNavbar', () => {
     renderApp('/');
     expect(navLinks()).toEqual(['Kombo', 'Carta']);
     expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
+    expect(screen.queryByRole('button', { name: 'Cerrar sesión' })).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ['Cliente', CUSTOMER],
+    ['Empleado', EMPLOYEE],
+    ['Administrador', ADMIN],
+  ])('shows the name, the role and the log out button to the role %s', (role, user) => {
+    renderApp('/', { user });
+    const navbar = screen.getByRole('navigation');
+    expect(navbar).toHaveTextContent(user.name);
+    expect(navbar).toHaveTextContent(role);
+    expect(screen.getByRole('button', { name: 'Cerrar sesión' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Iniciar sesión' })).not.toBeInTheDocument();
   });
 
   it('hides the log in button on the log in page', () => {
