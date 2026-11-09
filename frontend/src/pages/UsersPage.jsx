@@ -14,7 +14,7 @@ export default function UsersPage() {
 
   return (
     <section className="panel" aria-labelledby="users-title">
-      <h1 id="users-title" className="h2 mb-4">Usuarios</h1>
+      <h1 id="users-title" className="page-title">Usuarios</h1>
       {error && <ErrorState message="No hemos podido cargar los usuarios." onRetry={retry} />}
       {loading && !pageInfo && <LoadingState label="Cargando usuarios…" />}
       {pageInfo && (

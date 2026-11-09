@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
-import { Link, NavLink, useNavigate } from 'react-router';
+import { Button, Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { ROLE_LABELS } from '../utils/format';
+import BrandLogo from './BrandLogo';
 
 // Links shown to each role. Pages that do not exist yet are not linked.
 const LINKS = {
@@ -24,6 +25,7 @@ const LINKS = {
 export default function AppNavbar() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [expanded, setExpanded] = useState(false);
   const links = LINKS[user?.role ?? 'ANONYMOUS'];
 
@@ -34,14 +36,14 @@ export default function AppNavbar() {
   }
 
   return (
-    <Navbar expand="md" variant="dark" className="app-navbar py-3" expanded={expanded} onToggle={setExpanded}>
+    <Navbar expand="md" sticky="top" className="app-navbar py-2" expanded={expanded} onToggle={setExpanded}>
       <Container>
-        <Navbar.Brand as={Link} to="/" className="brand-wordmark" onClick={() => setExpanded(false)}>
-          kombo
+        <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
+          <BrandLogo />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-nav" aria-label="Abrir menú" />
         <Navbar.Collapse id="main-nav">
-          <Nav className="me-auto">
+          <Nav className="me-auto ms-md-3 gap-1">
             {links.map((link) => (
               <Nav.Link key={link.to} as={NavLink} to={link.to} end={link.end} onClick={() => setExpanded(false)}>
                 {link.label}
@@ -49,17 +51,19 @@ export default function AppNavbar() {
             ))}
           </Nav>
           <Nav>
-            {!loading && !user && (
-              <Nav.Link as={NavLink} to="/login" onClick={() => setExpanded(false)}>
+            {/* Not shown on the log in page itself */}
+            {!loading && !user && pathname !== '/login' && (
+              <Button as={Link} to="/login" variant="primary" className="nav-login" onClick={() => setExpanded(false)}>
                 Iniciar sesión
-              </Nav.Link>
+              </Button>
             )}
             {user && (
               <NavDropdown
                 align="end"
                 title={
-                  <span>
-                    {user.name} <span className="role-badge ms-1">{ROLE_LABELS[user.role]}</span>
+                  <span className="d-inline-flex align-items-center">
+                    <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
+                    {user.name} <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
                   </span>
                 }
                 id="user-menu"

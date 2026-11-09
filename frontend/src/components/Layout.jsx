@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Container, Toast, ToastContainer } from 'react-bootstrap';
 import { Outlet, useLocation } from 'react-router';
 import AppNavbar from './AppNavbar';
+import BrandLogo from './BrandLogo';
 
 // Common frame of every page: navigation bar, content and footer.
 // Pages can show a confirmation message by navigating with state: { message }.
@@ -18,7 +19,10 @@ export default function Layout({ children }) {
         <Container>{children ?? <Outlet />}</Container>
       </main>
       <footer className="app-footer py-4">
-        <Container>Kombo, comida rápida pedida fácil.</Container>
+        <Container className="d-flex flex-wrap align-items-center justify-content-between gap-2">
+          <BrandLogo className="" />
+          <span>Comida rápida, pedida fácil.</span>
+        </Container>
       </footer>
       <ToastContainer position="bottom-center" className="p-3">
         <Toast show={message !== null} onClose={() => setClosedKey(location.key)} delay={3500} autohide bg="dark">

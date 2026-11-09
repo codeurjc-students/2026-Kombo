@@ -47,7 +47,7 @@ class ProductListE2E {
         By grid = By.cssSelector("[data-testid='product-grid']");
         wait.until(ExpectedConditions.textToBePresentInElementLocated(grid, "Classic Burger"));
 
-        assertThat(driver.findElement(By.cssSelector(".navbar-brand")).getText()).isEqualTo("kombo");
+        assertThat(driver.findElement(By.cssSelector(".navbar-brand img")).getAttribute("alt")).isEqualTo("Kombo");
         assertThat(driver.findElement(grid).getText())
                 .contains("Classic Burger", "Chicken Burger", "French Fries", "Cola");
     }

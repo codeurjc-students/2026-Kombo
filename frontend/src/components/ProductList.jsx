@@ -14,8 +14,11 @@ export default function ProductList() {
   const { items: products, loading, error, hasMore, loadMore, retry } = usePagedList(fetchPage);
 
   return (
-    <section aria-label="Carta">
-      <div className="category-pills mb-4" role="group" aria-label="Filtrar por categoría">
+    <section aria-labelledby="menu-title">
+      <div className="menu-toolbar">
+        <h2 id="menu-title">Nuestra carta</h2>
+      </div>
+      <div className="category-pills" role="group" aria-label="Filtrar por categoría">
         <CategoryPill label="Todo" active={category === null} onClick={() => setCategory(null)} />
         {CATEGORIES.map((item) => (
           <CategoryPill

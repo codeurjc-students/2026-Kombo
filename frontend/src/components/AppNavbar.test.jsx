@@ -7,30 +7,37 @@ vi.mock('../services/productService', async (importOriginal) => ({
   getProductPage: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
 }));
 
+// Text of the links; the logo link is named by the alt text of its image
 function navLinks() {
-  return screen.getAllByRole('link').map((link) => link.textContent);
+  return screen.getAllByRole('link').map((link) => link.textContent || link.querySelector('img')?.alt);
 }
 
 describe('AppNavbar', () => {
   it('shows the log in link to anonymous users', () => {
     renderApp('/');
-    expect(navLinks()).toEqual(['kombo', 'Carta', 'Iniciar sesión']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta']);
+    expect(screen.getByRole('button', { name: 'Iniciar sesión' })).toHaveAttribute('href', '/login');
+  });
+
+  it('hides the log in button on the log in page', () => {
+    renderApp('/login');
+    expect(screen.getAllByRole('button', { name: 'Iniciar sesión' })).toHaveLength(1);
   });
 
   it('shows the order history to customers', () => {
     renderApp('/', { user: CUSTOMER });
-    expect(navLinks()).toEqual(['kombo', 'Carta', 'Mis pedidos']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mis pedidos']);
     expect(screen.getByText('Cliente')).toBeInTheDocument();
   });
 
   it('shows the profile to employees', () => {
     renderApp('/', { user: EMPLOYEE });
-    expect(navLinks()).toEqual(['kombo', 'Carta', 'Mi perfil']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mi perfil']);
   });
 
   it('shows the user management to the administrator', () => {
     renderApp('/', { user: ADMIN });
-    expect(navLinks()).toEqual(['kombo', 'Carta', 'Usuarios']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios']);
   });
 
   it('logs out and shows a confirmation', async () => {

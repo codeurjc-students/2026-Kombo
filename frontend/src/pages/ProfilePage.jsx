@@ -15,11 +15,16 @@ export default function ProfilePage() {
     <Row className="g-4">
       <Col lg={4}>
         <section className="panel" aria-labelledby="profile-title">
-          <h1 id="profile-title" className="h3 mb-1">
-            {user.name} {user.surname}
-          </h1>
-          <span className="role-badge">{ROLE_LABELS[user.role]}</span>
-          <dl className="mt-4 mb-0">
+          <div className="profile-header">
+            <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
+            <div>
+              <h1 id="profile-title" className="h3 mb-1">
+                {user.name} {user.surname}
+              </h1>
+              <span className="role-badge">{ROLE_LABELS[user.role]}</span>
+            </div>
+          </div>
+          <dl className="mb-0">
             <dt className="small text-secondary">Email</dt>
             <dd>{user.email}</dd>
             {user.phone && (
@@ -56,11 +61,11 @@ function OrderHistory({ userId }) {
       {!loading && !error && orders.length === 0 && (
         <p className="text-secondary mb-0">Todavía no has hecho ningún pedido. Echa un vistazo a la carta.</p>
       )}
-      <ListGroup variant="flush">
+      <ListGroup as="ul" className="list-unstyled d-grid gap-2 mb-0">
         {orders.map((order) => {
           const status = ORDER_STATUS[order.status] ?? { label: order.status, bg: 'secondary' };
           return (
-            <ListGroup.Item key={order.id} className="px-0 py-3">
+            <ListGroup.Item as="li" key={order.id} className="order-item">
               <div className="d-flex flex-wrap justify-content-between gap-2">
                 <div>
                   <strong>Pedido nº {order.orderNumber}</strong>
@@ -68,7 +73,7 @@ function OrderHistory({ userId }) {
                 </div>
                 <div className="text-end">
                   <Badge bg={status.bg} className="mb-1">{status.label}</Badge>
-                  <div className="fw-bold">{formatPrice(order.total)}</div>
+                  <div className="order-total">{formatPrice(order.total)}</div>
                 </div>
               </div>
               <div className="small text-secondary mt-1">

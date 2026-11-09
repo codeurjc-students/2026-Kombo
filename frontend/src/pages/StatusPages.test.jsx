@@ -30,7 +30,7 @@ describe('404 and error pages', () => {
     expect(screen.getByText('404')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Esta página no está en la carta' })).toBeInTheDocument();
     expect(screen.getByText('Volver a la carta')).toHaveAttribute('href', '/');
-    expect(screen.getByText('kombo')).toBeInTheDocument();
+    expect(screen.getAllByRole('img', { name: 'Kombo' }).length).toBeGreaterThan(0);
   });
 
   it('shows the error page when a page fails', () => {
@@ -39,7 +39,7 @@ describe('404 and error pages', () => {
 
     expect(screen.getByRole('heading', { name: 'Algo ha fallado' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Recargar la página' })).toBeInTheDocument();
-    expect(screen.getByText('kombo')).toBeInTheDocument();
+    expect(screen.getAllByRole('img', { name: 'Kombo' }).length).toBeGreaterThan(0);
   });
 
   it('shows the 404 page for a 404 route error', async () => {

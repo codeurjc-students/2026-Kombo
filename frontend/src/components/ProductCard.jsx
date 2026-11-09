@@ -1,15 +1,20 @@
 import { useState } from 'react';
-import { productImageUrl } from '../services/productService';
+import { CATEGORIES, productImageUrl } from '../services/productService';
 import { formatPrice } from '../utils/format';
+
+const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((category) => [category.value, category.label]));
 
 export default function ProductCard({ product }) {
   const [imageFailed, setImageFailed] = useState(false);
+  const category = CATEGORY_LABELS[product.category];
 
   return (
     <article className="product-card" aria-labelledby={`product-${product.id}`}>
       <div className="product-media">
         {imageFailed ? (
-          <div className="fallback" aria-hidden="true">{product.name.charAt(0)}</div>
+          <div className="fallback" aria-hidden="true">
+            <img src="/logo-icon.png" alt="" />
+          </div>
         ) : (
           <img
             src={productImageUrl(product.id)}
@@ -18,11 +23,12 @@ export default function ProductCard({ product }) {
             onError={() => setImageFailed(true)}
           />
         )}
-        <span className="price-sticker">{formatPrice(product.price)}</span>
+        {category && <span className="product-category">{category}</span>}
       </div>
       <div className="product-body">
-        <h2 id={`product-${product.id}`}>{product.name}</h2>
+        <h3 id={`product-${product.id}`}>{product.name}</h3>
         <p>{product.description}</p>
+        <span className="product-price">{formatPrice(product.price)}</span>
       </div>
     </article>
   );

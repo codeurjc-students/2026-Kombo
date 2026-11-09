@@ -39,46 +39,57 @@ export default function LoginPage() {
   }
 
   return (
-    <section className="panel auth-panel" aria-labelledby="login-title">
-      <h1 id="login-title" className="h2 mb-1">Inicia sesión</h1>
-      <p className="text-secondary mb-4">Consulta tus pedidos y pide más rápido.</p>
-      {error && (
-        <Alert variant="danger" role="alert">
-          {error}
-        </Alert>
-      )}
-      <Form onSubmit={handleSubmit} noValidate={false}>
-        <Form.Group className="mb-3" controlId="login-email">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-        </Form.Group>
-        <Form.Group className="mb-4" controlId="login-password">
-          <Form.Label>Contraseña</Form.Label>
-          <Form.Control
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </Form.Group>
-        <Button type="submit" variant="primary" size="lg" className="w-100" disabled={submitting}>
-          {submitting ? (
-            <>
-              <Spinner animation="border" size="sm" aria-hidden="true" className="me-2" />
-              Iniciando sesión…
-            </>
-          ) : (
-            'Iniciar sesión'
-          )}
-        </Button>
-      </Form>
+    <section className="panel auth-card" aria-labelledby="login-title">
+      <div className="auth-aside">
+        <div className="hero-badge" aria-hidden="true">
+          <img src="/logo-icon.png" alt="" />
+        </div>
+        <div>
+          <h2>Tu menú favorito, a un clic.</h2>
+          <p>Entra para ver tus pedidos y tus datos, y pedir más rápido.</p>
+        </div>
+      </div>
+      <div className="auth-form">
+        <h1 id="login-title" className="h2 mb-1">Inicia sesión</h1>
+        <p className="text-secondary mb-4">Consulta tus pedidos y pide más rápido.</p>
+        {error && (
+          <Alert variant="danger" role="alert">
+            {error}
+          </Alert>
+        )}
+        <Form onSubmit={handleSubmit} noValidate={false}>
+          <Form.Group className="mb-3" controlId="login-email">
+            <Form.Label>Email</Form.Label>
+            <Form.Control
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+          </Form.Group>
+          <Form.Group className="mb-4" controlId="login-password">
+            <Form.Label>Contraseña</Form.Label>
+            <Form.Control
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </Form.Group>
+          <Button type="submit" variant="primary" size="lg" className="w-100" disabled={submitting}>
+            {submitting ? (
+              <>
+                <Spinner animation="border" size="sm" aria-hidden="true" className="me-2" />
+                Iniciando sesión…
+              </>
+            ) : (
+              'Iniciar sesión'
+            )}
+          </Button>
+        </Form>
+      </div>
     </section>
   );
 }
