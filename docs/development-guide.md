@@ -210,9 +210,11 @@ The client is a React SPA. Its code is in `frontend/src`:
 | `theme.css` | Design tokens: the palette, the typefaces and the Bootstrap variables, defined in a single place |
 | `context/` | `AuthContext` and `AuthProvider`: session state (`user`, `loading`, `login`, `logout`) shared by every page |
 | `services/` | `httpClient.js` (common HTTP client: `credentials: 'include'`, JSON and `ApiError` with the status and the `detail` of the ProblemDetail) and one service per resource: `authService`, `productService` and `userService` |
-| `hooks/` | `usePagedList`: loads the pages of a paginated resource, with loading, error, retry and "show more" |
+| `hooks/` | `usePagedList`: loads the pages of a paginated resource, with loading, error, retry and the *Más resultados* button |
 | `components/` | `Layout` (navigation bar, content, footer and confirmation messages), `AppNavbar`, `ProtectedRoute`, `ProductList`, `ProductCard`, `StatusPage`, `LoadingState` and `ErrorState` |
 | `pages/` | One component per page: `HomePage`, `LoginPage`, `ProfilePage`, `UsersPage`, `NotFoundPage` and `ErrorPage` |
+
+**Lists.** Lists with more than 10 items (menu, order history and users) show the first 10 and a *Más resultados* button that loads the next 10.
 
 **Session.** The JWT is in an httpOnly cookie that JavaScript cannot read, so when the application starts `AuthProvider` asks `GET /api/v1/auth/me` who the user is. `ProtectedRoute` only shows its pages to logged in users with an allowed role: anonymous users are sent to the log in page (and back to the page they wanted after logging in) and other roles see a 403 page. The server checks the same rules; the client only avoids showing pages that would fail.
 
@@ -260,7 +262,7 @@ The server and the client have unit, integration and system tests. The system te
 | Unit | Client | Vitest and Testing Library | `LoginPage.test.jsx`, `ProfilePage.test.jsx`, `UsersPage.test.jsx`, `StatusPages.test.jsx` | Log in with redirection by role and error messages, profile and order history, users list with pages, and the 404 and error pages |
 | Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API |
 | Integration | Client | Vitest | `authService.integration.test.js` | Log in with a sample user and 401 with a wrong password, against the real REST API |
-| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser |
+| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser, 10 at first and the rest after *Más resultados* |
 | System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 
 Statistics:

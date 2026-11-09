@@ -17,7 +17,7 @@ describe('userService', () => {
     expect(apiFetch.mock.calls.map((call) => call[0])).toEqual([
       '/api/v1/users?page=2&size=10',
       '/api/v1/users/5',
-      '/api/v1/users/5/orders?page=1&size=5',
+      '/api/v1/users/5/orders?page=1&size=10',
     ]);
   });
 });

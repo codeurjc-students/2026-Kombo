@@ -52,11 +52,11 @@ describe('ProductList', () => {
       .mockResolvedValueOnce(page([{ id: 2, name: 'Second', price: 1 }], 1, 2));
     render(<ProductList />);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Ver más productos' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Más resultados' }));
 
     expect(await screen.findByText('Second')).toBeInTheDocument();
     expect(screen.getByText('First')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Ver más productos' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Más resultados' })).not.toBeInTheDocument();
   });
 
   it('shows an error with a retry button', async () => {
