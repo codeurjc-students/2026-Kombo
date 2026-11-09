@@ -9,6 +9,7 @@
   - [Domain model](#domain-model)
   - [Deployment](#deployment)
   - [Security](#security)
+  - [Client](#client)
   - [REST API](#rest-api)
 - [Quality control](#quality-control)
   - [Automated tests](#automated-tests)
@@ -47,6 +48,8 @@ Kombo is a web application with a SPA (Single Page Application) architecture. In
 - **springdoc-openapi**: generates the OpenAPI documentation of the REST API from the controllers and offers it with Swagger UI. https://springdoc.org
 - **MySQL 8.4**: relational database where the server stores the data. https://www.mysql.com
 - **React 19**: JavaScript library used to develop the client. https://react.dev
+- **React Router 8**: navigation between the pages of the client (SPA) and protected routes. https://reactrouter.com
+- **React Bootstrap 2 and Bootstrap 5.3**: responsive components of the client (navigation bar, forms, tables, alerts). https://react-bootstrap.netlify.app
 
 ## Tools
 
@@ -183,6 +186,36 @@ Users log in with their email and password. Passwords are stored encoded with BC
 
 Errors 401 (not logged in, invalid or expired token, wrong credentials) and 403 (role not allowed or data of another user) have the same `ProblemDetail` format as the rest of the errors of the REST API.
 
+### Client
+
+The client is a React SPA. Its code is in `frontend/src`:
+
+| Folder or file | Content |
+| :--- | :--- |
+| `main.jsx`, `App.jsx`, `routes.jsx` | Entry point, router (`createBrowserRouter`) and the routes of the application |
+| `theme.css` | Design tokens: the palette, the typefaces and the Bootstrap variables, defined in a single place |
+| `context/` | `AuthContext` and `AuthProvider`: session state (`user`, `loading`, `login`, `logout`) shared by every page |
+| `services/` | `httpClient.js` (common HTTP client: `credentials: 'include'`, JSON and `ApiError` with the status and the `detail` of the ProblemDetail) and one service per resource: `authService`, `productService` and `userService` |
+| `hooks/` | `usePagedList`: loads the pages of a paginated resource, with loading, error, retry and "show more" |
+| `components/` | `Layout` (navigation bar, content, footer and confirmation messages), `AppNavbar`, `ProtectedRoute`, `ProductList`, `ProductCard`, `StatusPage`, `LoadingState` and `ErrorState` |
+| `pages/` | One component per page: `HomePage`, `LoginPage`, `ProfilePage`, `UsersPage`, `NotFoundPage` and `ErrorPage` |
+
+**Session.** The JWT is in an httpOnly cookie that JavaScript cannot read, so when the application starts `AuthProvider` asks `GET /api/v1/auth/me` who the user is. `ProtectedRoute` only shows its pages to logged in users with an allowed role: anonymous users are sent to the log in page (and back to the page they wanted after logging in) and other roles see a 403 page. The server checks the same rules; the client only avoids showing pages that would fail.
+
+**Pages and navigation by role:**
+
+| Route | Page | Anonymous | Customer | Employee | Administrator |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| `/` | Menu with category filter | ✓ | ✓ | ✓ | ✓ |
+| `/login` | Log in | ✓ | | | |
+| `/profile` | Profile (and order history of the customer) | | ✓ | ✓ | ✓ |
+| `/admin/users` | Users | | | | ✓ |
+| Any other | 404 page | ✓ | ✓ | ✓ | ✓ |
+
+The navigation bar only shows the links of the role of the user, plus the name, the role and a *Log out* option.
+
+**Design.** Orange is the corporate colour of Kombo. The palette, defined once in `theme.css`, combines it with a cool navy ink for text and the navigation bar, a teal accent for roles and confirmations, and light neutral greys for the background. The headings use *Bricolage Grotesque* and the body text *DM Sans* (installed with npm, so they work without Internet). Buttons on orange use dark text, because white text on that orange does not reach the WCAG AA contrast. Every page gives feedback: loading states (spinners and skeletons), errors with a *Retry* button, hover and keyboard focus states, and confirmation messages (for example, after logging in or out). The layout is responsive: the product grid adapts its columns, the navigation bar collapses into a menu on mobile and tables scroll horizontally. The 404, 403 and error pages use the same layout and style.
+
 ### REST API
 
 The documentation of the REST API, generated with OpenAPI, can be seen here: [REST API documentation](https://raw.githack.com/codeurjc-students/2026-Kombo/main/docs/api/api-docs.html).
@@ -205,9 +238,15 @@ The server and the client have unit, integration and system tests. The system te
 | Unit | Server | JUnit and Mockito | `AdminInitializerTest` | The administrator is created or updated with the BCrypt hash of the configuration, and a plain password is rejected |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AuthApiIT` | Log in (cookie `HttpOnly`, `Secure` and `SameSite=Strict`), wrong credentials (401), `me` with and without session, invalid token (401) and log out |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AccessRulesApiIT` | 401 without login, 403 with a role that is not allowed, 403 when reading the profile, order history or orders of another user, and access of the owner, employees and administrator |
-| Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The component shows the list of products, with the service mocked and a virtual DOM |
+| Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The menu shows the products and their prices, filters by category, loads more pages, shows errors with *Retry*, the empty state and the image fallback, with the service mocked and a virtual DOM |
+| Unit | Client | Vitest | `httpClient.test.js`, `authService.test.js`, `productService.test.js`, `userService.test.js` | The HTTP client sends the cookie (`credentials: 'include'`) and JSON and turns errors into `ApiError`; each service calls its endpoints |
+| Unit | Client | Vitest and Testing Library | `AuthProvider.test.jsx` | The session is read on startup, and log in and log out update it |
+| Unit | Client | Vitest and Testing Library | `AppNavbar.test.jsx`, `ProtectedRoute.test.jsx` | The navigation bar shows the links of each role and logs out; protected routes redirect anonymous users to the log in page and show 403 to other roles |
+| Unit | Client | Vitest and Testing Library | `LoginPage.test.jsx`, `ProfilePage.test.jsx`, `UsersPage.test.jsx`, `StatusPages.test.jsx` | Log in with redirection by role and error messages, profile and order history, users list with pages, and the 404 and error pages |
 | Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API |
+| Integration | Client | Vitest | `authService.integration.test.js` | Log in with a sample user and 401 with a wrong password, against the real REST API |
 | System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser |
+| System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 
 Statistics:
 

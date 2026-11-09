@@ -10,7 +10,7 @@ Implement the smallest complete change within the existing structure. Reuse the 
 
 ## Structure and conventions
 
-The Spring Boot backend lives in `backend/` and the React frontend in `frontend/`. Backend packages under `es.urjc.kombo`: `controller` → `service` → `repository`, plus `model` (JPA entities), `dto` (records and MapStruct mappers) and `config`. A controller never uses a repository. Frontend: `src/components` (UI) and `src/services` (calls to the REST API). Tests mirror the production packages.
+The Spring Boot backend lives in `backend/` and the React frontend in `frontend/`. Backend packages under `es.urjc.kombo`: `controller` → `service` → `repository`, plus `model` (JPA entities), `dto` (records and MapStruct mappers) and `config`. A controller never uses a repository. Frontend: `src/pages` (one component per page), `src/components` (UI), `src/context` (session), `src/hooks`, `src/services` (calls to the REST API through `httpClient.js`) and `src/utils`; routes in `src/routes.jsx` and the palette in `src/theme.css`. Tests mirror the production packages.
 
 Use four-space Java indentation, constructor injection and descriptive English names. Code and comments in English; Spanish only in texts shown in the user interface. Name API representations `*DTO`, mappers `*Mapper`, repositories `*Repository` and services `*Service`. Test classes: `*Test` (unit), `*IT` (integration and system, Testcontainers), `*E2E` (Selenium).
 
