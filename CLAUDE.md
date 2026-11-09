@@ -12,7 +12,7 @@ Implement the smallest complete change within the existing structure. Reuse the 
 
 The Spring Boot backend lives in `backend/` and the React frontend in `frontend/`. Backend packages under `es.urjc.kombo`: `controller` → `service` → `repository`, plus `model` (JPA entities), `dto` (records and MapStruct mappers), `security` (Spring Security, JWT cookie) and `config`. A controller never uses a repository. Frontend: `src/pages` (one component per page), `src/components` (UI), `src/context` (session), `src/hooks`, `src/services` (calls to the REST API through `httpClient.js`) and `src/utils`; routes in `src/routes.jsx` and the palette in `src/theme.css`. Tests mirror the production packages.
 
-Use four-space Java indentation, constructor injection and descriptive English names. Code and comments in English; Spanish only in texts shown in the user interface. Name API representations `*DTO`, mappers `*Mapper`, repositories `*Repository` and services `*Service`. Test classes: `*Test` (unit), `*IT` (integration and system, Testcontainers), `*E2E` (Selenium).
+Use four-space Java indentation, constructor injection and descriptive English names. Code, comments and documentation in English; Spanish only in texts shown in the user interface, including the sample data (names and descriptions of products and ingredients). Name API representations `*DTO`, mappers `*Mapper`, repositories `*Repository` and services `*Service`. Test classes: `*Test` (unit), `*IT` (integration and system, Testcontainers), `*E2E` (Selenium).
 
 Rules from the TFG guide and the domain model:
 

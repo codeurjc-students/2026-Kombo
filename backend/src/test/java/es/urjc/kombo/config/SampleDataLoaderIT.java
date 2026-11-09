@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import es.urjc.kombo.TestcontainersConfiguration;
 import es.urjc.kombo.model.Combo;
@@ -51,7 +52,7 @@ class SampleDataLoaderIT {
     void loadsProductsCombosAndIngredients() {
         assertThat(productRepository.count()).isEqualTo(12);
         assertThat(comboRepository.findAll()).extracting(Combo::getName)
-                .containsExactlyInAnyOrder("Classic Menu", "Chicken Menu", "Family Menu");
+                .containsExactlyInAnyOrder("Menú clásico", "Menú de pollo", "Menú familiar");
         assertThat(ingredientRepository.count()).isEqualTo(15);
         assertThat(ingredientRepository.findAll()).filteredOn(Ingredient::isLowStock)
                 .extracting(Ingredient::getName).containsExactly("Bacon");
@@ -66,6 +67,16 @@ class SampleDataLoaderIT {
         User admin = userRepository.findByEmail("admin@kombo.com").orElseThrow();
         assertThat(admin.getPassword()).isNotEqualTo("admin");
         assertThat(passwordEncoder.matches("admin", admin.getPassword())).isTrue();
+    }
+
+    // Every sample product has its picture in resources/sample-images (named after the key of the product)
+    @Test
+    @Transactional
+    void loadsThePictureOfEveryProduct() {
+        assertThat(productRepository.findAll()).allSatisfy(product -> {
+            assertThat(product.getImage()).as(product.getName()).isNotNull();
+            assertThat(product.getImage().getContentType()).isEqualTo("image/jpeg");
+        });
     }
 
     @Test
