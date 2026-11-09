@@ -103,12 +103,12 @@ jobs:
       # The same image that is published, built from the code of the pull request (not pushed)
       - name: Start the application with docker compose
         run: |
-          docker compose -f docker-compose-dev.yml up -d --build
+          docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build
           for i in $(seq 1 60); do
             curl -skf https://localhost/api/v1/products > /dev/null && exit 0
             sleep 3
           done
-          echo "The application did not start" && docker compose -f docker-compose-dev.yml logs && exit 1
+          echo "The application did not start" && docker compose --env-file .env -f docker/docker-compose-dev.yml logs && exit 1
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -130,8 +130,8 @@ jobs:
 
       - name: Show application logs
         if: failure()
-        run: docker compose -f docker-compose-dev.yml logs
+        run: docker compose --env-file .env -f docker/docker-compose-dev.yml logs
 
       - name: Stop the application
         if: always()
-        run: docker compose -f docker-compose-dev.yml down -v
+        run: docker compose --env-file .env -f docker/docker-compose-dev.yml down -v

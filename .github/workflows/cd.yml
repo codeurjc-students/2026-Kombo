@@ -1,7 +1,7 @@
 # Continuous delivery: publishes the Docker image of Kombo in DockerHub (deliaml10/kombo).
-#  - push to main             -> tag "dev"
-#  - published GitHub release -> tags "<version>" and "latest", and docker-compose.yml as OCI artifact
-#  - manual run               -> tag "<branch>-<yyyymmdd>-<short commit>"
+#  - push to main             -> image and Compose OCI artifact with the tag "dev"
+#  - published GitHub release -> image and Compose OCI artifact with the tags "<version>" and "latest"
+#  - manual run               -> image with the tag "<branch>-<yyyymmddhhmm>-<short commit>"
 # The tags are decided here; the build is done by the reusable workflow docker-publish.yml.
 name: Continuous delivery
 
@@ -20,7 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       tags: ${{ steps.tags.outputs.tags }}
-      compose-tag: ${{ steps.tags.outputs.compose-tag }}
+      compose-tags: ${{ steps.tags.outputs.compose-tags }}
+      compose-image-tag: ${{ steps.tags.outputs.compose-image-tag }}
     steps:
       - id: tags
         env:
@@ -32,17 +33,21 @@ jobs:
           case "$EVENT" in
             push)
               echo "tags=dev" >> "$GITHUB_OUTPUT"
+              echo "compose-tags=dev" >> "$GITHUB_OUTPUT"
+              echo "compose-image-tag=dev" >> "$GITHUB_OUTPUT"
               ;;
             release)
               # A release "v0.1.0" or "0.1.0" publishes the tag "0.1.0"
               version="${RELEASE_TAG#v}"
               echo "tags=$version latest" >> "$GITHUB_OUTPUT"
-              echo "compose-tag=$version" >> "$GITHUB_OUTPUT"
+              echo "compose-tags=$version latest" >> "$GITHUB_OUTPUT"
+              # Both Compose artifacts point to the image of this version, not to "latest"
+              echo "compose-image-tag=$version" >> "$GITHUB_OUTPUT"
               ;;
             workflow_dispatch)
               # Docker tags cannot contain "/", so a branch "feature/x" becomes "feature-x"
               branch=$(echo "$BRANCH" | tr '/' '-' | tr -cd 'A-Za-z0-9_.-')
-              echo "tags=$branch-$(date -u +%Y%m%d)-${SHA::7}" >> "$GITHUB_OUTPUT"
+              echo "tags=$branch-$(date -u +%Y%m%d%H%M)-${SHA::7}" >> "$GITHUB_OUTPUT"
               ;;
           esac
 
@@ -52,7 +57,8 @@ jobs:
     uses: ./.github/workflows/docker-publish.yml
     with:
       tags: ${{ needs.tags.outputs.tags }}
-      compose-tag: ${{ needs.tags.outputs.compose-tag }}
+      compose-tags: ${{ needs.tags.outputs.compose-tags }}
+      compose-image-tag: ${{ needs.tags.outputs.compose-image-tag }}
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

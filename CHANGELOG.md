@@ -50,8 +50,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `docker/docker-compose.yml` (image `deliaml10/kombo:0.1`) and `docker/docker-compose-dev.yml` (image `deliaml10/kombo:dev`, can be built locally), with MySQL healthcheck and configuration with environment variables.
 - Self-signed HTTPS keystore generated on the first start of the container (`docker/entrypoint.sh`) and kept in a volume.
 - Quick start with Docker in the README.
-- Continuous delivery workflow (`cd.yml`) with a reusable build and publish workflow (`docker-publish.yml`): image `dev` on every push to `main`, `<version>` and `latest` on every release, and `<branch>-<date>-<commit>` on manual runs.
-- `docker-compose.yml` published as an OCI artifact (`deliaml10/kombo-compose:<version>`) on every release.
+- Continuous delivery workflow (`cd.yml`) with a reusable build and publish workflow (`docker-publish.yml`): image `dev` on every push to `main`, `<version>` and `latest` on every release, and `<branch>-<date-time>-<commit>` on manual runs.
+- `docker/docker-compose.yml` published as an OCI artifact (`deliaml10/kombo-compose`) with the tag `dev` on every push to `main`, and `<version>` and `latest` on every release.
 - Guide to publish a release and list of the DockerHub secrets.
 - Kombo logo in the navigation bar, the footer, the home banner and the log in page, and favicon (`favicon.ico`, `favicon.png` and `apple-touch-icon.png`).
 
