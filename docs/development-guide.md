@@ -417,14 +417,16 @@ Only Docker is needed (Docker Desktop on Windows and Mac). From the root of the 
 
    | File | Image | Use |
    | :--- | :--- | :--- |
-   | `docker-compose.yml` | `deliaml10/kombo:0.1` | Version 0.1, published in DockerHub |
-   | `docker-compose-dev.yml` | `deliaml10/kombo:dev` | Last version of `main`, published by CI, or built from the local code with `--build` |
+   | `docker/docker-compose.yml` | `deliaml10/kombo:0.1` | Version 0.1, published in DockerHub |
+   | `docker/docker-compose-dev.yml` | `deliaml10/kombo:dev` | Last version of `main`, published by CI, or built from the local code with `--build` |
 
    ```
-   docker compose up -d                                       # version 0.1
-   docker compose -f docker-compose-dev.yml up -d             # dev image from DockerHub
-   docker compose -f docker-compose-dev.yml up -d --build     # dev image built from the local code
+   docker compose --env-file .env -f docker/docker-compose.yml up -d
+   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d
+   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build
    ```
+
+   `--env-file .env` is needed because Docker Compose looks for the `.env` file in the folder of the Compose file (`docker/`), and the `.env` file is in the root of the repository.
 
 3. Open https://localhost: the client and the REST API (https://localhost/api/v1, Swagger UI at https://localhost/swagger-ui.html) are served by the same container. The certificate is self-signed, so the browser shows a warning the first time.
 
@@ -438,9 +440,9 @@ Each Compose file runs two services:
 Other useful commands:
 
 ```
-docker compose logs -f app       # logs of the application
-docker compose down              # stops and removes the containers (the data is kept)
-docker compose down -v           # also deletes the data and the certificate
+docker compose -f docker/docker-compose.yml logs -f app   # logs of the application (same -f for the next commands)
+docker compose -f docker/docker-compose.yml down      # stops and removes the containers (the data is kept)
+docker compose -f docker/docker-compose.yml down -v   # also deletes the data and the certificate
 docker build -f docker/Dockerfile -t deliaml10/kombo:dev .   # builds the image without Compose
 ```
 

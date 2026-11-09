@@ -47,7 +47,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Client unit tests of the services, the session, the navigation by role, the protected routes and every page; client integration test of the log in; Selenium test of the log in.
 - Multi-stage `docker/Dockerfile`: React build, Spring Boot jar with the client inside and final image with only the JRE, run by a non-root user.
 - The server returns the React client for `/` and the client routes (`SpaConfig`), so the client and the REST API share the same origin.
-- `docker-compose.yml` (image `deliaml10/kombo:0.1`) and `docker-compose-dev.yml` (image `deliaml10/kombo:dev`, can be built locally), with MySQL healthcheck and configuration with environment variables.
+- `docker/docker-compose.yml` (image `deliaml10/kombo:0.1`) and `docker/docker-compose-dev.yml` (image `deliaml10/kombo:dev`, can be built locally), with MySQL healthcheck and configuration with environment variables.
 - Self-signed HTTPS keystore generated on the first start of the container (`docker/entrypoint.sh`) and kept in a volume.
 - Quick start with Docker in the README.
 

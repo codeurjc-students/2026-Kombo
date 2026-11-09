@@ -1,6 +1,7 @@
 # Kombo version 0.1: image published in DockerHub and MySQL database.
+# From the root of the repository (where the .env file is):
 #   cp .env.example .env   (and change the values)
-#   docker compose up -d
+#   docker compose --env-file .env -f docker/docker-compose.yml up -d
 # The application is at https://localhost (self-signed certificate).
 name: kombo
 
