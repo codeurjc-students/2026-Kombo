@@ -1,0 +1,13 @@
+# Files that are not needed to build the image (smaller and faster build context)
+.git
+.github
+.vscode
+.env
+**/certs
+**/node_modules
+**/dist
+**/coverage
+**/target
+backend/src/main/resources/static
+docs
+images
