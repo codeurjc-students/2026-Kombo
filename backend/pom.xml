@@ -29,6 +29,7 @@
 	<properties>
 		<java.version>21</java.version>
 		<selenium.version>4.49.0</selenium.version>
+		<jjwt.version>0.12.6</jjwt.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -83,8 +84,30 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-crypto</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>${jjwt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>${jjwt.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -110,6 +133,34 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- Generates a throwaway self-signed keystore for the HTTPS tests in target/test-classes,
+			     so no private key is committed to the repository and CI needs no secret -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>keytool-maven-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>generate-test-keystore</id>
+						<phase>generate-test-resources</phase>
+						<goals>
+							<goal>generateKeyPair</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<keystore>${project.build.testOutputDirectory}/test-keystore.p12</keystore>
+					<storetype>PKCS12</storetype>
+					<storepass>test-password</storepass>
+					<alias>kombo</alias>
+					<dname>CN=localhost</dname>
+					<ext>SAN=dns:localhost,ip:127.0.0.1</ext>
+					<keyalg>RSA</keyalg>
+					<keysize>2048</keysize>
+					<validity>365</validity>
+					<skipIfExist>true</skipIfExist>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
