@@ -50,6 +50,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 
 - Logging out from a protected page (for example *Mis pedidos*) goes to the menu instead of the log in page.
 - The Selenium tests share their setup (`E2ETestSupport`), use a fixed window size and scroll to an element without animation before clicking it (Bootstrap enables smooth scrolling, which made the clicks land on other elements in CI).
+- The Selenium tests wait until a dropdown menu is really open (and click again if it is not), and save a screenshot and the HTML of the page of every failed test in `target/e2e-failures`, uploaded by CI as the `e2e-failures` artifact.
 - The sample data shown in the application (products, combos and ingredients) is in Spanish, like the rest of the interface; the keys of the products and the code stay in English. "Email" is shown as "Correo electrónico".
 - Sample pictures with the `.jpeg` extension are loaded, and the orange soda picture was renamed to `orange-soda.jpg`, so every sample product has its picture.
 - The menu of the home page shows product cards with picture and price instead of a plain list (`ProductList` tests adapted).
