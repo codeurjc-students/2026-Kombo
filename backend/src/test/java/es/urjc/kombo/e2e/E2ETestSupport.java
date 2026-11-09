@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -94,5 +95,12 @@ abstract class E2ETestSupport {
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});", element);
         wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+    }
+
+    // Activates a button with the keyboard (focus and Enter), like a keyboard user. Used for the buttons of the
+    // sticky navigation bar: in the Chrome of the GitHub runners the simulated mouse clicks on that bar did
+    // not reach the button (no error, no effect), while keyboard activation does not depend on coordinates.
+    protected void pressWithKeyboard(By locator) {
+        wait.until(ExpectedConditions.elementToBeClickable(locator)).sendKeys(Keys.ENTER);
     }
 }
