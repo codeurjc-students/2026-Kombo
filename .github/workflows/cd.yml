@@ -1,0 +1,58 @@
+# Continuous delivery: publishes the Docker image of Kombo in DockerHub (deliaml10/kombo).
+#  - push to main             -> tag "dev"
+#  - published GitHub release -> tags "<version>" and "latest", and docker-compose.yml as OCI artifact
+#  - manual run               -> tag "<branch>-<yyyymmdd>-<short commit>"
+# The tags are decided here; the build is done by the reusable workflow docker-publish.yml.
+name: Continuous delivery
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  tags:
+    name: Decide the image tags
+    runs-on: ubuntu-latest
+    outputs:
+      tags: ${{ steps.tags.outputs.tags }}
+      compose-tag: ${{ steps.tags.outputs.compose-tag }}
+    steps:
+      - id: tags
+        env:
+          EVENT: ${{ github.event_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          case "$EVENT" in
+            push)
+              echo "tags=dev" >> "$GITHUB_OUTPUT"
+              ;;
+            release)
+              # A release "v0.1.0" or "0.1.0" publishes the tag "0.1.0"
+              version="${RELEASE_TAG#v}"
+              echo "tags=$version latest" >> "$GITHUB_OUTPUT"
+              echo "compose-tag=$version" >> "$GITHUB_OUTPUT"
+              ;;
+            workflow_dispatch)
+              # Docker tags cannot contain "/", so a branch "feature/x" becomes "feature-x"
+              branch=$(echo "$BRANCH" | tr '/' '-' | tr -cd 'A-Za-z0-9_.-')
+              echo "tags=$branch-$(date -u +%Y%m%d)-${SHA::7}" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+  publish:
+    name: Publish
+    needs: tags
+    uses: ./.github/workflows/docker-publish.yml
+    with:
+      tags: ${{ needs.tags.outputs.tags }}
+      compose-tag: ${{ needs.tags.outputs.compose-tag }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
