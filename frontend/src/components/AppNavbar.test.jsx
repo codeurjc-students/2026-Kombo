@@ -61,8 +61,7 @@ describe('AppNavbar', () => {
       </AuthProvider>,
     );
 
-    fireEvent.click(await screen.findByRole('button', { name: /Lucía/ }));
-    fireEvent.click(await screen.findByText('Cerrar sesión'));
+    fireEvent.click(await screen.findByRole('button', { name: 'Cerrar sesión' }));
 
     expect(await screen.findByText('Has cerrado sesión.')).toBeInTheDocument();
     await waitFor(() => expect(logout).toHaveBeenCalled());
@@ -73,8 +72,7 @@ describe('AppNavbar', () => {
   it('logs out and shows a confirmation', async () => {
     const { auth } = renderApp('/', { user: CUSTOMER, logout: vi.fn().mockResolvedValue() });
 
-    fireEvent.click(screen.getByRole('button', { name: /Lucía/ }));
-    fireEvent.click(await screen.findByText('Cerrar sesión'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar sesión' }));
 
     await waitFor(() => expect(auth.logout).toHaveBeenCalled());
     expect(await screen.findByText('Has cerrado sesión.')).toBeInTheDocument();

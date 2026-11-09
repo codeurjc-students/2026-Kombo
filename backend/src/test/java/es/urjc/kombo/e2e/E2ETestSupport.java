@@ -14,7 +14,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -95,22 +94,5 @@ abstract class E2ETestSupport {
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});", element);
         wait.until(ExpectedConditions.elementToBeClickable(element)).click();
-    }
-
-    // Opens a Bootstrap dropdown menu. If the menu is not open after a moment (the click arrived while
-    // the page was still updating), the toggle is clicked again, up to three times.
-    protected void openDropdown(By toggle) {
-        for (int attempt = 1; ; attempt++) {
-            click(toggle);
-            try {
-                new WebDriverWait(driver, Duration.ofSeconds(3)).until(
-                        ExpectedConditions.attributeToBe(toggle, "aria-expanded", "true"));
-                return;
-            } catch (TimeoutException exception) {
-                if (attempt == 3) {
-                    throw exception;
-                }
-            }
-        }
     }
 }
