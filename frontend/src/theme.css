@@ -1,0 +1,285 @@
+/* Kombo design tokens: the whole palette is defined here, once.
+   Orange is the corporate colour; ink (a cool navy) and teal are its complements. */
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/dm-sans';
+
+:root {
+  --kombo-orange: #f26b1d;
+  --kombo-orange-strong: #c4520c;
+  --kombo-orange-soft: #ffe6d5;
+  --kombo-ink: #1d2b3a;
+  --kombo-slate: #5a6878;
+  --kombo-teal: #0f8a7e;
+  --kombo-teal-soft: #d8f1ee;
+  --kombo-mist: #f3f5f8;
+  --kombo-white: #ffffff;
+
+  --kombo-font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --kombo-font-body: 'DM Sans Variable', system-ui, sans-serif;
+  --kombo-radius-card: 1.25rem;
+  --kombo-radius-control: 0.75rem;
+
+  /* Bootstrap reads these variables, so its components use the Kombo palette */
+  --bs-primary: var(--kombo-orange);
+  --bs-primary-rgb: 242, 107, 29;
+  --bs-body-font-family: var(--kombo-font-body);
+  --bs-body-color: var(--kombo-ink);
+  --bs-body-bg: var(--kombo-mist);
+  --bs-secondary-color: var(--kombo-slate);
+  --bs-link-color: var(--kombo-orange-strong);
+  --bs-link-color-rgb: 196, 82, 12;
+  --bs-link-hover-color: var(--kombo-ink);
+  --bs-border-radius: var(--kombo-radius-control);
+  --bs-focus-ring-color: rgba(242, 107, 29, 0.35);
+}
+
+h1, h2, h3, .display-font {
+  font-family: var(--kombo-font-display);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--kombo-ink);
+}
+
+/* Ink text on orange: white on this orange does not reach the WCAG AA contrast */
+.btn-primary {
+  --bs-btn-bg: var(--kombo-orange);
+  --bs-btn-border-color: var(--kombo-orange);
+  --bs-btn-color: var(--kombo-ink);
+  --bs-btn-hover-bg: var(--kombo-orange-strong);
+  --bs-btn-hover-border-color: var(--kombo-orange-strong);
+  --bs-btn-hover-color: var(--kombo-white);
+  --bs-btn-active-bg: var(--kombo-orange-strong);
+  --bs-btn-active-border-color: var(--kombo-orange-strong);
+  --bs-btn-active-color: var(--kombo-white);
+  --bs-btn-disabled-bg: var(--kombo-orange);
+  --bs-btn-disabled-border-color: var(--kombo-orange);
+  --bs-btn-disabled-color: var(--kombo-ink);
+  font-weight: 700;
+}
+
+.btn-outline-ink {
+  --bs-btn-color: var(--kombo-ink);
+  --bs-btn-border-color: var(--kombo-ink);
+  --bs-btn-hover-bg: var(--kombo-ink);
+  --bs-btn-hover-color: var(--kombo-white);
+  --bs-btn-hover-border-color: var(--kombo-ink);
+  --bs-btn-active-bg: var(--kombo-ink);
+  --bs-btn-active-color: var(--kombo-white);
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 3px solid var(--kombo-orange);
+  outline-offset: 2px;
+}
+
+/* Layout */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  padding-block: 2rem 3rem;
+}
+
+.app-navbar {
+  background: var(--kombo-ink);
+}
+
+.app-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active {
+  color: var(--kombo-white);
+}
+
+.app-navbar .nav-link.active {
+  box-shadow: inset 0 -3px 0 var(--kombo-orange);
+}
+
+.brand-wordmark {
+  font-family: var(--kombo-font-display);
+  font-weight: 800;
+  font-size: 1.75rem;
+  letter-spacing: -0.04em;
+  color: var(--kombo-orange);
+  line-height: 1;
+}
+
+.brand-wordmark:hover {
+  color: var(--kombo-orange);
+}
+
+.role-badge {
+  background: var(--kombo-teal-soft);
+  color: var(--kombo-teal);
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+.app-footer {
+  color: var(--kombo-slate);
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(29, 43, 58, 0.08);
+}
+
+/* Home */
+.menu-hero h1 {
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  line-height: 1.02;
+  max-width: 14ch;
+}
+
+.menu-hero p {
+  max-width: 46ch;
+  color: var(--kombo-slate);
+  font-size: 1.1rem;
+}
+
+.category-pills {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.category-pill {
+  border: 2px solid var(--kombo-ink);
+  background: transparent;
+  color: var(--kombo-ink);
+  border-radius: 999px;
+  padding: 0.4rem 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.category-pill:hover {
+  background: var(--kombo-orange-soft);
+}
+
+.category-pill[aria-pressed='true'] {
+  background: var(--kombo-ink);
+  color: var(--kombo-white);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  background: var(--kombo-white);
+  border-radius: var(--kombo-radius-card);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.product-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--kombo-orange-soft);
+}
+
+.product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-media .fallback {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  font-family: var(--kombo-font-display);
+  font-size: 4rem;
+  font-weight: 800;
+  color: var(--kombo-orange);
+}
+
+/* The price sticker is the signature element of the menu */
+.price-sticker {
+  position: absolute;
+  right: 0.85rem;
+  bottom: -1.4rem;
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 50%;
+  background: var(--kombo-orange);
+  color: var(--kombo-ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--kombo-font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  transform: rotate(-8deg);
+  box-shadow: 0 0 0 4px var(--kombo-white);
+}
+
+.product-body {
+  padding: 1.25rem 1.25rem 1.5rem;
+}
+
+.product-body h2 {
+  font-size: 1.3rem;
+  margin: 0 5rem 0.35rem 0;
+}
+
+.product-body p {
+  color: var(--kombo-slate);
+  margin: 0;
+}
+
+/* Forms and panels */
+.panel {
+  background: var(--kombo-white);
+  border-radius: var(--kombo-radius-card);
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+.auth-panel {
+  max-width: 26rem;
+  margin-inline: auto;
+}
+
+/* 404, 403 and error pages */
+.status-page {
+  max-width: 34rem;
+  margin: 2rem auto;
+  text-align: center;
+}
+
+.status-code {
+  font-family: var(--kombo-font-display);
+  font-weight: 800;
+  font-size: clamp(5rem, 22vw, 9rem);
+  line-height: 0.9;
+  color: var(--kombo-orange);
+  letter-spacing: -0.06em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Lists and tables inside a white panel keep the panel background */
+.panel .list-group,
+.panel .table {
+  --bs-list-group-bg: transparent;
+  --bs-table-bg: transparent;
+}
