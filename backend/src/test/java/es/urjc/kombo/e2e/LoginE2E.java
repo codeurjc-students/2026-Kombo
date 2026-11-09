@@ -19,7 +19,15 @@ class LoginE2E extends E2ETestSupport {
 
         click(By.xpath("//nav//button[normalize-space() = 'Cerrar sesión']"));
 
+        // Back on the menu, with the confirmation and the navigation bar of an anonymous user
+        wait.until(ExpectedConditions.urlToBe(BASE_URL + "/"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(".toast"), "Has cerrado sesión."));
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(".navbar"), "Iniciar sesión"));
+        assertThat(driver.findElement(By.cssSelector(".navbar")).getText()).doesNotContain("Lucía", "Cerrar sesión");
+
+        // The session really ended in the server (the cookie was deleted): a protected page asks to log in again
+        driver.get(BASE_URL + "/profile");
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("login-title"), "Inicia sesión"));
     }
 
     @Test
