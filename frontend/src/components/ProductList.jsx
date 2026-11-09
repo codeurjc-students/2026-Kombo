@@ -5,7 +5,8 @@ import ErrorState from './ErrorState';
 import ProductCard from './ProductCard';
 import usePagedList from '../hooks/usePagedList';
 
-const PAGE_SIZE = 12;
+// Lists show 10 items and a "Más resultados" button for the next ones
+const PAGE_SIZE = 10;
 
 // Menu with a category filter and a "show more" button (the REST API returns pages)
 export default function ProductList() {
@@ -51,7 +52,7 @@ export default function ProductList() {
       {hasMore && !error && (
         <div className="text-center mt-5">
           <Button variant="outline-ink" size="lg" onClick={loadMore} disabled={loading}>
-            {loading ? 'Cargando…' : 'Ver más productos'}
+            {loading ? 'Cargando…' : 'Más resultados'}
           </Button>
         </div>
       )}

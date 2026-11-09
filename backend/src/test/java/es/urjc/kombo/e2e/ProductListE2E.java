@@ -51,4 +51,19 @@ class ProductListE2E {
         assertThat(driver.findElement(grid).getText())
                 .contains("Classic Burger", "Chicken Burger", "French Fries", "Cola");
     }
+
+    // The menu shows the first 10 of the 12 sample products and the rest with "Más resultados"
+    @Test
+    void moreResultsShowsTheNextProducts() {
+        driver.get(BASE_URL);
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        By cards = By.cssSelector("article.product-card");
+        wait.until(ExpectedConditions.numberOfElementsToBe(cards, 10));
+
+        driver.findElement(By.xpath("//button[normalize-space()='Más resultados']")).click();
+
+        wait.until(ExpectedConditions.numberOfElementsToBe(cards, 12));
+        assertThat(driver.findElements(By.xpath("//button[normalize-space()='Más resultados']"))).isEmpty();
+    }
 }

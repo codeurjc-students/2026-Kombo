@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 
 // Loads the pages of a paginated REST API resource ({ content, page }).
 // fetchPage(pageNumber) must be stable (useCallback): when it changes, the list starts again from page 0.
-// With accumulate, the new pages are added to the previous ones ("show more"); without it, they replace them.
+// loadMore() adds the next page to the items already loaded (the "Más resultados" button).
 // State is only set when a request finishes, as the React hooks rules recommend.
-export default function usePagedList(fetchPage, { accumulate = true } = {}) {
+export default function usePagedList(fetchPage) {
   const [request, setRequest] = useState({ fetchPage, page: 0, attempt: 0 });
   const [state, setState] = useState({ request: null, items: [], pageInfo: null, error: null });
 
@@ -21,7 +21,7 @@ export default function usePagedList(fetchPage, { accumulate = true } = {}) {
         if (!cancelled) {
           setState((previous) => ({
             request,
-            items: accumulate && request.page > 0 ? [...previous.items, ...result.content] : result.content,
+            items: request.page > 0 ? [...previous.items, ...result.content] : result.content,
             pageInfo: result.page,
             error: null,
           }));
@@ -35,7 +35,7 @@ export default function usePagedList(fetchPage, { accumulate = true } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [request, accumulate]);
+  }, [request]);
 
   const sameList = state.request?.fetchPage === fetchPage;
   const pageInfo = sameList ? state.pageInfo : null;
@@ -46,7 +46,6 @@ export default function usePagedList(fetchPage, { accumulate = true } = {}) {
     loading: state.request !== request,
     error: state.request === request ? state.error : null,
     hasMore: Boolean(pageInfo && pageInfo.number + 1 < pageInfo.totalPages),
-    goToPage: (page) => setRequest((current) => ({ ...current, page, attempt: 0 })),
     loadMore: () => setRequest((current) => ({ ...current, page: (pageInfo?.number ?? 0) + 1, attempt: 0 })),
     retry: () => setRequest((current) => ({ ...current, attempt: current.attempt + 1 })),
   };

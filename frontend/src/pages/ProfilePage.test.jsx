@@ -31,7 +31,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Listo')).toBeInTheDocument();
     expect(screen.getAllByText('2 × Classic Burger')).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ver pedidos anteriores' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Más resultados' }));
 
     expect(await screen.findByText('Entregado')).toBeInTheDocument();
     expect(getUserOrders).toHaveBeenLastCalledWith(CUSTOMER.id, { page: 1 });
