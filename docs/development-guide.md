@@ -397,8 +397,8 @@ On Linux and macOS, port 443 needs administrator permissions: use `sudo` or chan
 
 When the server starts with an empty database, it loads sample data (class `SampleDataLoader`, in `es.urjc.kombo.config`):
 
-- 15 ingredients with their stock (bacon starts below its alert limit, to show a low stock ingredient).
-- 9 products in the categories *Burgers*, *Sides*, *Drinks* and *Desserts*, each one with its ingredients and quantities, and 3 combos (*Classic Menu*, *Chicken Menu* and *Family Menu*).
+- 15 ingredients with their stock (*Bacon* starts below its alert limit, to show a low stock ingredient).
+- 9 products in the categories *Burgers*, *Sides*, *Drinks* and *Desserts*, each one with its ingredients and quantities, and 3 combos (*Menú clásico*, *Menú de pollo* and *Menú familiar*). The names, descriptions and units of the products and ingredients are in Spanish, because the application shows them to the users; the code and the keys of the products are in English.
 - A customer and an employee, with the password encoded with BCrypt (the administrator is not sample data: it is created from the configuration, see [Security](#security)):
 
   | Role | Email | Password |
