@@ -21,7 +21,7 @@ export default function UsersPage() {
           <thead>
             <tr>
               <th scope="col">Nombre</th>
-              <th scope="col">Email</th>
+              <th scope="col">Correo electrónico</th>
               <th scope="col">Teléfono</th>
               <th scope="col">Rol</th>
             </tr>

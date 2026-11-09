@@ -58,6 +58,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 ### Changed
 
 - Client redesign with the colours of the logo: light navigation bar, orange home banner, product cards with category and the price in orange, split log in page and Montserrat headings.
+- The sample data shown in the application (products, combos and ingredients) is in Spanish, like the rest of the interface; the keys of the products and the code stay in English. "Email" is shown as "Correo electrónico".
+- Sample pictures with the `.jpeg` extension are loaded, and the orange soda picture was renamed to `orange-soda.jpg`, so every sample product has its picture.
 - The menu of the home page shows product cards with picture and price instead of a plain list (`ProductList` tests adapted).
 - Secrets (database password, JWT key, keystore password and administrator password hash) are read from environment variables instead of `application.properties`.
 - The administrator is no longer part of the sample data.

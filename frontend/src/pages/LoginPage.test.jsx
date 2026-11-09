@@ -16,7 +16,7 @@ vi.mock('../services/userService', () => ({
 }));
 
 function fillAndSubmit() {
-  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@kombo.com' } });
+  fireEvent.change(screen.getByLabelText('Correo electrónico'), { target: { value: 'customer@kombo.com' } });
   fireEvent.change(screen.getByLabelText('Contraseña'), { target: { value: 'customer' } });
   fireEvent.click(screen.getByRole('button', { name: 'Iniciar sesión' }));
 }

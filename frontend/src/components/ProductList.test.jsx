@@ -77,17 +77,17 @@ describe('ProductList', () => {
   });
 
   it('shows the Kombo icon when the product has no image', async () => {
-    getProductPage.mockResolvedValue(page([{ id: 1, name: 'Water', price: 1, category: 'Drinks' }]));
+    getProductPage.mockResolvedValue(page([{ id: 1, name: 'Agua', price: 1, category: 'Drinks' }]));
     const { container } = render(<ProductList />);
 
-    fireEvent.error(await screen.findByRole('img', { name: 'Water' }));
+    fireEvent.error(await screen.findByRole('img', { name: 'Agua' }));
 
-    expect(screen.queryByRole('img', { name: 'Water' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('img', { name: 'Agua' })).not.toBeInTheDocument();
     expect(container.querySelector('.fallback img')).toHaveAttribute('src', '/logo-icon.png');
   });
 
   it('shows the category of each product', async () => {
-    getProductPage.mockResolvedValue(page([{ id: 1, name: 'Water', price: 1, category: 'Drinks' }]));
+    getProductPage.mockResolvedValue(page([{ id: 1, name: 'Agua', price: 1, category: 'Drinks' }]));
     render(<ProductList />);
 
     const card = await screen.findByRole('article');

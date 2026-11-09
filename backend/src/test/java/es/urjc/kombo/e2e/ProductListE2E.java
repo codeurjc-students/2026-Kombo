@@ -45,11 +45,11 @@ class ProductListE2E {
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         By grid = By.cssSelector("[data-testid='product-grid']");
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(grid, "Classic Burger"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(grid, "Hamburguesa clásica"));
 
         assertThat(driver.findElement(By.cssSelector(".navbar-brand img")).getAttribute("alt")).isEqualTo("Kombo");
         assertThat(driver.findElement(grid).getText())
-                .contains("Classic Burger", "Chicken Burger", "French Fries", "Cola");
+                .contains("Hamburguesa clásica", "Hamburguesa de pollo", "Patatas fritas", "Refresco de cola");
     }
 
     // The menu shows the first 10 of the 12 sample products and the rest with "Más resultados"

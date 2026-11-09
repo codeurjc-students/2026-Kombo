@@ -42,7 +42,7 @@ class ProductApiIT {
     void getProductsReturnsTheFirstPageOfProducts() {
         given().when().get("/api/v1/products")
                 .then().statusCode(200)
-                .body("content.name", hasItems("Classic Burger", "Chicken Burger", "French Fries", "Cola"))
+                .body("content.name", hasItems("Hamburguesa clásica", "Hamburguesa de pollo", "Patatas fritas", "Refresco de cola"))
                 .body("page.number", equalTo(0))
                 .body("page.size", equalTo(10));
     }
@@ -52,7 +52,7 @@ class ProductApiIT {
         given().queryParam("category", "Drinks")
                 .when().get("/api/v1/products")
                 .then().statusCode(200)
-                .body("content.name", contains("Cola", "Orange Soda", "Water"));
+                .body("content.name", contains("Refresco de cola", "Refresco de naranja", "Agua"));
     }
 
     @Test
@@ -63,7 +63,7 @@ class ProductApiIT {
 
         given().when().get("/api/v1/products/{id}", id)
                 .then().statusCode(200)
-                .body("name", equalTo("French Fries"))
+                .body("name", equalTo("Patatas fritas"))
                 .body("combo", equalTo(false));
     }
 

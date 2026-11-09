@@ -11,7 +11,7 @@ const order = (id, status) => ({
   status,
   total: 12.5,
   createdAt: '2026-11-09T10:00:00',
-  lines: [{ id, quantity: 2, product: { name: 'Classic Burger' } }],
+  lines: [{ id, quantity: 2, product: { name: 'Hamburguesa clásica' } }],
 });
 
 describe('ProfilePage', () => {
@@ -29,7 +29,7 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Calle Mayor 1')).toBeInTheDocument();
     expect(await screen.findByText('Pedido nº 2')).toBeInTheDocument();
     expect(screen.getByText('Listo')).toBeInTheDocument();
-    expect(screen.getAllByText('2 × Classic Burger')).toHaveLength(1);
+    expect(screen.getAllByText('2 × Hamburguesa clásica')).toHaveLength(1);
 
     fireEvent.click(screen.getByRole('button', { name: 'Más resultados' }));
 

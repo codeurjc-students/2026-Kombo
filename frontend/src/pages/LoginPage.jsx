@@ -59,7 +59,7 @@ export default function LoginPage() {
         )}
         <Form onSubmit={handleSubmit} noValidate={false}>
           <Form.Group className="mb-3" controlId="login-email">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>Correo electrónico</Form.Label>
             <Form.Control
               type="email"
               autoComplete="email"

@@ -25,7 +25,7 @@ export default function ProfilePage() {
             </div>
           </div>
           <dl className="mb-0">
-            <dt className="small text-secondary">Email</dt>
+            <dt className="small text-secondary">Correo electrónico</dt>
             <dd>{user.email}</dd>
             {user.phone && (
               <>
