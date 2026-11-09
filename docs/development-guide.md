@@ -269,8 +269,8 @@ Statistics (9 November 2026; the screenshots below are from Phase 2):
 
 | | Server | Client | Total |
 | :--- | :---: | :---: | :---: |
-| Number of tests | 70 (21 unit, 45 integration and REST API system, 4 Selenium) | 49 (46 unit, 3 integration) | 119 |
-| Line coverage | 83.9 % (JaCoCo, `./mvnw verify`) | 94.9 % (unit tests, `npm run test:coverage`) | |
+| Number of tests | 70 (21 unit, 45 integration and REST API system, 4 Selenium) | 51 (48 unit, 3 integration) | 121 |
+| Line coverage | 83.9 % (JaCoCo, `./mvnw verify`) | 95.1 % (unit tests, `npm run test:coverage`) | |
 
 ![Server tests execution](images/tests-backend.png)
 

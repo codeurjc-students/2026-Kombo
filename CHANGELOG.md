@@ -53,9 +53,11 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Continuous delivery workflow (`cd.yml`) with a reusable build and publish workflow (`docker-publish.yml`): image `dev` on every push to `main`, `<version>` and `latest` on every release, and `<branch>-<date>-<commit>` on manual runs.
 - `docker-compose.yml` published as an OCI artifact (`deliaml10/kombo-compose:<version>`) on every release.
 - Guide to publish a release and list of the DockerHub secrets.
+- Kombo logo in the navigation bar, the footer, the home banner and the log in page, and favicon (`favicon.ico`, `favicon.png` and `apple-touch-icon.png`).
 
 ### Changed
 
+- Client redesign with the colours of the logo: light navigation bar, orange home banner, product cards with category and the price in orange, split log in page and Montserrat headings.
 - The menu of the home page shows product cards with picture and price instead of a plain list (`ProductList` tests adapted).
 - Secrets (database password, JWT key, keystore password and administrator password hash) are read from environment variables instead of `application.properties`.
 - The administrator is no longer part of the sample data.
