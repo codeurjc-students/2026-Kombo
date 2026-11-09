@@ -50,6 +50,9 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `docker-compose.yml` (image `deliaml10/kombo:0.1`) and `docker-compose-dev.yml` (image `deliaml10/kombo:dev`, can be built locally), with MySQL healthcheck and configuration with environment variables.
 - Self-signed HTTPS keystore generated on the first start of the container (`docker/entrypoint.sh`) and kept in a volume.
 - Quick start with Docker in the README.
+- Continuous delivery workflow (`cd.yml`) with a reusable build and publish workflow (`docker-publish.yml`): image `dev` on every push to `main`, `<version>` and `latest` on every release, and `<branch>-<date>-<commit>` on manual runs.
+- `docker-compose.yml` published as an OCI artifact (`deliaml10/kombo-compose:<version>`) on every release.
+- Guide to publish a release and list of the DockerHub secrets.
 
 ### Changed
 
@@ -57,7 +60,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Secrets (database password, JWT key, keystore password and administrator password hash) are read from environment variables instead of `application.properties`.
 - The administrator is no longer part of the sample data.
 - The tests of the REST API, the Vite proxy, the client integration test and the Selenium test use HTTPS.
-- The full quality control workflow starts the backend over HTTPS on port 8443 with a temporary certificate.
+- The client integration tests and the Selenium tests of the full quality control run against the application started with `docker compose`, instead of the jar and the Vite server.
 - `GET /api/v1/products` returns DTOs instead of the `Product` entity (the JSON fields do not change).
 - AI usage log updated with the Phase 3 sessions.
 - Analysis updated with all the entities of the code (Combo and OrderLine added) and their current attributes and relations.
