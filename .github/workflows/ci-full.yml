@@ -114,11 +114,24 @@ jobs:
           ./mvnw -B package -DskipTests
           cp target/kombo-*.jar "$RUNNER_TEMP/kombo.jar"
 
+      # Throwaway self-signed certificate and test-only values: nothing secret is needed in CI.
+      # Port 8443 because a non-root process cannot listen on 443 in the runner.
       - name: Start backend
+        env:
+          SERVER_PORT: 8443
+          KOMBO_SSL_KEY_STORE: file:${{ runner.temp }}/kombo-keystore.p12
+          KOMBO_SSL_KEY_STORE_PASSWORD: ci-password
+          KOMBO_DB_PASSWORD: password
+          KOMBO_JWT_SECRET: ci-secret-0123456789-0123456789-0123456789
+          # BCrypt hash of "admin" (only used in CI)
+          KOMBO_ADMIN_PASSWORD_HASH: $2b$10$GfBhP7nNxexOinn7O4x0w.GfVoH.WobAAFbuerLEUfjiiP43QFFd6
         run: |
+          keytool -genkeypair -alias kombo -keyalg RSA -keysize 2048 -validity 30 -storetype PKCS12 \
+            -keystore "$RUNNER_TEMP/kombo-keystore.p12" -storepass ci-password \
+            -dname "CN=localhost" -ext "SAN=dns:localhost,ip:127.0.0.1"
           nohup java -jar "$RUNNER_TEMP/kombo.jar" > "$RUNNER_TEMP/backend.log" 2>&1 &
           for i in $(seq 1 60); do
-            curl -sf http://localhost:8080/api/v1/products > /dev/null && exit 0
+            curl -skf https://localhost:8443/api/v1/products > /dev/null && exit 0
             sleep 2
           done
           echo "Backend did not start" && cat "$RUNNER_TEMP/backend.log" && exit 1
@@ -130,10 +143,14 @@ jobs:
       # Vitest "integration" project: real component against the real REST API
       - name: Run frontend integration tests
         working-directory: frontend
+        env:
+          KOMBO_BACKEND_URL: https://localhost:8443
         run: npm run test:integration
 
       - name: Start frontend
         working-directory: frontend
+        env:
+          KOMBO_BACKEND_URL: https://localhost:8443
         run: |
           nohup npm run dev > "$RUNNER_TEMP/frontend.log" 2>&1 &
           for i in $(seq 1 30); do

@@ -27,6 +27,8 @@ class ProductListE2E {
     void setUp() {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
+        // The application uses a self-signed certificate when it is served over HTTPS (Docker)
+        options.setAcceptInsecureCerts(true);
         driver = new ChromeDriver(options);
     }
 

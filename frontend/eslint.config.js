@@ -18,4 +18,9 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  // The Vite configuration and the integration tests run in Node.js, where "process" exists
+  {
+    files: ['vite.config.js', 'src/**/*.integration.test.{js,jsx}'],
+    languageOptions: { globals: globals.node },
+  },
 ])
