@@ -44,10 +44,11 @@ class ProductListE2E {
         driver.get(BASE_URL);
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("ul"), "Classic Burger"));
+        By grid = By.cssSelector("[data-testid='product-grid']");
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(grid, "Classic Burger"));
 
-        assertThat(driver.findElement(By.tagName("h1")).getText()).isEqualTo("Kombo");
-        assertThat(driver.findElement(By.tagName("ul")).getText())
+        assertThat(driver.findElement(By.cssSelector(".navbar-brand")).getText()).isEqualTo("kombo");
+        assertThat(driver.findElement(grid).getText())
                 .contains("Classic Burger", "Chicken Burger", "French Fries", "Cola");
     }
 }
