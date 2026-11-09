@@ -31,9 +31,22 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Content type of the images (`contentType` attribute of `Image`).
 - Passwords encoded with BCrypt (`spring-security-crypto`).
 - Integration tests of the sample data, enabled and disabled.
+- Spring Security with BCrypt passwords, `UserDetailsService` and the roles `CUSTOMER`, `EMPLOYEE` and `ADMIN`.
+- Log in with a JWT in an `HttpOnly`, `Secure` and `SameSite=Strict` cookie: `POST /api/v1/auth/login`, `POST /api/v1/auth/logout` and `GET /api/v1/auth/me`.
+- A single administrator created on startup from `KOMBO_ADMIN_EMAIL` and the BCrypt hash `KOMBO_ADMIN_PASSWORD_HASH`.
+- Access rules by role and ownership, with 401 and 403 errors in ProblemDetail format.
+- REST endpoints `GET /api/v1/users` (administrator), `GET /api/v1/users/{id}`, `GET /api/v1/users/{id}/orders` and `GET /api/v1/orders/{id}`, which only return the data of the user themselves (or any data to the administrator, and any order to employees).
+- HTTPS on port 443 with a self-signed keystore generated with `keytool`.
+- `.env.example` with all the environment variables; the backend reads a local `.env` file.
+- Security tests: authentication, 401 without login, 403 with a wrong role and 403 with data of another user.
+- Login flow, users and orders in the Postman collection.
 
 ### Changed
 
+- Secrets (database password, JWT key, keystore password and administrator password hash) are read from environment variables instead of `application.properties`.
+- The administrator is no longer part of the sample data.
+- The tests of the REST API, the Vite proxy, the client integration test and the Selenium test use HTTPS.
+- The full quality control workflow starts the backend over HTTPS on port 8443 with a temporary certificate.
 - `GET /api/v1/products` returns DTOs instead of the `Product` entity (the JSON fields do not change).
 - AI usage log updated with the Phase 3 sessions.
 - Analysis updated with all the entities of the code (Combo and OrderLine added) and their current attributes and relations.

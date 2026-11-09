@@ -1,16 +1,129 @@
 {
   "info": {
     "name": "Kombo REST API",
-    "description": "Example requests for every operation of the Kombo REST API. Set the baseUrl variable to the address of the backend.",
+    "description": "Example requests for every operation of the Kombo REST API. Set the baseUrl variable to the address of the backend (https://localhost by default). The backend uses a self-signed certificate: disable \"SSL certificate verification\" in the Postman settings. Log in first with \"Auth > Log in\": Postman keeps the httpOnly session cookie and sends it in the next requests. The sample users are customer@kombo.com / customer and employee@kombo.com / employee; the administrator is admin@kombo.com with the password configured in KOMBO_ADMIN_PASSWORD_HASH.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080"
+      "value": "https://localhost"
+    },
+    {
+      "key": "email",
+      "value": "customer@kombo.com"
+    },
+    {
+      "key": "password",
+      "value": "customer"
+    },
+    {
+      "key": "userId",
+      "value": "2"
+    },
+    {
+      "key": "orderId",
+      "value": "1"
     }
   ],
   "item": [
+    {
+      "name": "Auth",
+      "description": "Login flow: log in, check the logged in user and log out. The JWT travels in the httpOnly cookie kombo_token.",
+      "item": [
+        {
+          "name": "Log in",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Checks the email and password. Answers 200 with the user and the Set-Cookie header with the session JWT (httpOnly, Secure, SameSite=Strict), or 401 with wrong credentials. Change the email and password variables to log in with another user.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get the logged in user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns the logged in user (200), or 401 without a valid session cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Log out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Deletes the session cookie (204)."
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Products",
       "item": [
@@ -211,6 +324,121 @@
               ]
             },
             "description": "Example of error: returns 400 Bad Request in ProblemDetail format."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Each user can only read their own data; the administrator can read any user.",
+      "item": [
+        {
+          "name": "Get users (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users"
+              ]
+            },
+            "description": "Paginated list of users. Only the administrator: 401 without login and 403 with another role."
+          },
+          "response": []
+        },
+        {
+          "name": "Get a user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Profile of a user. 200 for the user themselves or the administrator, 403 for another user, 401 without login."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the orders of a user",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "orders"
+              ]
+            },
+            "description": "Order history of a user, the most recent first (paginated). 200 for the user themselves or the administrator, 403 for another user."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get an order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "Detail of an order. Employees and the administrator can read any order; a customer only their own (403 otherwise). 404 if it does not exist."
           },
           "response": []
         }
