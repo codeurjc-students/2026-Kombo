@@ -1,11 +1,20 @@
 package es.urjc.kombo.e2e;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.TestWatcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -18,8 +27,30 @@ abstract class E2ETestSupport {
 
     protected static final String BASE_URL = System.getProperty("e2e.baseUrl", "http://localhost:5173");
 
+    private static final Path FAILURES_FOLDER = Path.of("target", "e2e-failures");
+
     protected WebDriver driver;
     protected WebDriverWait wait;
+
+    // When a test fails, a screenshot and the HTML of the page are saved in target/e2e-failures
+    // (CI uploads them as an artifact), before the browser is closed
+    @RegisterExtension
+    final TestWatcher saveFailures = new TestWatcher() {
+        @Override
+        public void testFailed(ExtensionContext context, Throwable cause) {
+            saveFailure(context.getRequiredTestClass().getSimpleName() + "-" + context.getRequiredTestMethod().getName());
+        }
+
+        @Override
+        public void testSuccessful(ExtensionContext context) {
+            quitBrowser();
+        }
+
+        @Override
+        public void testAborted(ExtensionContext context, Throwable cause) {
+            quitBrowser();
+        }
+    };
 
     @BeforeEach
     void startBrowser() {
@@ -32,10 +63,27 @@ abstract class E2ETestSupport {
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    @AfterEach
-    void closeBrowser() {
+    // The browser is closed by the watcher (not in @AfterEach) because JUnit calls the watcher after
+    // @AfterEach, and the screenshot of a failure needs the browser open
+    private void quitBrowser() {
         if (driver != null) {
             driver.quit();
+            driver = null;
+        }
+    }
+
+    private void saveFailure(String name) {
+        if (driver == null) {
+            return;
+        }
+        try {
+            Files.createDirectories(FAILURES_FOLDER);
+            Files.write(FAILURES_FOLDER.resolve(name + ".png"), ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+            Files.writeString(FAILURES_FOLDER.resolve(name + ".html"), driver.getPageSource(), StandardCharsets.UTF_8);
+        } catch (IOException | RuntimeException exception) {
+            // Saving the evidence must never hide the real failure of the test
+        } finally {
+            quitBrowser();
         }
     }
 
@@ -47,5 +95,22 @@ abstract class E2ETestSupport {
         ((JavascriptExecutor) driver).executeScript(
                 "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});", element);
         wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+    }
+
+    // Opens a Bootstrap dropdown menu. If the menu is not open after a moment (the click arrived while
+    // the page was still updating), the toggle is clicked again, up to three times.
+    protected void openDropdown(By toggle) {
+        for (int attempt = 1; ; attempt++) {
+            click(toggle);
+            try {
+                new WebDriverWait(driver, Duration.ofSeconds(3)).until(
+                        ExpectedConditions.attributeToBe(toggle, "aria-expanded", "true"));
+                return;
+            } catch (TimeoutException exception) {
+                if (attempt == 3) {
+                    throw exception;
+                }
+            }
+        }
     }
 }

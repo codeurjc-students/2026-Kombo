@@ -17,8 +17,8 @@ class LoginE2E extends E2ETestSupport {
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("main"), "Pedido nº 1"));
         assertThat(driver.findElement(By.cssSelector(".navbar")).getText()).contains("Lucía", "Mis pedidos");
 
-        click(By.id("user-menu"));
-        click(By.linkText("Cerrar sesión"));
+        openDropdown(By.id("user-menu"));
+        click(By.xpath("//a[contains(@class, 'dropdown-item') and normalize-space() = 'Cerrar sesión']"));
 
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(".navbar"), "Iniciar sesión"));
     }
