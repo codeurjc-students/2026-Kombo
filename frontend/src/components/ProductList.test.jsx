@@ -46,6 +46,18 @@ describe('ProductList', () => {
     expect(getProductPage).toHaveBeenLastCalledWith(expect.objectContaining({ category: 'Drinks', page: 0 }));
   });
 
+  it('shows the whole menu again with "Todo"', async () => {
+    getProductPage.mockResolvedValue(page([{ id: 1, name: 'Test Drink', price: 1 }]));
+    render(<ProductList />);
+    await screen.findByText('Test Drink');
+    fireEvent.click(screen.getByRole('button', { name: 'Bebidas' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Todo' }));
+
+    expect(screen.getByRole('button', { name: 'Todo' })).toHaveAttribute('aria-pressed', 'true');
+    expect(getProductPage).toHaveBeenLastCalledWith(expect.objectContaining({ category: null, page: 0 }));
+  });
+
   it('loads the next page with the "show more" button', async () => {
     getProductPage
       .mockResolvedValueOnce(page([{ id: 1, name: 'First', price: 1 }], 0, 2))
