@@ -55,6 +55,19 @@ class ProductApiIT {
                 .body("content.name", contains("Refresco de cola", "Refresco de naranja", "Agua"));
     }
 
+    // The 3 sample combos, 2 per page: the second page has the last one.
+    // Other tests of this class add products, but never to the "Combos" category.
+    @Test
+    void getProductsReturnsTheRequestedPageOfACategory() {
+        given().queryParam("category", "Combos").queryParam("page", 1).queryParam("size", 2)
+                .when().get("/api/v1/products")
+                .then().statusCode(200)
+                .body("content.name", contains("Menú familiar"))
+                .body("page.number", equalTo(1))
+                .body("page.totalElements", equalTo(3))
+                .body("page.totalPages", equalTo(2));
+    }
+
     @Test
     void getProductReturnsTheProductDetail() {
         int id = given().queryParam("category", "Sides")

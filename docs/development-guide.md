@@ -246,25 +246,25 @@ The server and the client have unit, integration and system tests. The system te
 
 | Type | Part | Tool | Test | What it checks |
 | :--- | :--- | :--- | :--- | :------------- |
-| Unit | Server | JUnit and Mockito | `ProductServiceTest` | The service returns the pages of products, filters by category, returns the product image and fails when a product or its image does not exist, with the database mocked |
-| Integration | Server | JUnit and Testcontainers | `ProductServiceIT` | The service returns the active products, the pages, the detail of products and combos and the images stored in a real MySQL database (without sample data) |
+| Unit | Server | JUnit and Mockito | `ProductServiceTest` | The service returns the pages of products, filters by category (a blank category is the whole menu), returns the product image and fails when a product or its image does not exist, with the database mocked |
+| Integration | Server | JUnit and Testcontainers | `ProductServiceIT` | The service returns the active products, the combos in their category, the pages, the detail of products and combos and the images stored in a real MySQL database (without sample data) |
 | Integration | Server | JUnit and Testcontainers | `SampleDataLoaderIT` | The sample data (products, combos, ingredients, users of each role with encoded passwords and orders) is loaded once |
 | Integration | Server | JUnit and Testcontainers | `SampleDataDisabledIT` | With `kombo.sample-data.enabled=false` no sample data is loaded, and the only user is the administrator created from the configuration |
-| System | Server | JUnit and Rest Assured | `ProductApiIT` | The REST API returns the pages of sample products, the category filter, the product detail, the product image and the 400 and 404 errors |
+| System | Server | JUnit and Rest Assured | `ProductApiIT` | The REST API returns the pages of sample products, the category filter, a page of a category, the product detail, the product image and the 400 and 404 errors |
 | Unit | Server | JUnit | `JwtServiceTest` | The JWT is created and validated, tokens with another key, expired or malformed are rejected, and the cookie is `HttpOnly`, `Secure` and `SameSite=Strict` |
 | Unit | Server | JUnit and Mockito | `OrderServiceTest` | A customer can only read their own orders; employees and the administrator can read any order |
 | Unit | Server | JUnit and Mockito | `AdminInitializerTest` | The administrator is created or updated with the BCrypt hash of the configuration, and a plain password is rejected |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AuthApiIT` | Log in (cookie `HttpOnly`, `Secure` and `SameSite=Strict`), wrong credentials (401), `me` with and without session, invalid token (401) and log out |
 | System | Server | JUnit and Rest Assured (HTTPS) | `SpaForwardingIT` | The server returns the client (`index.html`) for `/` and for the client routes, and keeps the 404 of unknown REST API endpoints and missing files |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AccessRulesApiIT` | 401 without login, 403 with a role that is not allowed, 403 when reading the profile, order history or orders of another user, and access of the owner, employees and administrator |
-| Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The menu shows the products and their prices, filters by category, loads more pages, shows errors with *Retry*, the empty state and the image fallback, with the service mocked and a virtual DOM |
+| Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The menu shows the products and their prices, filters by category and goes back to the whole menu with *Todo*, loads more pages, shows errors with *Retry*, the empty state and the image fallback, with the service mocked and a virtual DOM |
 | Unit | Client | Vitest | `httpClient.test.js`, `authService.test.js`, `productService.test.js`, `userService.test.js` | The HTTP client sends the cookie (`credentials: 'include'`) and JSON and turns errors into `ApiError`; each service calls its endpoints |
 | Unit | Client | Vitest and Testing Library | `AuthProvider.test.jsx` | The session is read on startup, and log in and log out update it |
 | Unit | Client | Vitest and Testing Library | `AppNavbar.test.jsx`, `ProtectedRoute.test.jsx` | The navigation bar shows the links of each role and logs out; protected routes redirect anonymous users to the log in page and show 403 to other roles |
 | Unit | Client | Vitest and Testing Library | `LoginPage.test.jsx`, `ProfilePage.test.jsx`, `UsersPage.test.jsx`, `StatusPages.test.jsx` | Log in with redirection by role and error messages, profile and order history, users list with pages, and the 404 and error pages |
-| Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API |
+| Integration | Client | Vitest and Testing Library | `ProductList.integration.test.jsx` | The component shows the list of products obtained from the real REST API, filters the *Menús* category and loads the next products with *Más resultados* |
 | Integration | Client | Vitest | `authService.integration.test.js` | Log in with a sample user and 401 with a wrong password, against the real REST API |
-| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser, 10 at first and the rest after *Más resultados* |
+| System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser, 10 at first and the rest after *Más resultados*, and the *Menús* category shows only the 3 combos |
 | System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 
 The Selenium tests share their setup in `E2ETestSupport`: headless Chrome with a fixed window size, clicks without scroll animation, and a screenshot and the HTML of the page of every failed test in `backend/target/e2e-failures` (in CI, the `e2e-failures` artifact of the run).

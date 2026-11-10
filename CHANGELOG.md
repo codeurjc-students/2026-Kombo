@@ -54,6 +54,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `docker/docker-compose.yml` published as an OCI artifact (`deliaml10/kombo-compose`) with the tag `dev` on every push to `main`, and `<version>` and `latest` on every release.
 - Guide to publish a release and list of the DockerHub secrets.
 - Kombo logo in the navigation bar, the footer, the home banner and the log in page, and favicon (`favicon.ico`, `favicon.png` and `apple-touch-icon.png`).
+- Tests of the menu by category: blank category (server unit), combos listed in their category (server-database integration), a page of a category (REST API), *Todo* button (client unit), category filter and *Más resultados* with the real REST API (client integration) and *Menús* category in a real browser (Selenium).
 
 ### Changed
 

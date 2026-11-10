@@ -68,6 +68,17 @@ class ProductServiceTest {
         assertThat(result.getContent()).extracting(ProductDTO::name).containsExactly("Test Drink");
     }
 
+    // A blank category (for example "?category=") is the same as no category: the whole menu
+    @Test
+    void findActiveWithBlankCategoryReturnsAllActiveProducts() {
+        List<Product> products = List.of(new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers"));
+        when(productRepository.findByActiveTrue(pageable)).thenReturn(new PageImpl<>(products, pageable, 1));
+
+        Page<ProductDTO> result = productService.findActive(" ", pageable);
+
+        assertThat(result.getContent()).extracting(ProductDTO::name).containsExactly("Test Burger");
+    }
+
     @Test
     void findByIdThrowsWhenTheProductDoesNotExist() {
         when(productRepository.findByIdAndActiveTrue(99L)).thenReturn(Optional.empty());

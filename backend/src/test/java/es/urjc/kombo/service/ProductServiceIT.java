@@ -92,6 +92,14 @@ class ProductServiceIT {
         assertThat(result.getContent()).extracting(ProductDTO::name).containsExactly("Test Burger");
     }
 
+    // Combos are products too: they are listed in their own category
+    @Test
+    void findActiveListsTheCombosInTheirCategory() {
+        Page<ProductDTO> result = productService.findActive("Combos", PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).extracting(ProductDTO::name).containsExactly("Test Menu");
+    }
+
     @Test
     void findActiveReturnsTheRequestedPage() {
         Page<ProductDTO> result = productService.findActive(null, PageRequest.of(1, 2));
