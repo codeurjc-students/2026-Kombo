@@ -40,9 +40,24 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `.env.example` with all the environment variables; the backend reads a local `.env` file.
 - Security tests: authentication, 401 without login, 403 with a wrong role and 403 with data of another user.
 - Login flow, users and orders in the Postman collection.
+- Client navigation with React Router and responsive design with React Bootstrap, with the Kombo palette (orange, navy and teal) defined in `theme.css`.
+- Layout with a navigation bar that changes with the role of the user, `AuthContext` with the session and protected routes by role.
+- Common HTTP client (`credentials: 'include'`, `ApiError`) and one service per resource (`authService`, `productService`, `userService`).
+- Pages: menu with category filter and "show more", log in, profile with the order history of the customer, users list for the administrator, and 404, 403 and error pages with the same style.
+- Client unit tests of the services, the session, the navigation by role, the protected routes and every page; client integration test of the log in; Selenium test of the log in.
 
 ### Changed
 
+- Logging out from a protected page (for example *Mis pedidos*) goes to the menu instead of the log in page.
+- The Selenium tests share their setup (`E2ETestSupport`), use a fixed window size and scroll to an element without animation before clicking it (Bootstrap enables smooth scrolling, which made the clicks land on other elements in CI).
+- The user menu of the navigation bar is no longer a dropdown: the name, the role and a *Cerrar sesión* button are always visible (the dropdown did not open with the Chrome of the CI runners).
+- The Selenium tests save a screenshot and the HTML of the page of every failed test in `target/e2e-failures`, uploaded by CI as the `e2e-failures` artifact.
+- Logging out shows the menu at once (`flushSync` navigation of `RouterProvider` from `react-router/dom`) before the session ends, so a protected page can no longer send the user to the log in page while logging out.
+- The Selenium log in test clicks the *Cerrar sesión* button of the navigation bar with JavaScript: in the headless Chrome of the CI runners neither mouse clicks nor the keyboard reached that bar.
+- The full quality control workflow runs the UI tests against the production build of the client (`vite build` and `vite preview`), and shows the client log when they fail.
+- The sample data shown in the application (products, combos and ingredients) is in Spanish, like the rest of the interface; the keys of the products and the code stay in English. "Email" is shown as "Correo electrónico".
+- Sample pictures with the `.jpeg` extension are loaded, and the orange soda picture was renamed to `orange-soda.jpg`, so every sample product has its picture.
+- The menu of the home page shows product cards with picture and price instead of a plain list (`ProductList` tests adapted).
 - Secrets (database password, JWT key, keystore password and administrator password hash) are read from environment variables instead of `application.properties`.
 - The administrator is no longer part of the sample data.
 - The tests of the REST API, the Vite proxy, the client integration test and the Selenium test use HTTPS.

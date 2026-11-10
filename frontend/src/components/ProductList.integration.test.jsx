@@ -11,9 +11,9 @@ describe('ProductList with the real REST API', () => {
 
     render(<ProductList />);
 
-    expect(await screen.findByText(/Classic Burger/)).toBeInTheDocument();
-    expect(screen.getByText(/Chicken Burger/)).toBeInTheDocument();
-    expect(screen.getByText(/French Fries/)).toBeInTheDocument();
-    expect(screen.getByText(/Cola/)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Hamburguesa clásica' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Hamburguesa de pollo' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Patatas fritas' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Refresco de cola' })).toBeInTheDocument();
   });
 });
