@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.extension.TestWatcher;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -97,10 +96,12 @@ abstract class E2ETestSupport {
         wait.until(ExpectedConditions.elementToBeClickable(element)).click();
     }
 
-    // Activates a button with the keyboard (focus and Enter), like a keyboard user. Used for the buttons of the
-    // sticky navigation bar: in the Chrome of the GitHub runners the simulated mouse clicks on that bar did
-    // not reach the button (no error, no effect), while keyboard activation does not depend on coordinates.
-    protected void pressWithKeyboard(By locator) {
-        wait.until(ExpectedConditions.elementToBeClickable(locator)).sendKeys(Keys.ENTER);
+    // Clicks a button of the sticky navigation bar with JavaScript (element.click()), which runs the same React
+    // handler as a user click. In the headless Chrome of the GitHub runners neither the simulated mouse clicks nor
+    // the keyboard reached the buttons of that bar (no error, no effect), so this click does not depend on the
+    // coordinates of the bar or on the keyboard focus of the runner.
+    protected void clickInNavbar(By locator) {
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
 }
