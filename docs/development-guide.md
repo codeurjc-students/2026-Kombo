@@ -18,6 +18,8 @@
   - [Task management](#task-management)
   - [Git](#git)
   - [Continuous integration](#continuous-integration)
+  - [Continuous delivery](#continuous-delivery)
+  - [Publishing a release](#publishing-a-release)
 - [Running and editing the code](#running-and-editing-the-code)
   - [Cloning the repository](#cloning-the-repository)
   - [Configuration (environment variables)](#configuration-environment-variables)
@@ -267,12 +269,12 @@ The server and the client have unit, integration and system tests. The system te
 
 The Selenium tests share their setup in `E2ETestSupport`: headless Chrome with a fixed window size, clicks without scroll animation, and a screenshot and the HTML of the page of every failed test in `backend/target/e2e-failures` (in CI, the `e2e-failures` artifact of the run).
 
-Statistics:
+Statistics (9 November 2026; the screenshots below are from Phase 2):
 
 | | Server | Client | Total |
 | :--- | :---: | :---: | :---: |
-| Number of tests | 3 | 3 | 6 |
-| Line coverage | 95 % | 75 % | |
+| Number of tests | 72 (21 unit, 46 integration and REST API system, 5 Selenium) | 52 (49 unit, 3 integration) | 124 |
+| Line coverage | 83.9 % (JaCoCo, `./mvnw verify`) | 95.1 % (unit tests, `npm run test:coverage`) | |
 
 ![Server tests execution](images/tests-backend.png)
 
@@ -329,7 +331,38 @@ The code is stored in a Git repository on GitHub. The branching strategy is GitH
 The continuous integration is done with two GitHub Actions workflows:
 
 - **Basic quality control** (`.github/workflows/ci-basics.yml`): runs on every commit to a feature branch (and also on `main`, so that SonarQube Cloud analyses the main branch). It builds the server and runs its unit tests, builds the client, checks it with ESLint and runs its unit tests, and analyses the code with SonarQube Cloud.
-- **Full quality control** (`.github/workflows/ci-full.yml`): runs when a pull request to `main` is opened or updated. It runs the unit, integration and system tests of the server and the client. The `main` branch is protected so that the pull request cannot be merged if this workflow fails.
+- **Full quality control** (`.github/workflows/ci-full.yml`): runs when a pull request to `main` is opened or updated. It runs the unit, integration and system tests of the server and the client. The client integration tests and the Selenium tests run against the application started with `docker compose` (`docker/docker-compose-dev.yml --build`, the same image that is published, built from the code of the pull request) at https://localhost, with a `.env` file of test-only values. The `main` branch is protected so that the pull request cannot be merged if this workflow fails.
+
+### Continuous delivery
+
+The Docker image is published in DockerHub (`deliaml10/kombo`) by the **Continuous delivery** workflow (`.github/workflows/cd.yml`). The workflow only decides the tags; the build and the push are done by the reusable workflow `.github/workflows/docker-publish.yml` (`workflow_call`), so the logic is not duplicated:
+
+| Trigger | Image tags | Other |
+| :--- | :--- | :--- |
+| Push to `main` (merged pull request) | `dev` | `docker/docker-compose.yml` published as an OCI artifact in `deliaml10/kombo-compose:dev`, pointing to the image `dev` |
+| Published GitHub release (for example `0.1.0` or `v0.1.0`) | `0.1.0` and `latest` | Compose OCI artifact `deliaml10/kombo-compose:0.1.0` and `deliaml10/kombo-compose:latest`, both pointing to the image `0.1.0` |
+| Manual run (*Actions → Continuous delivery → Run workflow*, choosing a branch) | `<branch>-<yyyymmddhhmm>-<commit>` (UTC), for example `add-login-page-202611091352-3f2a9c1` (`/` in the branch name becomes `-`) | |
+
+The workflow needs two repository secrets, created in GitHub in *Settings → Secrets and variables → Actions → New repository secret* (repository administrator permissions are needed):
+
+| Secret | Value |
+| :--- | :--- |
+| `DOCKERHUB_USERNAME` | DockerHub user (`deliaml10`) |
+| `DOCKERHUB_TOKEN` | DockerHub access token with *Read & Write* permission, created in DockerHub in *Account settings → Personal access tokens* (never the password) |
+
+The published Compose application can be run without cloning the repository, with a `.env` file in the current folder:
+
+```
+docker compose -f oci://docker.io/deliaml10/kombo-compose:0.1.0 up -d
+```
+
+### Publishing a release
+
+1. Merge into `main` all the pull requests of the version, with the full quality control in green.
+2. In `CHANGELOG.md`, move the changes of `[Unreleased]` to a section with the version and date (in a pull request).
+3. In GitHub, *Releases → Draft a new release*: create the tag (for example `0.1.0`) on `main`, use the version as title and the changelog section as description, and press *Publish release*.
+4. The Continuous delivery workflow publishes the images `deliaml10/kombo:0.1.0` and `deliaml10/kombo:latest` and the Compose artifacts `deliaml10/kombo-compose:0.1.0` and `deliaml10/kombo-compose:latest`. Check it in *Actions* and in DockerHub.
+5. Try it: `docker compose -f oci://docker.io/deliaml10/kombo-compose:0.1.0 up -d` and open https://localhost.
 
 ## Running and editing the code
 
