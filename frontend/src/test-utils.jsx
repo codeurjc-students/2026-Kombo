@@ -1,5 +1,6 @@
 import { render } from '@testing-library/react';
-import { RouterProvider, createMemoryRouter } from 'react-router';
+import { createMemoryRouter } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 import { vi } from 'vitest';
 import { AuthContext } from './context/AuthContext';
 import { routes } from './routes';

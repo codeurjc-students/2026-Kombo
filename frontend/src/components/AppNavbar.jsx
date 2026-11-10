@@ -30,10 +30,12 @@ export default function AppNavbar() {
   const links = LINKS[user?.role ?? 'ANONYMOUS'];
 
   // Goes to the menu first: if the session were closed while a protected page is shown,
-  // ProtectedRoute would send the user to the log in page instead
+  // ProtectedRoute would send the user to the log in page instead.
+  // React Router renders navigations as a low-priority transition: flushSync shows the menu at once,
+  // so the protected page is no longer on screen when the user becomes null.
   async function handleLogout() {
     setExpanded(false);
-    navigate('/', { state: { message: 'Has cerrado sesión.' } });
+    await navigate('/', { state: { message: 'Has cerrado sesión.' }, flushSync: true });
     await logout();
   }
 

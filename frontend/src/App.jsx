@@ -1,4 +1,6 @@
-import { RouterProvider, createBrowserRouter } from 'react-router';
+import { createBrowserRouter } from 'react-router';
+// The RouterProvider of react-router/dom can apply a navigation at once (flushSync option)
+import { RouterProvider } from 'react-router/dom';
 import AuthProvider from './context/AuthProvider';
 import { routes } from './routes';
 
