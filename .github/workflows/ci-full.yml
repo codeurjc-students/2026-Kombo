@@ -147,12 +147,15 @@ jobs:
           KOMBO_BACKEND_URL: https://localhost:8443
         run: npm run test:integration
 
+      # Production build of the client (the code that is deployed, without the development mode of React and Vite),
+      # served by "vite preview", which forwards /api to the backend with the same proxy as "npm run dev"
       - name: Start frontend
         working-directory: frontend
         env:
           KOMBO_BACKEND_URL: https://localhost:8443
         run: |
-          nohup npm run dev > "$RUNNER_TEMP/frontend.log" 2>&1 &
+          npm run build
+          nohup npm run preview -- --port 5173 --strictPort > "$RUNNER_TEMP/frontend.log" 2>&1 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:5173 > /dev/null && exit 0
             sleep 2
@@ -173,6 +176,8 @@ jobs:
           path: backend/target/e2e-failures
           if-no-files-found: ignore
 
-      - name: Show backend log
+      - name: Show backend and frontend logs
         if: failure()
-        run: cat "$RUNNER_TEMP/backend.log"
+        run: |
+          cat "$RUNNER_TEMP/backend.log"
+          cat "$RUNNER_TEMP/frontend.log"
