@@ -1,0 +1,50 @@
+# Kombo development version: image with the "dev" tag (the last commit of main, published by CI)
+# or built from the local code. From the root of the repository (where the .env file is):
+#   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d            (published dev image)
+#   docker compose --env-file .env -f docker/docker-compose-dev.yml up -d --build    (built from the local code)
+# The application is at https://localhost (self-signed certificate).
+name: kombo-dev
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${KOMBO_DB_PASSWORD:?Set KOMBO_DB_PASSWORD in the .env file}
+      MYSQL_DATABASE: kombo
+    volumes:
+      - db-data:/var/lib/mysql
+    # See docker-compose.yml: TCP check, ready only when the real server is running
+    healthcheck:
+      test: ["CMD-SHELL", "mysql -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD -e 'SELECT 1' > /dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  app:
+    image: deliaml10/kombo:dev
+    # Paths relative to this file: the build context is the root of the repository
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "443:8443"
+    environment:
+      KOMBO_DB_URL: jdbc:mysql://db:3306/kombo
+      KOMBO_DB_PASSWORD: ${KOMBO_DB_PASSWORD}
+      KOMBO_ADMIN_EMAIL: ${KOMBO_ADMIN_EMAIL:-admin@kombo.com}
+      KOMBO_ADMIN_PASSWORD_HASH: ${KOMBO_ADMIN_PASSWORD_HASH:?Set KOMBO_ADMIN_PASSWORD_HASH in the .env file}
+      KOMBO_JWT_SECRET: ${KOMBO_JWT_SECRET:?Set KOMBO_JWT_SECRET in the .env file}
+      KOMBO_SSL_KEY_STORE_PASSWORD: ${KOMBO_SSL_KEY_STORE_PASSWORD:?Set KOMBO_SSL_KEY_STORE_PASSWORD in the .env file}
+      KOMBO_SAMPLEDATA_ENABLED: ${KOMBO_SAMPLEDATA_ENABLED:-true}
+    volumes:
+      - certs:/app/certs
+
+volumes:
+  db-data:
+  certs:

@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Copied by the Docker build (client static files)
+src/main/resources/static/

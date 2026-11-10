@@ -71,6 +71,17 @@
 > **Project status: only the functional and technical objectives of the application have been defined, and development has started, but the implementation is not functional yet.**
 
 
+## Quick start
+
+Requirements: Docker (Docker Desktop on Windows and Mac). From the root of the repository:
+
+```
+cp .env.example .env      # and change the values
+docker compose --env-file .env -f docker/docker-compose.yml up -d
+```
+
+Open https://localhost (self-signed certificate: accept the browser warning). Sample users: `customer@kombo.com` / `customer` and `employee@kombo.com` / `employee`; administrator `admin@kombo.com` with the password of `KOMBO_ADMIN_PASSWORD_HASH` (`admin` with the example file). The [development guide](docs/development-guide.md#running-and-editing-the-code) explains how to run each part without Docker, the environment variables and the tests.
+
 ## Index
 
 - [Objectives](docs/objectives.md)
