@@ -80,6 +80,23 @@ class ProductApiIT {
                 .body("combo", equalTo(false));
     }
 
+    // "Menú clásico" of the sample data: a classic burger, fries and a cola
+    @Test
+    void getProductOfAComboReturnsItsProductsAndIngredients() {
+        int id = given().queryParam("category", "Combos").queryParam("sort", "name")
+                .when().get("/api/v1/products")
+                .then().extract().path("content[0].id");
+
+        given().when().get("/api/v1/products/{id}", id)
+                .then().statusCode(200)
+                .body("name", equalTo("Menú clásico"))
+                .body("combo", equalTo(true))
+                .body("products.product.name", contains("Hamburguesa clásica", "Patatas fritas", "Refresco de cola"))
+                .body("products.quantity", contains(1, 1, 1))
+                .body("ingredients.name", hasItems("Carne de ternera", "Patatas", "Refresco de cola"))
+                .body("ingredients.find { it.name == 'Patatas' }.quantity", equalTo(150));
+    }
+
     @Test
     void getProductThatDoesNotExistReturns404() {
         given().when().get("/api/v1/products/{id}", 999999)

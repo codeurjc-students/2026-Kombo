@@ -10,6 +10,41 @@ servers:
 - url: https://localhost
   description: Generated server url
 paths:
+  /api/v1/users:
+    get:
+      tags:
+      - user-controller
+      operationId: getUsers
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelUserDTO"
+    post:
+      tags:
+      - user-controller
+      operationId: signUp
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
   /api/v1/auth/logout:
     post:
       tags:
@@ -36,24 +71,6 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
-  /api/v1/users:
-    get:
-      tags:
-      - user-controller
-      operationId: getUsers
-      parameters:
-      - name: pageable
-        in: query
-        required: true
-        schema:
-          $ref: "#/components/schemas/Pageable"
-      responses:
-        "200":
-          description: OK
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/PagedModelUserDTO"
   /api/v1/users/{id}:
     get:
       tags:
@@ -192,13 +209,33 @@ paths:
                 $ref: "#/components/schemas/UserDTO"
 components:
   schemas:
-    LoginRequestDTO:
+    SignUpRequestDTO:
       type: object
       properties:
+        name:
+          type: string
+          maxLength: 50
+          minLength: 0
+        surname:
+          type: string
+          maxLength: 100
+          minLength: 0
         email:
           type: string
+          format: email
+          maxLength: 100
+          minLength: 0
+        phone:
+          type: string
+          pattern: "^$|^\\+?[0-9 ]{9,15}$"
         password:
           type: string
+          maxLength: 72
+          minLength: 8
+      required:
+      - email
+      - name
+      - password
     UserDTO:
       type: object
       properties:
@@ -223,6 +260,13 @@ components:
           type: array
           items:
             type: string
+    LoginRequestDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
     Pageable:
       type: object
       properties:

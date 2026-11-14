@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Container, Nav, Navbar } from 'react-bootstrap';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { ROLE_LABELS } from '../utils/format';
 import BrandLogo from './BrandLogo';
 
@@ -24,6 +25,7 @@ const LINKS = {
 
 export default function AppNavbar() {
   const { user, loading, logout } = useAuth();
+  const { count } = useCart();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [expanded, setExpanded] = useState(false);
@@ -54,7 +56,20 @@ export default function AppNavbar() {
               </Nav.Link>
             ))}
           </Nav>
-          <Nav>
+          <Nav className="align-items-md-center gap-2">
+            {/* Units in the cart (the cart page is not ready yet, so it is not a link) */}
+            <span className="nav-cart" aria-label={`Carrito: ${count} ${count === 1 ? 'producto' : 'productos'}`}>
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                <path
+                  d="M3 9h18l-2 10H5L3 9Zm5 0V7a4 4 0 0 1 8 0v2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              <span className="nav-cart-count" data-testid="cart-count">{count}</span>
+            </span>
             {/* Not shown on the log in page itself */}
             {!loading && !user && pathname !== '/login' && (
               <Button as={Link} to="/login" variant="primary" className="nav-login" onClick={() => setExpanded(false)}>

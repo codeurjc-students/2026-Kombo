@@ -1,10 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as authService from '../services/authService';
+import * as userService from '../services/userService';
 import { useAuth } from './AuthContext';
 import AuthProvider from './AuthProvider';
 
 vi.mock('../services/authService');
+vi.mock('../services/userService');
 
 function Probe() {
   const auth = useAuth();
@@ -12,6 +14,9 @@ function Probe() {
     <>
       <p>{auth.loading ? 'loading' : (auth.user?.name ?? 'anonymous')}</p>
       <button type="button" onClick={() => auth.login('employee@kombo.com', 'employee')}>login</button>
+      <button type="button" onClick={() => auth.signUp({ name: 'Ana', email: 'ana@example.com', password: 'secret-password' })}>
+        sign up
+      </button>
       <button type="button" onClick={() => auth.logout()}>logout</button>
     </>
   );
@@ -54,5 +59,19 @@ describe('AuthProvider', () => {
   it('fails when used outside the provider', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<Probe />)).toThrow('useAuth must be used inside an AuthProvider');
+  });
+
+  it('signs up and logs in with the new account', async () => {
+    authService.getCurrentUser.mockResolvedValue(null);
+    userService.signUp.mockResolvedValue({ name: 'Ana' });
+    authService.login.mockResolvedValue({ name: 'Ana' });
+    render(<AuthProvider><Probe /></AuthProvider>);
+    await screen.findByText('anonymous');
+
+    fireEvent.click(screen.getByRole('button', { name: 'sign up' }));
+
+    expect(await screen.findByText('Ana')).toBeInTheDocument();
+    expect(userService.signUp).toHaveBeenCalledWith({ name: 'Ana', email: 'ana@example.com', password: 'secret-password' });
+    expect(authService.login).toHaveBeenCalledWith('ana@example.com', 'secret-password');
   });
 });

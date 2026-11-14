@@ -6,9 +6,9 @@ import { AuthContext } from './context/AuthContext';
 import { routes } from './routes';
 
 // Renders the real routes of the application at a URL, with a fake session
-export function renderApp(url, { user = null, loading = false, login = vi.fn(), logout = vi.fn() } = {}) {
+export function renderApp(url, { user = null, loading = false, login = vi.fn(), signUp = vi.fn(), logout = vi.fn() } = {}) {
   const router = createMemoryRouter(routes, { initialEntries: [url] });
-  const auth = { user, loading, login, logout };
+  const auth = { user, loading, login, signUp, logout };
   render(
     <AuthContext.Provider value={auth}>
       <RouterProvider router={router} />

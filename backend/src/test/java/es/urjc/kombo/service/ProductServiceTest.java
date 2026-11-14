@@ -2,6 +2,7 @@ package es.urjc.kombo.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -23,8 +24,12 @@ import org.springframework.data.domain.Pageable;
 
 import es.urjc.kombo.dto.ImageFileDTO;
 import es.urjc.kombo.dto.ProductDTO;
+import es.urjc.kombo.dto.ProductDetailDTO;
+import es.urjc.kombo.dto.ProductIngredientDTO;
 import es.urjc.kombo.dto.ProductMapper;
+import es.urjc.kombo.model.Combo;
 import es.urjc.kombo.model.Image;
+import es.urjc.kombo.model.Ingredient;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.repository.ProductRepository;
 
@@ -77,6 +82,44 @@ class ProductServiceTest {
         Page<ProductDTO> result = productService.findActive(" ", pageable);
 
         assertThat(result.getContent()).extracting(ProductDTO::name).containsExactly("Test Burger");
+    }
+
+    @Test
+    void findByIdReturnsTheIngredientsOfAProduct() {
+        Product burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
+        burger.addIngredient(new Ingredient("Bread", "units", 100, 20), 1);
+        burger.addIngredient(new Ingredient("Beef", "g", 5000, 1000), 150);
+        when(productRepository.findByIdAndActiveTrue(1L)).thenReturn(Optional.of(burger));
+
+        ProductDetailDTO detail = productService.findById(1L);
+
+        assertThat(detail.name()).isEqualTo("Test Burger");
+        assertThat(detail.combo()).isFalse();
+        assertThat(detail.products()).isEmpty();
+        // Sorted by name
+        assertThat(detail.ingredients()).extracting(ProductIngredientDTO::name, ProductIngredientDTO::quantity)
+                .containsExactly(tuple("Beef", 150), tuple("Bread", 1));
+    }
+
+    // A combo lists its products and the ingredients of all of them, multiplied by the units of each product
+    @Test
+    void findByIdReturnsTheProductsAndIngredientsOfACombo() {
+        Ingredient bread = new Ingredient("Bread", "units", 100, 20);
+        Product burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
+        burger.addIngredient(bread, 1);
+        Product drink = new Product("Test Drink", new BigDecimal("1.50"), "Test description", "Drinks");
+        Combo menu = new Combo("Test Menu", new BigDecimal("9.00"), "Two burgers and a drink", "Combos");
+        menu.addProduct(burger, 2);
+        menu.addProduct(drink, 1);
+        when(productRepository.findByIdAndActiveTrue(3L)).thenReturn(Optional.of(menu));
+
+        ProductDetailDTO detail = productService.findById(3L);
+
+        assertThat(detail.combo()).isTrue();
+        assertThat(detail.products()).extracting(item -> item.product().name(), item -> item.quantity())
+                .containsExactly(tuple("Test Burger", 2), tuple("Test Drink", 1));
+        assertThat(detail.ingredients()).extracting(ProductIngredientDTO::name, ProductIngredientDTO::quantity)
+                .containsExactly(tuple("Bread", 2));
     }
 
     @Test
