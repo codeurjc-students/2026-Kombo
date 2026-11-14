@@ -49,6 +49,7 @@ class LoginE2E extends E2ETestSupport {
         driver.get(BASE_URL + "/login");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-email"))).sendKeys(email);
         driver.findElement(By.id("login-password")).sendKeys(password);
-        click(By.cssSelector("button[type='submit']"));
+        // The page also has the sign up form: the button is looked for inside the log in form
+        click(By.cssSelector("form[aria-labelledby='login-title'] button[type='submit']"));
     }
 }

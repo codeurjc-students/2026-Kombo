@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import ProductList from './ProductList';
 
 // Integration test: uses the real service and the real REST API.
@@ -11,7 +12,7 @@ describe('ProductList with the real REST API', () => {
   });
 
   it('renders the sample products returned by the backend', async () => {
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     expect(await screen.findByRole('heading', { name: 'Hamburguesa clásica' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hamburguesa de pollo' })).toBeInTheDocument();
@@ -20,7 +21,7 @@ describe('ProductList with the real REST API', () => {
   });
 
   it('shows only the combos of the "Menús" category', async () => {
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByRole('heading', { name: 'Hamburguesa clásica' });
 
     fireEvent.click(screen.getByRole('button', { name: 'Menús' }));
@@ -33,7 +34,7 @@ describe('ProductList with the real REST API', () => {
 
   // The first page has the 10 first sample products; "Menú de pollo" (the 11th) comes with the next page
   it('loads the next products with "Más resultados"', async () => {
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByRole('heading', { name: 'Hamburguesa clásica' });
     expect(screen.queryByRole('heading', { name: 'Menú de pollo' })).not.toBeInTheDocument();
 

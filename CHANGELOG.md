@@ -55,6 +55,12 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Guide to publish a release and list of the DockerHub secrets.
 - Kombo logo in the navigation bar, the footer, the home banner and the log in page, and favicon (`favicon.ico`, `favicon.png` and `apple-touch-icon.png`).
 - Tests of the menu by category: blank category (server unit), combos listed in their category (server-database integration), a page of a category (REST API), *Todo* button (client unit), category filter and *Más resultados* with the real REST API (client integration) and *Menús* category in a real browser (Selenium).
+- Sign up: `POST /api/v1/users` (public) creates a customer with name, optional surname and phone, a unique email and a BCrypt password of 8 to 72 characters; answers 201 with the `Location` header, 400 with the invalid fields and 409 if the email is already registered (`spring-boot-starter-validation`).
+- Sign up form on the log in page, next to the log in form as in the mockup: optional surname and phone, repeated password checked in the client, and log in with the new account at once (`signUp` in `AuthContext`).
+- Product and combo detail page (`/products/{id}`): picture, price, description, ingredients and, for a combo, its products with links to their detail; the product cards of the menu open it.
+- Cart kept in the browser (`CartContext`, `localStorage`) with an *Añadir al carrito* button on the detail page and the number of units in the navigation bar.
+- Tests of the product detail (server unit of products and combos, REST API detail of a combo, client unit and integration of the page, Selenium) and of the sign up (server unit, server-database integration, REST API, client unit and integration, Selenium).
+- Sign up requests in the Postman collection.
 
 ### Changed
 
@@ -86,6 +92,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Server integration test of the products service runs without sample data; REST API test updated to the new sample data.
 - Development guide: sample data, credentials and how to disable it; tests table updated.
 - Changelog split into phases.
+- The log in page shows the sign up and log in forms side by side, separated by a dashed line, instead of the orange side panel; the Selenium log in test clicks the button of the log in form.
+- Errors of invalid request bodies name each invalid field in the `detail` of the ProblemDetail.
 
 ## Phase 2 - 2026-10-29
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { CATEGORIES, productImageUrl } from '../services/productService';
 import { formatPrice } from '../utils/format';
 
@@ -26,7 +27,12 @@ export default function ProductCard({ product }) {
         {category && <span className="product-category">{category}</span>}
       </div>
       <div className="product-body">
-        <h3 id={`product-${product.id}`}>{product.name}</h3>
+        <h3 id={`product-${product.id}`}>
+          {/* The link covers the whole card (stretched-link), so any part of it opens the detail */}
+          <Link to={`/products/${product.id}`} className="stretched-link">
+            {product.name}
+          </Link>
+        </h3>
         <p>{product.description}</p>
         <span className="product-price">{formatPrice(product.price)}</span>
       </div>

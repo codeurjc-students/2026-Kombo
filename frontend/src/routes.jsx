@@ -4,6 +4,7 @@ import ErrorPage from './pages/ErrorPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
 
@@ -15,6 +16,7 @@ export const routes = [
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'products/:id', element: <ProductDetailPage /> },
       { path: 'login', element: <LoginPage /> },
       {
         element: <ProtectedRoute roles={['CUSTOMER', 'EMPLOYEE', 'ADMIN']} />,

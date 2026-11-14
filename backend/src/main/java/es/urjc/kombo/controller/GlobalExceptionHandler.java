@@ -1,8 +1,15 @@
 package es.urjc.kombo.controller;
 
+import java.util.stream.Collectors;
+
 import org.springframework.data.core.PropertyReferenceException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -13,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import es.urjc.kombo.service.EmailAlreadyUsedException;
 import es.urjc.kombo.service.ResourceNotFoundException;
 
 // Uniform error responses for the whole REST API, in the standard ProblemDetail format (RFC 9457).
@@ -24,6 +32,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ProblemDetail handleResourceNotFound(ResourceNotFoundException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    // A @Valid request body with wrong fields: the detail names each field and the problem, for example
+    // "email: must be a well-formed email address"
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
+            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String detail = exception.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .sorted()
+                .collect(Collectors.joining("; "));
+        return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail));
+    }
+
+    @ExceptionHandler(EmailAlreadyUsedException.class)
+    public ProblemDetail handleEmailAlreadyUsed(EmailAlreadyUsedException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 
     // Sorting by a property that does not exist, for example ?sort=unknown

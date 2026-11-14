@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import ProductList from './ProductList';
 import { getProductPage } from '../services/productService';
 
@@ -26,18 +27,20 @@ describe('ProductList', () => {
       ]),
     );
 
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     const cards = await screen.findAllByRole('article');
     expect(cards).toHaveLength(2);
     expect(within(cards[0]).getByRole('heading')).toHaveTextContent('Test Burger');
     expect(cards[0]).toHaveTextContent(/5,00\s€/);
     expect(cards[1]).toHaveTextContent(/1,50\s€/);
+    // Each card opens the detail page of its product
+    expect(within(cards[1]).getByRole('link', { name: 'Test Drink' })).toHaveAttribute('href', '/products/2');
   });
 
   it('filters by category', async () => {
     getProductPage.mockResolvedValue(page([{ id: 1, name: 'Test Drink', price: 1 }]));
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByText('Test Drink');
 
     fireEvent.click(screen.getByRole('button', { name: 'Bebidas' }));
@@ -48,7 +51,7 @@ describe('ProductList', () => {
 
   it('shows the whole menu again with "Todo"', async () => {
     getProductPage.mockResolvedValue(page([{ id: 1, name: 'Test Drink', price: 1 }]));
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByText('Test Drink');
     fireEvent.click(screen.getByRole('button', { name: 'Bebidas' }));
 
@@ -62,7 +65,7 @@ describe('ProductList', () => {
     getProductPage
       .mockResolvedValueOnce(page([{ id: 1, name: 'First', price: 1 }], 0, 2))
       .mockResolvedValueOnce(page([{ id: 2, name: 'Second', price: 1 }], 1, 2));
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     fireEvent.click(await screen.findByRole('button', { name: 'Más resultados' }));
 
@@ -73,7 +76,7 @@ describe('ProductList', () => {
 
   it('shows an error with a retry button', async () => {
     getProductPage.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(page([{ id: 1, name: 'Back', price: 1 }]));
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     fireEvent.click(await screen.findByRole('button', { name: 'Reintentar' }));
 
@@ -83,14 +86,14 @@ describe('ProductList', () => {
   it('shows a message when a category is empty', async () => {
     getProductPage.mockResolvedValue(page([]));
 
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     expect(await screen.findByText(/No hay productos/)).toBeInTheDocument();
   });
 
   it('shows the Kombo icon when the product has no image', async () => {
     getProductPage.mockResolvedValue(page([{ id: 1, name: 'Agua', price: 1, category: 'Drinks' }]));
-    const { container } = render(<ProductList />);
+    const { container } = render(<ProductList />, { wrapper: MemoryRouter });
 
     fireEvent.error(await screen.findByRole('img', { name: 'Agua' }));
 
@@ -100,7 +103,7 @@ describe('ProductList', () => {
 
   it('shows the category of each product', async () => {
     getProductPage.mockResolvedValue(page([{ id: 1, name: 'Agua', price: 1, category: 'Drinks' }]));
-    render(<ProductList />);
+    render(<ProductList />, { wrapper: MemoryRouter });
 
     const card = await screen.findByRole('article');
     expect(within(card).getByText('Bebidas')).toBeInTheDocument();

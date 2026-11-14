@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getProductPage, getProducts, productImageUrl } from './productService';
+import { getProduct, getProductPage, getProducts, productImageUrl } from './productService';
 
 const page = {
   content: [{ id: 1, name: 'Test Burger', price: 5 }],
@@ -36,6 +36,14 @@ describe('productService', () => {
     mockFetch({ ok: false, status: 500, json: () => Promise.resolve({}) });
 
     await expect(getProducts()).rejects.toThrow('Error 500');
+  });
+
+  it('returns the detail of a product', async () => {
+    const detail = { id: 7, name: 'Test Menu', combo: true, ingredients: [], products: [] };
+    mockFetch({ ok: true, status: 200, json: () => Promise.resolve(detail) });
+
+    expect(await getProduct(7)).toEqual(detail);
+    expect(fetch.mock.calls[0][0]).toBe('/api/v1/products/7');
   });
 
   it('builds the URL of the product image', () => {
