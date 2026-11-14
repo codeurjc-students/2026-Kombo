@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { CATEGORIES, productImageUrl } from '../services/productService';
+import { CATEGORY_LABELS, productImageUrl } from '../services/productService';
 import { formatPrice } from '../utils/format';
-
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((category) => [category.value, category.label]));
 
 export default function ProductCard({ product }) {
   const [imageFailed, setImageFailed] = useState(false);

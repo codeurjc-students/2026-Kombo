@@ -11,6 +11,9 @@ export const CATEGORIES = [
   { value: 'Desserts', label: 'Postres' },
 ];
 
+// Text shown for each category of the REST API, for example CATEGORY_LABELS.Burgers is 'Hamburguesas'
+export const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((category) => [category.value, category.label]));
+
 // Returns a page of the menu: { content: [...], page: { size, number, totalElements, totalPages } }
 export function getProductPage({ category, page = 0, size = 12 } = {}) {
   const params = new URLSearchParams({ page, size });

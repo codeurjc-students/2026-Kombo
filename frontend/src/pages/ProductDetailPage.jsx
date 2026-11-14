@@ -5,11 +5,9 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import { useCart } from '../context/CartContext';
 import { ApiError } from '../services/httpClient';
-import { CATEGORIES, getProduct, productImageUrl } from '../services/productService';
+import { CATEGORY_LABELS, getProduct, productImageUrl } from '../services/productService';
 import NotFoundPage from './NotFoundPage';
 import { formatPrice } from '../utils/format';
-
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((category) => [category.value, category.label]));
 
 // Detail of a product or combo: picture, description, ingredients and, for a combo, the products it includes.
 // State is only set when the request finishes (same approach as usePagedList).
