@@ -5,29 +5,47 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 
 import es.urjc.kombo.TestcontainersConfiguration;
+import es.urjc.kombo.repository.OrderRepository;
 import es.urjc.kombo.security.JwtService;
 import io.restassured.http.ContentType;
 
 // System tests of the checkout: real server over HTTPS and database with the sample data.
 // The whole flow goes through HTTP: read the menu and the delivery cost, place the order and read it back.
+// The orders placed here are deleted after each test, because the other system tests share the database
+// and count the sample orders (for example the order history of the customer in AccessRulesApiIT).
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
 class OrderApiIT {
 
+    // Every order of these tests uses this email; the sample orders do not
+    private static final String TEST_EMAIL = "ana@example.com";
+
     @LocalServerPort
     private int port;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     @BeforeEach
     void setUp() {
         ApiTestSupport.configureHttps(port);
+    }
+
+    @AfterEach
+    void deleteTheTestOrders() {
+        orderRepository.deleteAll(orderRepository.findAll().stream()
+                .filter(order -> TEST_EMAIL.equals(order.getCustomerEmail()))
+                .toList());
     }
 
     @Test
@@ -148,8 +166,8 @@ class OrderApiIT {
     private static String order(int productId, int quantity, String deliveryType, String address, String payment) {
         return """
                 {"lines":[{"productId":%d,"quantity":%d}],"deliveryType":"%s","deliveryAddress":%s,
-                 "paymentMethod":"%s","customerName":"Ana Pérez","customerEmail":"ana@example.com",
+                 "paymentMethod":"%s","customerName":"Ana Pérez","customerEmail":"%s",
                  "customerPhone":"600123456"}
-                """.formatted(productId, quantity, deliveryType, address, payment);
+                """.formatted(productId, quantity, deliveryType, address, payment, TEST_EMAIL);
     }
 }
