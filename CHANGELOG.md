@@ -61,6 +61,12 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Cart kept in the browser (`CartContext`, `localStorage`) with an *Añadir al carrito* button on the detail page and the number of units in the navigation bar.
 - Tests of the product detail (server unit of products and combos, REST API detail of a combo, client unit and integration of the page, Selenium) and of the sign up (server unit, server-database integration, REST API, client unit and integration, Selenium).
 - Sign up requests in the Postman collection.
+- Cart: change the units of a product, remove it and empty the cart (`cartReducer`), and a cart page (`/cart`) with the subtotal and a note on the delivery cost of home deliveries (the delivery type, the delivery cost and the total are shown in the checkout); the cart counter of the navigation bar links to it.
+- Checkout `POST /api/v1/orders` (anonymous users, customers and employees; 403 for the administrator): the server takes the current prices, copies the name and price of each product into its line, calculates the delivery cost, marks card payments as paid and answers 201 with the `Location` header. The order number is `1000 + id` (unique).
+- Settings with the delivery cost of home deliveries (2,50 € by default, free from 25 €): `GET /api/v1/settings` (public) and `PUT /api/v1/settings` (administrator), and the administrator page *Ajustes* (`/admin/settings`).
+- Checkout page (`/checkout`): delivery type (eat in, take away or home delivery with address), contact form with validation (filled in with the data of the logged in customer) and simulated payment by card or cash; confirmation page with the order number.
+- Tests of the cart and the checkout: server unit (`OrderServiceTest`, `SettingsServiceTest`), server-database integration (`OrderServiceIT`), REST API (`OrderApiIT`), client unit (cart logic, cart, checkout and settings pages), client integration with the REST API (`CheckoutPage.integration.test.jsx`) and Selenium from the cart to the confirmation (`CheckoutE2E`).
+- Checkout and settings requests in the Postman collection.
 
 ### Changed
 
@@ -94,6 +100,10 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Changelog split into phases.
 - The log in page shows the sign up and log in forms side by side, separated by a dashed line, instead of the orange side panel; the Selenium log in test clicks the button of the log in form.
 - Errors of invalid request bodies name each invalid field in the `detail` of the ProblemDetail.
+- `OrderLineDTO` includes the name of the product at the time of the purchase and `OrderDTO` the subtotal; the sample orders are numbered like the new ones (`1000 + id`).
+- SonarQube Cloud issues fixed: the promise of `navigate` in the log in page, repeated texts of the sample data as constants, the binary field of `Image` renamed to `data` (same database column), `LocalDateTime.now()` with the time zone, a duplicated CSS selector, `!important` in the navigation bar, `<fieldset>` and `<output>` instead of the `group` and `status` roles, and `findByText` in a test. `test-utils.jsx` is analysed as test code.
+- Analysis, development guide (domain model and tests table) and OpenAPI documentation updated with the checkout and the settings.
+- The entity relationship diagram of the analysis is drawn from left to right and has a legend of its symbols.
 
 ## Phase 2 - 2026-10-29
 

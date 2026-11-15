@@ -88,7 +88,7 @@ classDiagram
     }
     class Image {
         Long id
-        Blob image
+        Blob data
         String contentType
         String text
     }
@@ -129,8 +129,13 @@ classDiagram
     }
     class OrderLine {
         Long id
+        String productName
         int quantity
         BigDecimal unitPrice
+    }
+    class Settings {
+        Long id
+        BigDecimal deliveryCost
     }
 
     Product <|-- Combo
@@ -144,7 +149,9 @@ classDiagram
 ```
 
 - **Combo extends Product** (single table inheritance), so a combo can be used wherever a product is expected. `getIngredientUsage()` returns the quantity of each ingredient used when one unit is sold; a combo overrides it to add up the ingredients of its products.
-- **OrderLine** stores the unit price at the time of the purchase, so past orders and the cash register closing do not change if a price changes.
+- **OrderLine** stores the name and the unit price of the product at the time of the purchase, so past orders and the cash register closing do not change if a product changes. It keeps the reference to the product for the ingredients used (inventory).
+- **Order number**: `1000 + id`, given just after the order is saved (`Order.assignOrderNumber()`), so it is unique without a counter; the column has a unique constraint.
+- **Settings** has a single row with the delivery cost of home deliveries, which the administrator can change. Home deliveries with a subtotal of 25 € or more (`Settings.FREE_DELIVERY_THRESHOLD`) do not pay it; the server always calculates it, never the client.
 - The enumerations are declared inside the entity that uses them (`User.Role`, `Order.DeliveryType`, `Order.OrderStatus` and `Order.PaymentMethod`) and are stored as text.
 - Images are stored in the database. They are loaded lazily, only when they are needed.
 
@@ -255,7 +262,10 @@ The server and the client have unit, integration and system tests. The system te
 | System | Server | JUnit and Rest Assured | `ProductApiIT` | The REST API returns the pages of sample products, the category filter, a page of a category, the product detail, the detail of a combo with its products and ingredients, the product image and the 400 and 404 errors |
 | System | Server | JUnit and Rest Assured (HTTPS) | `UserApiIT` | Sign up: 201 with the `Location` header and without the password, the new customer can log in, 409 with a registered email, 400 with the invalid fields named in the detail, and the role cannot be chosen |
 | Unit | Server | JUnit | `JwtServiceTest` | The JWT is created and validated, tokens with another key, expired or malformed are rejected, and the cookie is `HttpOnly`, `Secure` and `SameSite=Strict` |
-| Unit | Server | JUnit and Mockito | `OrderServiceTest` | A customer can only read their own orders; employees and the administrator can read any order |
+| Unit | Server | JUnit and Mockito | `OrderServiceTest` | A customer can only read their own orders; employees and the administrator can read any order. Placing an order copies the current name and price of each product, gives the number `1000 + id`, adds the delivery cost only to home deliveries below 25 €, marks card payments as paid, saves the order in the history of a customer (not of an employee), and rejects a home delivery without address and a product that is not on the menu, with the database mocked |
+| Unit | Server | JUnit and Mockito | `SettingsServiceTest` | The settings are created with the default delivery cost (2,50 €), the administrator changes it, and only home deliveries below the free delivery threshold pay it |
+| Integration | Server | JUnit and Testcontainers | `OrderServiceIT` | A placed order is stored in a real MySQL database with its lines, a unique number and the price and name of the product at the time of the purchase, which do not change when the product changes |
+| System | Server | JUnit and Rest Assured (HTTPS) | `OrderApiIT` | Whole checkout through HTTP: a customer places a home delivery (201, `Location`, prices and delivery cost from the server) and finds it with `GET /orders/{id}` and in their history; an anonymous order paid by card; 400 without address or with invalid fields; 403 for the administrator; only the administrator changes the delivery cost, which is used by the next orders |
 | Unit | Server | JUnit and Mockito | `AdminInitializerTest` | The administrator is created or updated with the BCrypt hash of the configuration, and a plain password is rejected |
 | System | Server | JUnit and Rest Assured (HTTPS) | `AuthApiIT` | Log in (cookie `HttpOnly`, `Secure` and `SameSite=Strict`), wrong credentials (401), `me` with and without session, invalid token (401) and log out |
 | System | Server | JUnit and Rest Assured (HTTPS) | `SpaForwardingIT` | The server returns the client (`index.html`) for `/` and for the client routes, and keeps the 404 of unknown REST API endpoints and missing files |
@@ -263,7 +273,11 @@ The server and the client have unit, integration and system tests. The system te
 | Unit | Client | Vitest and Testing Library | `ProductList.test.jsx` | The menu shows the products and their prices, filters by category and goes back to the whole menu with *Todo*, loads more pages, links each card to its detail page, shows errors with *Retry*, the empty state and the image fallback, with the service mocked and a virtual DOM |
 | Unit | Client | Vitest | `httpClient.test.js`, `authService.test.js`, `productService.test.js`, `userService.test.js` | The HTTP client sends the cookie (`credentials: 'include'`) and JSON and turns errors into `ApiError`; each service calls its endpoints |
 | Unit | Client | Vitest and Testing Library | `AuthProvider.test.jsx` | The session is read on startup, and log in, sign up (which logs in afterwards) and log out update it |
-| Unit | Client | Vitest and Testing Library | `CartProvider.test.jsx` | The cart adds products, sums the units of the same product, is kept in `localStorage` and starts empty when the stored cart is not valid |
+| Unit | Client | Vitest | `cartReducer.test.js` | The logic of the cart: add, sum the units of the same product, change the units (0 removes the product, at most 99), remove, empty, count and subtotal without rounding errors |
+| Unit | Client | Vitest and Testing Library | `CartProvider.test.jsx` | The cart adds products, changes their units, removes them and empties, is kept in `localStorage` (it survives a reload) and starts empty or skips the items when the stored cart is not valid |
+| Unit | Client | Vitest and Testing Library | `CartPage.test.jsx` | The cart page shows the products and only the subtotal (the delivery type is chosen in the checkout) with a note on the delivery cost of home deliveries, changes the units and removes products, the empty cart, the cart when the delivery cost cannot be loaded and the administrator without the checkout button |
+| Unit | Client | Vitest and Testing Library | `CheckoutPage.test.jsx`, `checkoutValidation.test.js`, `orderService.test.js` | The checkout places a home delivery paid by card (without sending the card data), shows the order number and empties the cart; it shows the wrong fields, starts with the data of the customer, pays in cash, shows the server errors and sends an empty cart back to the cart page; the validation of each field and the simulated card; the order and settings services |
+| Unit | Client | Vitest and Testing Library | `AdminSettingsPage.test.jsx` | The administrator changes the delivery cost; errors when it cannot be loaded or saved; the page is only for the administrator |
 | Unit | Client | Vitest and Testing Library | `ProductDetailPage.test.jsx` | The detail page shows the picture, price, description and ingredients, the products of a combo with links, adds the product to the cart and updates the counter of the navigation bar, and shows the image fallback, the 404 page and errors with *Reintentar* |
 | Unit | Client | Vitest and Testing Library | `AppNavbar.test.jsx`, `ProtectedRoute.test.jsx` | The navigation bar shows the links of each role and logs out; protected routes redirect anonymous users to the log in page and show 403 to other roles |
 | Unit | Client | Vitest and Testing Library | `LoginPage.test.jsx`, `ProfilePage.test.jsx`, `UsersPage.test.jsx`, `StatusPages.test.jsx` | Log in with redirection by role and error messages, sign up (logged in and sent to the profile, different passwords, registered email and invalid data), profile and order history, users list with pages, and the 404 and error pages |
@@ -271,10 +285,12 @@ The server and the client have unit, integration and system tests. The system te
 | Integration | Client | Vitest | `authService.integration.test.js` | Log in with a sample user and 401 with a wrong password, against the real REST API |
 | Integration | Client | Vitest and Testing Library | `ProductDetailPage.integration.test.jsx` | The detail page shows the ingredients of a sample product, the products of a sample combo and the 404 page, with the real REST API |
 | Integration | Client | Vitest | `userService.integration.test.js` | Sign up of a new customer who can then log in, and 409 with a registered email, against the real REST API |
+| Integration | Client | Vitest and Testing Library | `CheckoutPage.integration.test.jsx` | The checkout places a home delivery paid in cash with the real REST API and shows the number and the total (with the delivery cost) calculated by the server |
 | System | Client | JUnit and Selenium | `ProductListE2E` | The sample products are shown on the home page of a real browser, 10 at first and the rest after *Más resultados*, and the *Menús* category shows only the 3 combos |
 | System | Client | JUnit and Selenium | `LoginE2E` | A customer logs in, sees their orders and logs out; a wrong password shows an error; anonymous users are sent to the log in page |
 | System | Client | JUnit and Selenium | `ProductDetailE2E` | From the menu, the detail of a product shows its picture and ingredients and adds it to the cart (kept after reloading); the detail of a combo lists its products with links; an unknown product shows the 404 page |
 | System | Client | JUnit and Selenium | `SignUpE2E` | A new customer signs up and is logged in on their profile; a registered email and different passwords show an error |
+| System | Client | JUnit and Selenium | `CheckoutE2E` | From the menu to the confirmation: products added to the cart, only the subtotal in the cart page, delivery cost (free from 25 €) and total in the checkout, home delivery paid by card, order number and empty cart; the checkout shows the wrong fields |
 
 The Selenium tests share their setup in `E2ETestSupport`: headless Chrome with a fixed window size, clicks without scroll animation, and a screenshot and the HTML of the page of every failed test in `backend/target/e2e-failures` (in CI, the `e2e-failures` artifact of the run).
 
