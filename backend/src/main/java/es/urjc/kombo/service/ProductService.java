@@ -50,7 +50,7 @@ public class ProductService {
         if (image == null) {
             throw new ResourceNotFoundException("Product " + id + " has no image");
         }
-        return new ImageFileDTO(image.getContentType(), new ByteArrayResource(readBytes(image.getImage())));
+        return new ImageFileDTO(image.getContentType(), new ByteArrayResource(readBytes(image.getData())));
     }
 
     private Product findActiveProduct(long id) {
