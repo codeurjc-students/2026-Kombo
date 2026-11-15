@@ -52,3 +52,10 @@ Keep the documentation up to date in the same branch as the change:
 - [docs/AI_USAGE.md](docs/AI_USAGE.md): record everything the AI does in the project (explanations, proposals, reviews, code, documentation, Git operations) in the entry of that day, with the fields required by the guide: date, phase, tool, version, configuration, objective and issue, how it was used, and context files (including this `CLAUDE.md`). State honestly what the AI did and what the author did.
 
 Leave changes unstaged. Obtain the author's explicit approval before staging, committing, pushing, opening a pull request, merging or closing an issue.
+
+At the end of every task or code change, include a summary with these four headings (in Spanish, as shown to the author):
+
+- **Añadido**: new files or functions and what they are for.
+- **Modificado**: what changed and why.
+- **Borrado**: what was removed and why.
+- **Finalidad**: which problem it solves or what it brings to the project.

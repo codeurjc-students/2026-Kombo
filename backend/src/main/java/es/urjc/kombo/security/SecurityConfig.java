@@ -53,6 +53,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users").hasRole("ADMIN")
+                        // Anonymous users can also place orders (the administrator cannot: see OrderController)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").permitAll()
+                        // The delivery cost is shown to everyone, and only the administrator changes it
+                        .requestMatchers(HttpMethod.GET, "/api/v1/settings").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/settings").hasRole("ADMIN")
                         // Ownership of /users/{id} and /orders/{id} is checked in the controllers and services
                         .requestMatchers("/api/**").authenticated()
                         // The React application (static files), Swagger UI and the OpenAPI document are public

@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 
-// Cart shared by the whole application: { items, count, addItem }
+// Cart shared by the whole application:
+// { items, count, subtotal, addItem, updateQuantity, removeItem, clearCart }
 export const CartContext = createContext(null);
 
 export function useCart() {

@@ -28,7 +28,8 @@ export default function LoginPage() {
 
   function goToHome(loggedUser, message) {
     const target = location.state?.from ?? HOME_BY_ROLE[loggedUser.role] ?? '/';
-    navigate(target, { replace: true, state: { message } });
+    // navigate returns a promise; nothing has to wait for it
+    void navigate(target, { replace: true, state: { message } });
   }
 
   async function handleLogin(event) {

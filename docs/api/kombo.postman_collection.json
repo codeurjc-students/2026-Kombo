@@ -531,6 +531,82 @@
       "name": "Orders",
       "item": [
         {
+          "name": "Place an order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    { \"productId\": 1, \"quantity\": 2 },\n    { \"productId\": 8, \"quantity\": 1 }\n  ],\n  \"deliveryType\": \"DELIVERY\",\n  \"deliveryAddress\": \"Calle Tulipán s/n, 28933 Móstoles, Madrid\",\n  \"paymentMethod\": \"CARD\",\n  \"customerName\": \"Ana Martín\",\n  \"customerEmail\": \"ana@example.com\",\n  \"customerPhone\": \"600123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "Checkout (anonymous, customer or employee; 403 for the administrator). The server takes the prices from the database and adds the delivery cost. 201 with the order, its number (1000 + id) and the Location header."
+          },
+          "response": []
+        },
+        {
+          "name": "Place a home delivery without address (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [{ \"productId\": 1, \"quantity\": 1 }],\n  \"deliveryType\": \"DELIVERY\",\n  \"paymentMethod\": \"CASH\",\n  \"customerName\": \"Ana Martín\",\n  \"customerEmail\": \"ana@example.com\",\n  \"customerPhone\": \"600123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "A home delivery needs a delivery address: 400 in ProblemDetail format."
+          },
+          "response": []
+        },
+        {
           "name": "Get an order",
           "request": {
             "method": "GET",
@@ -553,6 +629,74 @@
               ]
             },
             "description": "Detail of an order. Employees and the administrator can read any order; a customer only their own (403 otherwise). 404 if it does not exist."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get the delivery cost",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "settings"
+              ]
+            },
+            "description": "Public. Delivery cost of home deliveries and the subtotal from which delivery is free."
+          },
+          "response": []
+        },
+        {
+          "name": "Change the delivery cost (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deliveryCost\": 2.50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "settings"
+              ]
+            },
+            "description": "Only the administrator (log in with the administrator first). 400 if the cost is negative or above 99.99."
           },
           "response": []
         }

@@ -10,6 +10,35 @@ servers:
 - url: https://localhost
   description: Generated server url
 paths:
+  /api/v1/settings:
+    get:
+      tags:
+      - settings-controller
+      operationId: getSettings
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SettingsDTO"
+    put:
+      tags:
+      - settings-controller
+      operationId: updateSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsUpdateDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SettingsDTO"
   /api/v1/users:
     get:
       tags:
@@ -45,6 +74,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/orders:
+    post:
+      tags:
+      - order-controller
+      operationId: createOrder
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OrderDTO"
   /api/v1/auth/logout:
     post:
       tags:
@@ -209,6 +256,22 @@ paths:
                 $ref: "#/components/schemas/UserDTO"
 components:
   schemas:
+    SettingsUpdateDTO:
+      type: object
+      properties:
+        deliveryCost:
+          type: number
+          maximum: 99.99
+          minimum: 0.00
+      required:
+      - deliveryCost
+    SettingsDTO:
+      type: object
+      properties:
+        deliveryCost:
+          type: number
+        freeDeliveryThreshold:
+          type: number
     SignUpRequestDTO:
       type: object
       properties:
@@ -260,52 +323,63 @@ components:
           type: array
           items:
             type: string
-    LoginRequestDTO:
+    OrderLineRequestDTO:
       type: object
       properties:
-        email:
-          type: string
-        password:
-          type: string
-    Pageable:
-      type: object
-      properties:
-        page:
+        productId:
+          type: integer
+          format: int64
+        quantity:
           type: integer
           format: int32
-          minimum: 0
-        size:
-          type: integer
-          format: int32
+          maximum: 99
           minimum: 1
-        sort:
-          type: array
-          items:
-            type: string
-    PageMetadata:
+      required:
+      - productId
+    OrderRequestDTO:
       type: object
       properties:
-        size:
-          type: integer
-          format: int64
-        number:
-          type: integer
-          format: int64
-        totalElements:
-          type: integer
-          format: int64
-        totalPages:
-          type: integer
-          format: int64
-    PagedModelUserDTO:
-      type: object
-      properties:
-        content:
+        lines:
           type: array
           items:
-            $ref: "#/components/schemas/UserDTO"
-        page:
-          $ref: "#/components/schemas/PageMetadata"
+            $ref: "#/components/schemas/OrderLineRequestDTO"
+          maxItems: 50
+          minItems: 0
+        deliveryType:
+          type: string
+          enum:
+          - EAT_IN
+          - TAKE_AWAY
+          - DELIVERY
+        deliveryAddress:
+          type: string
+          maxLength: 255
+          minLength: 0
+        paymentMethod:
+          type: string
+          enum:
+          - CARD
+          - CASH
+        customerName:
+          type: string
+          maxLength: 100
+          minLength: 0
+        customerEmail:
+          type: string
+          format: email
+          maxLength: 255
+          minLength: 0
+        customerPhone:
+          type: string
+          minLength: 1
+          pattern: "\\+?[0-9 ]{9,15}"
+      required:
+      - customerEmail
+      - customerName
+      - customerPhone
+      - deliveryType
+      - lines
+      - paymentMethod
     OrderDTO:
       type: object
       properties:
@@ -356,6 +430,8 @@ components:
         deliveredAt:
           type: string
           format: date-time
+        subtotal:
+          type: number
         deliveryCost:
           type: number
         total:
@@ -368,6 +444,8 @@ components:
           format: int64
         product:
           $ref: "#/components/schemas/ProductDTO"
+        productName:
+          type: string
         quantity:
           type: integer
           format: int32
@@ -375,15 +453,6 @@ components:
           type: number
         subtotal:
           type: number
-    PagedModelOrderDTO:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: "#/components/schemas/OrderDTO"
-        page:
-          $ref: "#/components/schemas/PageMetadata"
     ProductDTO:
       type: object
       properties:
@@ -398,6 +467,61 @@ components:
           type: string
         category:
           type: string
+    LoginRequestDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageMetadata:
+      type: object
+      properties:
+        size:
+          type: integer
+          format: int64
+        number:
+          type: integer
+          format: int64
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+    PagedModelUserDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+    PagedModelOrderDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
     PagedModelProductDTO:
       type: object
       properties:

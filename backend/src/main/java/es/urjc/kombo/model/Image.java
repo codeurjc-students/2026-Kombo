@@ -2,6 +2,7 @@ package es.urjc.kombo.model;
 
 import java.sql.Blob;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -15,8 +16,10 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Binary content; the column keeps its original name so existing databases still work
     @Lob
-    private Blob image;
+    @Column(name = "image")
+    private Blob data;
 
     // MIME type of the image (for example image/jpeg), sent in the Content-Type header
     private String contentType;
@@ -26,8 +29,8 @@ public class Image {
     public Image() {
     }
 
-    public Image(Blob image, String contentType, String text) {
-        this.image = image;
+    public Image(Blob data, String contentType, String text) {
+        this.data = data;
         this.contentType = contentType;
         this.text = text;
     }
@@ -36,12 +39,12 @@ public class Image {
         return id;
     }
 
-    public Blob getImage() {
-        return image;
+    public Blob getData() {
+        return data;
     }
 
-    public void setImage(Blob image) {
-        this.image = image;
+    public void setData(Blob data) {
+        this.data = data;
     }
 
     public String getContentType() {

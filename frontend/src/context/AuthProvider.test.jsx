@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as authService from '../services/authService';
 import * as userService from '../services/userService';
@@ -53,7 +53,7 @@ describe('AuthProvider', () => {
   it('treats a failed session check as anonymous', async () => {
     authService.getCurrentUser.mockRejectedValue(new Error('offline'));
     render(<AuthProvider><Probe /></AuthProvider>);
-    await waitFor(() => expect(screen.getByText('anonymous')).toBeInTheDocument());
+    expect(await screen.findByText('anonymous')).toBeInTheDocument();
   });
 
   it('fails when used outside the provider', () => {

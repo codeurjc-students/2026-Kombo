@@ -19,7 +19,7 @@ export default function ProductList() {
       <div className="menu-toolbar">
         <h2 id="menu-title">Nuestra carta</h2>
       </div>
-      <div className="category-pills" role="group" aria-label="Filtrar por categoría">
+      <fieldset className="category-pills" aria-label="Filtrar por categoría">
         <CategoryPill label="Todo" active={category === null} onClick={() => setCategory(null)} />
         {CATEGORIES.map((item) => (
           <CategoryPill
@@ -29,7 +29,7 @@ export default function ProductList() {
             onClick={() => setCategory(item.value)}
           />
         ))}
-      </div>
+      </fieldset>
 
       {error && (
         <ErrorState

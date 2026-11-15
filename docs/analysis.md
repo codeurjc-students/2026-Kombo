@@ -12,8 +12,9 @@ The screen mockups and the navigation flow are in the [README](../README.md).
 5. **Entity 5**: Combo.
 6. **Entity 6**: Order.
 7. **Entity 7**: OrderLine.
+8. **Entity 8**: Settings.
 
-Compared to the first version of the analysis, two entities have been added. **Combo** is a special type of product that groups several products, and **OrderLine** replaces the direct relation between Order and Product, so that each line of an order stores its quantity and the price paid.
+Compared to the first version of the analysis, two entities have been added. **Combo** is a special type of product that groups several products, and **OrderLine** replaces the direct relation between Order and Product, so that each line of an order stores its quantity and the price paid. **Settings** was added later to store the delivery cost, which the administrator can change.
 
 - User - Order (1:N): a user can place several orders, but an order belongs to one user (anonymous orders do not have a user).
 
@@ -29,12 +30,15 @@ Compared to the first version of the analysis, two entities have been added. **C
 
 - Image - User (1:1): each user has an associated image and an image belongs to one user.
 
+- Settings has no relations: it is a single row with the values of the restaurant that the administrator can change (the delivery cost).
+
 - Image - Product (1:1): each product has an associated image and an image belongs to one product.
 
 The following diagram shows the entities and their relations. A combo is a product, so it also has the relations of Product (image, ingredients and order lines).
 
 ```mermaid
 erDiagram
+    direction LR
     USER |o--o{ ORDER : places
     USER ||--o| IMAGE : "profile picture"
     ORDER ||--|{ ORDER_LINE : contains
@@ -43,7 +47,19 @@ erDiagram
     PRODUCT }o--o{ INGREDIENT : "uses (quantity)"
     COMBO ||--|| PRODUCT : "is a"
     COMBO }o--o{ PRODUCT : "includes (quantity)"
+    SETTINGS
 ```
+
+**Legend.** Each end of a line shows how many entities of that side take part in the relation: the outer symbol is the maximum and the inner symbol (next to the line) is the minimum.
+
+| Symbol at the end of the line | Meaning | Example |
+| :---: | :--- | :--- |
+| `‖` (two bars) | Exactly one | An order line belongs to exactly one order |
+| `o\|` (circle and bar) | Zero or one | An order has zero or one user (anonymous orders have none) |
+| `\|<` (bar and crow's foot) | One or more | An order has one or more lines |
+| `o<` (circle and crow's foot) | Zero or more | A user places zero or more orders |
+
+The text on each line names the relation, and *(quantity)* means that the relation also stores a quantity (for example, the grams of an ingredient used by a product). `SETTINGS` has no lines because it is not related to other entities.
 
 ### Entity attributes
 **User**
@@ -89,8 +105,8 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 
 **Order**
 - Id: identifier.
-- Order number.
-- User: empty for anonymous orders.
+- Order number: unique, 1000 + id.
+- User: empty for anonymous orders and for the counter orders of employees.
 - Lines: products of the order (OrderLine).
 - Delivery type: eat in, take away or delivery.
 - Delivery address.
@@ -100,14 +116,19 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 - Customer name, email and phone: data of the checkout form.
 - Creation date.
 - Delivery date.
-- Delivery cost.
+- Delivery cost: only for home deliveries with a subtotal below 25 €, taken from Settings.
 - Total price: sum of the lines plus the delivery cost.
 
 **OrderLine**
 - Id: identifier.
 - Product.
+- Product name: name of the product at the time of the purchase.
 - Quantity.
 - Unit price: price of the product at the time of the purchase, so that past orders do not change if the price changes.
+
+**Settings**
+- Id: identifier.
+- Delivery cost: cost of home deliveries (2,50 € by default), changed by the administrator.
 
 
 
@@ -130,6 +151,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | View the ingredient inventory | | | X | X |
 | View the cash register closing | | | X | X |
 | Manage products (create, edit, delete, picture) | | | | X |
+| Change the delivery cost | | | | X |
 | Manage ingredients and restock | | | | X |
 | Manage employees | | | | X |
 | View the dashboard and the sales reports | | | | X |

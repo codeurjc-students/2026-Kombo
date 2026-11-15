@@ -2,9 +2,9 @@ import { Spinner } from 'react-bootstrap';
 
 export default function LoadingState({ label = 'Cargando…' }) {
   return (
-    <div className="d-flex align-items-center justify-content-center gap-2 py-5 text-secondary" role="status">
+    <output className="d-flex align-items-center justify-content-center gap-2 py-5 text-secondary">
       <Spinner animation="border" size="sm" aria-hidden="true" />
       <span>{label}</span>
-    </div>
+    </output>
   );
 }

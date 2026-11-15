@@ -21,6 +21,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.urjc.kombo.service.EmailAlreadyUsedException;
+import es.urjc.kombo.service.InvalidOrderException;
 import es.urjc.kombo.service.ResourceNotFoundException;
 
 // Uniform error responses for the whole REST API, in the standard ProblemDetail format (RFC 9457).
@@ -44,6 +45,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .sorted()
                 .collect(Collectors.joining("; "));
         return ResponseEntity.badRequest().body(ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail));
+    }
+
+    @ExceptionHandler(InvalidOrderException.class)
+    public ProblemDetail handleInvalidOrder(InvalidOrderException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(EmailAlreadyUsedException.class)
