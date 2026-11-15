@@ -2,11 +2,13 @@ package es.urjc.kombo.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,11 +29,15 @@ public class Order {
     public enum OrderStatus { IN_PREPARATION, READY, DELIVERED, CANCELLED }
     public enum PaymentMethod { CARD, CASH }
 
+    public static final int ORDER_NUMBER_OFFSET = 1000;
+
 
     @Id 
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Number shown to the customer: ORDER_NUMBER_OFFSET + id, so it is unique (see assignOrderNumber)
+    @Column(unique = true)
     private Integer orderNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -71,7 +77,7 @@ public class Order {
         this.user = user;
         this.deliveryType = deliveryType;
         this.paymentMethod = paymentMethod;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(ZoneId.systemDefault());
     }
 
     public void addLine(Product product, int quantity) {
@@ -84,10 +90,23 @@ public class Order {
         recalculateTotal();
     }
 
-    private void recalculateTotal() {
-        total = lines.stream()
+    // Gives the order its number from its id, which the database has just generated (call it after saving)
+    public void assignOrderNumber() {
+        if (id == null) {
+            throw new IllegalStateException("The order must be saved before it gets its number");
+        }
+        this.orderNumber = ORDER_NUMBER_OFFSET + Math.toIntExact(id);
+    }
+
+    // Sum of the lines, without the delivery cost
+    public BigDecimal getSubtotal() {
+        return lines.stream()
                 .map(OrderLine::getSubtotal)
-                .reduce(deliveryCost, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private void recalculateTotal() {
+        total = getSubtotal().add(deliveryCost);
     }
     
     //getters
@@ -156,10 +175,6 @@ public class Order {
     }
 
     //setters
-        public void setOrderNumber(Integer orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
     public void setDeliveryAddress(String deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
     }

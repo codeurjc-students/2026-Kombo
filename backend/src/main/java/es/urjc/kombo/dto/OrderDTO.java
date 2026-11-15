@@ -21,6 +21,7 @@ public record OrderDTO(
         String customerPhone,
         LocalDateTime createdAt,
         LocalDateTime deliveredAt,
+        BigDecimal subtotal,
         BigDecimal deliveryCost,
         BigDecimal total
 ) {

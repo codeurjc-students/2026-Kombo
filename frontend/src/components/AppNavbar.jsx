@@ -20,6 +20,7 @@ const LINKS = {
   ADMIN: [
     { to: '/', label: 'Carta', end: true },
     { to: '/admin/users', label: 'Usuarios' },
+    { to: '/admin/settings', label: 'Ajustes' },
   ],
 };
 
@@ -57,8 +58,13 @@ export default function AppNavbar() {
             ))}
           </Nav>
           <Nav className="align-items-md-center gap-2">
-            {/* Units in the cart (the cart page is not ready yet, so it is not a link) */}
-            <span className="nav-cart" aria-label={`Carrito: ${count} ${count === 1 ? 'producto' : 'productos'}`}>
+            {/* Units in the cart, with a link to the cart page */}
+            <Link
+              to="/cart"
+              className="nav-cart"
+              aria-label={`Carrito: ${count} ${count === 1 ? 'producto' : 'productos'}`}
+              onClick={() => setExpanded(false)}
+            >
               <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
                 <path
                   d="M3 9h18l-2 10H5L3 9Zm5 0V7a4 4 0 0 1 8 0v2"
@@ -69,7 +75,7 @@ export default function AppNavbar() {
                 />
               </svg>
               <span className="nav-cart-count" data-testid="cart-count">{count}</span>
-            </span>
+            </Link>
             {/* Not shown on the log in page itself */}
             {!loading && !user && pathname !== '/login' && (
               <Button as={Link} to="/login" variant="primary" className="nav-login" onClick={() => setExpanded(false)}>

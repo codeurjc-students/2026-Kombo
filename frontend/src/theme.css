@@ -147,11 +147,17 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   display: block;
 }
 
+/* Bootstrap reads the padding of the links from these variables (no !important needed) */
+.app-navbar .navbar-nav {
+  --bs-nav-link-padding-x: 1rem;
+  --bs-nav-link-padding-y: 0.45rem;
+  --bs-navbar-nav-link-padding-x: 1rem;
+}
+
 .app-navbar .nav-link {
   color: var(--kombo-ink);
   font-weight: 600;
   border-radius: 999px;
-  padding: 0.45rem 1rem !important;
   transition: background-color 0.15s, color 0.15s;
 }
 
@@ -310,6 +316,9 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
 }
 
 .category-pills {
+  /* It is a <fieldset>: remove the default border and spacing of the browser */
+  border: 0;
+  min-width: 0;
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
@@ -348,6 +357,8 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
 }
 
 .product-card {
+  /* The name is a stretched link: the whole card opens the detail page */
+  position: relative;
   background: var(--kombo-white);
   border-radius: var(--kombo-radius-xl);
   padding: 0.6rem;
@@ -445,10 +456,6 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   color: var(--kombo-orange-strong);
 }
 
-/* The name is a stretched link: the whole card opens the detail page */
-.product-card {
-  position: relative;
-}
 
 .product-body h3 a {
   color: inherit;
@@ -462,6 +469,8 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
 
 /* Cart counter of the navigation bar */
 .nav-cart {
+  text-decoration: none;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -479,6 +488,123 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   background: var(--kombo-orange-soft);
   font-family: var(--kombo-font-display);
   font-size: 0.85rem;
+}
+
+.nav-cart:hover,
+.nav-cart:focus-visible {
+  background: var(--kombo-orange-soft);
+  color: var(--kombo-orange-deep);
+}
+
+/* ---------- Cart, checkout and confirmation ---------- */
+.cart-list {
+  list-style: none;
+  margin: 0;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  padding-block: 1rem;
+  border-bottom: 1px solid var(--kombo-line);
+}
+
+.cart-item:last-child {
+  border-bottom: 0;
+}
+
+.cart-item-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-item-name a {
+  color: var(--kombo-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.cart-quantity {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cart-quantity .form-control {
+  width: 4rem;
+  text-align: center;
+}
+
+.cart-line-total {
+  min-width: 5rem;
+  text-align: right;
+}
+
+.cart-remove {
+  color: var(--kombo-slate);
+  text-decoration: none;
+}
+
+@media (max-width: 575.98px) {
+  .cart-item {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.summary-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.summary-list dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.summary-total {
+  border-top: 1px solid var(--kombo-line);
+  padding-top: 0.75rem;
+  font-family: var(--kombo-font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.summary-total dd {
+  color: var(--kombo-orange-strong);
+  font-weight: 800;
+}
+
+.summary-items {
+  padding-left: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.checkout-section {
+  border: 0;
+  min-width: 0;
+  margin-bottom: 1.75rem;
+}
+
+.confirmation-kicker {
+  color: var(--kombo-teal);
+  font-weight: 700;
+}
+
+.order-number {
+  font-family: var(--kombo-font-display);
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 800;
+  color: var(--kombo-orange-strong);
+  margin-bottom: 0.5rem;
+}
+
+.settings-panel {
+  max-width: 32rem;
+  margin: 1rem auto;
 }
 
 /* ---------- Product detail ---------- */
@@ -704,4 +830,10 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
     transition: none !important;
     animation: none !important;
   }
+}
+
+/* Radio buttons and checkboxes with the colour of the brand */
+.form-check-input:checked {
+  background-color: var(--kombo-orange-strong);
+  border-color: var(--kombo-orange-strong);
 }

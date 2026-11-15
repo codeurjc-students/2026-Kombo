@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,18 @@ public class SampleDataLoader implements CommandLineRunner {
     private static final String SIDES = "Sides";
     private static final String DRINKS = "Drinks";
     private static final String COMBOS = "Combos";
+    // Ingredient names and product keys used more than once
+    private static final String UNITS = "unidades";
+    private static final String BURGER_BUN = "Pan de hamburguesa";
+    private static final String BEEF = "Carne de ternera";
+    private static final String CHEDDAR = "Queso cheddar";
+    private static final String LETTUCE = "Lechuga";
+    private static final String CHICKEN_NUGGETS = "Nuggets de pollo";
+    private static final String COLA = "Refresco de cola";
+    private static final String ORANGE_SODA = "Refresco de naranja";
+    private static final String CLASSIC_BURGER = "classic-burger";
+    private static final String CHICKEN_BURGER = "chicken-burger";
+    private static final String FRENCH_FRIES = "french-fries";
 
     private final IngredientRepository ingredientRepository;
     private final ProductRepository productRepository;
@@ -84,19 +97,19 @@ public class SampleDataLoader implements CommandLineRunner {
     // Names, descriptions and units are in Spanish because the application shows them to the users
     private void createIngredients() {
         // name, unit, stock, alert limit (bacon starts below its limit to show a low stock ingredient)
-        saveIngredient("Pan de hamburguesa", "unidades", 200, 50);
-        saveIngredient("Carne de ternera", "unidades", 150, 40);
-        saveIngredient("Filete de pollo", "unidades", 100, 30);
-        saveIngredient("Queso cheddar", "lonchas", 300, 80);
+        saveIngredient(BURGER_BUN, UNITS, 200, 50);
+        saveIngredient(BEEF, UNITS, 150, 40);
+        saveIngredient("Filete de pollo", UNITS, 100, 30);
+        saveIngredient(CHEDDAR, "lonchas", 300, 80);
         saveIngredient("Bacon", "lonchas", 40, 50);
-        saveIngredient("Lechuga", "g", 3000, 1000);
+        saveIngredient(LETTUCE, "g", 3000, 1000);
         saveIngredient("Tomate", "g", 4000, 1000);
         saveIngredient("Mayonesa", "g", 2000, 500);
         saveIngredient("Patatas", "g", 20000, 5000);
-        saveIngredient("Nuggets de pollo", "unidades", 400, 100);
-        saveIngredient("Refresco de cola", "unidades", 120, 30);
-        saveIngredient("Refresco de naranja", "unidades", 80, 20);
-        saveIngredient("Botella de agua", "unidades", 100, 30);
+        saveIngredient(CHICKEN_NUGGETS, UNITS, 400, 100);
+        saveIngredient(COLA, UNITS, 120, 30);
+        saveIngredient(ORANGE_SODA, UNITS, 80, 20);
+        saveIngredient("Botella de agua", UNITS, 100, 30);
         saveIngredient("Helado de vainilla", "g", 5000, 1000);
         saveIngredient("Sirope de chocolate", "ml", 2000, 500);
     }
@@ -104,22 +117,22 @@ public class SampleDataLoader implements CommandLineRunner {
     // Each product has a key in English, which is also the name of its picture in sample-images/.
     // The first four products are the ones used by the existing UI and REST API tests.
     private void createProducts() {
-        saveProduct("classic-burger", "Hamburguesa clásica", "8.50",
+        saveProduct(CLASSIC_BURGER, "Hamburguesa clásica", "8.50",
                 "Hamburguesa de ternera con lechuga, tomate y queso", BURGERS,
-                Map.of("Pan de hamburguesa", 1, "Carne de ternera", 1, "Queso cheddar", 1, "Lechuga", 20, "Tomate", 30));
-        saveProduct("chicken-burger", "Hamburguesa de pollo", "7.90", "Hamburguesa de pollo crujiente con mayonesa",
-                BURGERS, Map.of("Pan de hamburguesa", 1, "Filete de pollo", 1, "Lechuga", 20, "Mayonesa", 15));
-        saveProduct("french-fries", "Patatas fritas", "2.95", "Ración mediana de patatas fritas", SIDES,
+                Map.of(BURGER_BUN, 1, BEEF, 1, CHEDDAR, 1, LETTUCE, 20, "Tomate", 30));
+        saveProduct(CHICKEN_BURGER, "Hamburguesa de pollo", "7.90", "Hamburguesa de pollo crujiente con mayonesa",
+                BURGERS, Map.of(BURGER_BUN, 1, "Filete de pollo", 1, LETTUCE, 20, "Mayonesa", 15));
+        saveProduct(FRENCH_FRIES, "Patatas fritas", "2.95", "Ración mediana de patatas fritas", SIDES,
                 Map.of("Patatas", 150));
-        saveProduct("cola", "Refresco de cola", "2.20", "Refresco de cola de 500 ml", DRINKS,
-                Map.of("Refresco de cola", 1));
+        saveProduct("cola", COLA, "2.20", "Refresco de cola de 500 ml", DRINKS,
+                Map.of(COLA, 1));
         saveProduct("bacon-cheeseburger", "Hamburguesa doble con bacon", "9.90",
                 "Doble hamburguesa de ternera con bacon y queso cheddar", BURGERS,
-                Map.of("Pan de hamburguesa", 1, "Carne de ternera", 2, "Queso cheddar", 2, "Bacon", 2));
-        saveProduct("chicken-nuggets", "Nuggets de pollo", "5.50", "Seis nuggets de pollo", SIDES,
-                Map.of("Nuggets de pollo", 6));
-        saveProduct("orange-soda", "Refresco de naranja", "2.20", "Refresco de naranja de 500 ml", DRINKS,
-                Map.of("Refresco de naranja", 1));
+                Map.of(BURGER_BUN, 1, BEEF, 2, CHEDDAR, 2, "Bacon", 2));
+        saveProduct("chicken-nuggets", CHICKEN_NUGGETS, "5.50", "Seis nuggets de pollo", SIDES,
+                Map.of(CHICKEN_NUGGETS, 6));
+        saveProduct("orange-soda", ORANGE_SODA, "2.20", "Refresco de naranja de 500 ml", DRINKS,
+                Map.of(ORANGE_SODA, 1));
         saveProduct("water", "Agua", "1.50", "Botella de agua de 500 ml", DRINKS, Map.of("Botella de agua", 1));
         saveProduct("chocolate-sundae", "Sundae de chocolate", "3.50", "Helado de vainilla con sirope de chocolate",
                 "Desserts", Map.of("Helado de vainilla", 150, "Sirope de chocolate", 30));
@@ -127,13 +140,13 @@ public class SampleDataLoader implements CommandLineRunner {
 
     private void createCombos() {
         saveCombo("classic-menu", "Menú clásico", "11.50", "Hamburguesa clásica, patatas fritas y refresco de cola",
-                Map.of("classic-burger", 1, "french-fries", 1, "cola", 1));
+                Map.of(CLASSIC_BURGER, 1, FRENCH_FRIES, 1, "cola", 1));
         saveCombo("chicken-menu", "Menú de pollo", "10.90",
                 "Hamburguesa de pollo, patatas fritas y refresco de naranja",
-                Map.of("chicken-burger", 1, "french-fries", 1, "orange-soda", 1));
+                Map.of(CHICKEN_BURGER, 1, FRENCH_FRIES, 1, "orange-soda", 1));
         saveCombo("family-menu", "Menú familiar", "29.90",
                 "Dos hamburguesas clásicas, dos de pollo, cuatro raciones de patatas fritas y cuatro refrescos de cola",
-                Map.of("classic-burger", 2, "chicken-burger", 2, "french-fries", 4, "cola", 4));
+                Map.of(CLASSIC_BURGER, 2, CHICKEN_BURGER, 2, FRENCH_FRIES, 4, "cola", 4));
     }
 
     // A customer and an employee (the administrator is created by AdminInitializer); returns the customer, who places some of the sample orders
@@ -156,13 +169,13 @@ public class SampleDataLoader implements CommandLineRunner {
         delivered.setDeliveryCost(new BigDecimal("2.50"));
         delivered.setPaid(true);
         delivered.setStatus(Order.OrderStatus.DELIVERED);
-        delivered.setDeliveredAt(LocalDateTime.now());
-        saveOrder(delivered, 1);
+        delivered.setDeliveredAt(LocalDateTime.now(ZoneId.systemDefault()));
+        saveOrder(delivered);
 
         Order inPreparation = new Order(customer, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
-        inPreparation.addLine(products.get("chicken-burger"), 2);
-        inPreparation.addLine(products.get("french-fries"), 1);
-        saveOrder(inPreparation, 2);
+        inPreparation.addLine(products.get(CHICKEN_BURGER), 2);
+        inPreparation.addLine(products.get(FRENCH_FRIES), 1);
+        saveOrder(inPreparation);
 
         Order ready = new Order(null, Order.DeliveryType.EAT_IN, Order.PaymentMethod.CARD);
         ready.addLine(products.get("family-menu"), 1);
@@ -171,14 +184,14 @@ public class SampleDataLoader implements CommandLineRunner {
         ready.setCustomerPhone("600777888");
         ready.setPaid(true);
         ready.setStatus(Order.OrderStatus.READY);
-        saveOrder(ready, 3);
+        saveOrder(ready);
 
         Order cancelled = new Order(null, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
         cancelled.addLine(products.get("cola"), 1);
         cancelled.setCustomerName("Marta Ruiz");
         cancelled.setCustomerPhone("600999000");
         cancelled.setStatus(Order.OrderStatus.CANCELLED);
-        saveOrder(cancelled, 4);
+        saveOrder(cancelled);
     }
 
     private void saveIngredient(String name, String unit, int stock, int alertLimit) {
@@ -200,9 +213,9 @@ public class SampleDataLoader implements CommandLineRunner {
         products.put(key, productRepository.save(combo));
     }
 
-    private void saveOrder(Order order, int orderNumber) {
-        order.setOrderNumber(orderNumber);
-        orderRepository.save(order);
+    // Same numbering as the orders placed in the application: ORDER_NUMBER_OFFSET + id
+    private void saveOrder(Order order) {
+        orderRepository.save(order).assignOrderNumber();
     }
 
     // Reads resources/sample-images/<key>.jpg (or .jpeg or .png). Without the file, the product has no image.

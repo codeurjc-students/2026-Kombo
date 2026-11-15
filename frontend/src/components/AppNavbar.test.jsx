@@ -19,8 +19,12 @@ vi.mock('../services/productService', async (importOriginal) => ({
 }));
 
 // Text of the links; the logo link is named by the alt text of its image
+// Links of the pages (the cart link is checked on its own)
 function navLinks() {
-  return screen.getAllByRole('link').map((link) => link.textContent || link.querySelector('img')?.alt);
+  return screen
+    .getAllByRole('link')
+    .filter((link) => !link.getAttribute('aria-label')?.startsWith('Carrito'))
+    .map((link) => link.textContent || link.querySelector('img')?.alt);
 }
 
 describe('AppNavbar', () => {
@@ -62,7 +66,12 @@ describe('AppNavbar', () => {
 
   it('shows the user management to the administrator', () => {
     renderApp('/', { user: ADMIN });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios', 'Ajustes']);
+  });
+
+  it('links the cart counter to the cart page', () => {
+    renderApp('/');
+    expect(screen.getByRole('link', { name: 'Carrito: 0 productos' })).toHaveAttribute('href', '/cart');
   });
 
   // Real AuthProvider: the session really ends, so ProtectedRoute could redirect to the log in page

@@ -19,6 +19,8 @@ public class OrderLine {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Product product;
 
+    // Name and price of the product at the time of the purchase: past orders do not change if the product changes
+    private String productName;
     private int quantity;
     private BigDecimal unitPrice;
 
@@ -27,6 +29,7 @@ public class OrderLine {
 
     public OrderLine(Product product, int quantity) {
         this.product = product;
+        this.productName = product.getName();
         this.quantity = quantity;
         this.unitPrice = product.getPrice();
     }
@@ -42,6 +45,9 @@ public class OrderLine {
     }
     public Product getProduct(){
         return this.product;
+    }
+    public String getProductName(){
+        return this.productName;
     }
     public int getQuantity(){
         return this.quantity;
