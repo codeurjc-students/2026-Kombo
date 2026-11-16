@@ -104,6 +104,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - SonarQube Cloud issues fixed: the promise of `navigate` in the log in page, repeated texts of the sample data as constants, the binary field of `Image` renamed to `data` (same database column), `LocalDateTime.now()` with the time zone, a duplicated CSS selector, `!important` in the navigation bar, `<fieldset>` and `<output>` instead of the `group` and `status` roles, and `findByText` in a test. `test-utils.jsx` is analysed as test code.
 - Analysis, development guide (domain model and tests table) and OpenAPI documentation updated with the checkout and the settings.
 - The entity relationship diagram of the analysis is drawn from left to right and has a legend of its symbols.
+- Gantt chart of the methodology updated with the real dates of the Phase 3 tasks done until 15 November (from the Git history and the AI sessions) and the plan of the remaining tasks until the release 0.1 on 22 November.
 
 ## Phase 2 - 2026-10-29
 
