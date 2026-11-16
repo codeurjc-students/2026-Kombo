@@ -50,6 +50,7 @@ Keep the documentation up to date in the same branch as the change:
 
 - [CHANGELOG.md](CHANGELOG.md): add every notable change under `[Unreleased]` (Keep a Changelog format).
 - [docs/AI_USAGE.md](docs/AI_USAGE.md): record everything the AI does in the project (explanations, proposals, reviews, code, documentation, Git operations) in the entry of that day, with the fields required by the guide: date, phase, tool, version, configuration, objective and issue, how it was used, and context files (including this `CLAUDE.md`). State honestly what the AI did and what the author did.
+- [docs/methodology.md](docs/methodology.md): at the end of every session, update the Gantt chart: mark the tasks done with their real dates (taken from the Git history and the AI usage log), add the tasks that were not in the chart and move the pending ones if the plan changed.
 
 Leave changes unstaged. Obtain the author's explicit approval before staging, committing, pushing, opening a pull request, merging or closing an issue.
 

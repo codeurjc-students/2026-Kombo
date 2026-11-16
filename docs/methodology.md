@@ -39,15 +39,20 @@ gantt
     Phase 2 documentation                            :done, f2i, 2026-10-25, 5d
 
     section Phase 3 - Version 0.1
+    Phase planning and GitHub issues                 :done, f3p, 2026-11-01, 2d
     Line endings and domain model                    :done, f3m, 2026-11-02, 1d
     AI context file and domain model documentation   :done, f3n, 2026-11-03, 1d
-    DTOs, paginated products API and error handling  :active, f3o, 2026-11-03, 1d
-    Sign up, log in and roles                        :f3a, 2026-11-04, 4d
-    Menu and product detail                          :f3b, after f3a, 2d
-    Cart, checkout and simulated payment             :f3c, after f3b, 4d
-    Profile and order history                        :f3d, after f3c, 2d
-    Order dashboard and product and user management  :f3e, after f3d, 4d
-    Docker, continuous delivery and release 0.1      :f3f, after f3e, 3d
+    DTOs, paginated products API and error handling  :done, f3o, 2026-11-03, 1d
+    Sample data and product images                   :done, f3s, 2026-11-04, 1d
+    Log in, roles and HTTPS                          :done, f3a, 2026-11-09, 1d
+    Client layout, log in, profile and order history :done, f3l, 2026-11-09, 2d
+    Docker and continuous delivery                   :done, f3c, 2026-11-09, 2d
+    Menu by category                                 :done, f3b, 2026-11-10, 1d
+    Product detail and sign up                       :done, f3d, 2026-11-12, 3d
+    Cart, checkout and simulated payment             :done, f3k, 2026-11-15, 1d
+    Personal data and saved addresses                :f3u, 2026-11-17, 2d
+    Order dashboard and product and user management  :f3e, after f3u, 3d
+    Release 0.1 and Phase 3 documentation            :f3r, after f3e, 1d
 
     section Phase 4 - Version 0.2
     Search, filters and customisation                :f4a, 2026-11-23, 5d
