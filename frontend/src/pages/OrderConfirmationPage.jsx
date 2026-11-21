@@ -1,6 +1,7 @@
 import { Button } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router';
 import OrderSummary from '../components/OrderSummary';
+import { useAuth } from '../context/AuthContext';
 import { DELIVERY_TYPES, PAYMENT_METHODS } from '../utils/delivery';
 import { formatPrice } from '../utils/format';
 
@@ -8,6 +9,7 @@ import { formatPrice } from '../utils/format';
 // so after reloading the page there is nothing to show.
 export default function OrderConfirmationPage() {
   const order = useLocation().state?.order;
+  const { user } = useAuth();
 
   if (!order) {
     return (
@@ -40,6 +42,9 @@ export default function OrderConfirmationPage() {
           ))}
         </ul>
         <Button as={Link} to="/" variant="outline-ink" className="w-100">Volver a la carta</Button>
+        {user?.role === 'EMPLOYEE' && (
+          <Button as={Link} to="/orders" variant="outline-ink" className="w-100 mt-2">Ir a los pedidos</Button>
+        )}
       </OrderSummary>
     </section>
   );

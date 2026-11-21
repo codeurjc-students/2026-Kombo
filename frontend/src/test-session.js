@@ -12,7 +12,12 @@ export async function startCustomerSession(prefix) {
   // A new session replaces the one of a previous call
   vi.unstubAllGlobals();
   await signUp({ name: 'Ana', surname: 'Pruebas', email, phone: '600123456', password });
+  return startSession(email, password);
+}
 
+// Logs in with an existing user (for example the sample employee) and keeps the session cookie, as above
+export async function startSession(email, password) {
+  vi.unstubAllGlobals();
   const realFetch = globalThis.fetch;
   let cookie = null;
   vi.stubGlobal('fetch', async (url, options = {}) => {

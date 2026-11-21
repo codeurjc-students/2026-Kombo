@@ -15,15 +15,17 @@ import { formatPrice } from '../utils/format';
 // Value of the address choice that means "write a new address"
 const NEW_ADDRESS = 'NEW';
 
-// Logged in users start with their own data, which they can change, and their first saved address
+// Customers start with their own data, which they can change, and their first saved address. Anonymous users and
+// employees (counter orders, for a customer at the counter) start with an empty form.
 function initialForm(user) {
+  const customer = user?.role === 'CUSTOMER' ? user : null;
   return {
     deliveryType: 'TAKE_AWAY',
-    addressChoice: user?.addresses?.[0] ?? NEW_ADDRESS,
+    addressChoice: customer?.addresses?.[0] ?? NEW_ADDRESS,
     address: '',
-    name: user ? [user.name, user.surname].filter(Boolean).join(' ') : '',
-    email: user?.email ?? '',
-    phone: user?.phone ?? '',
+    name: customer ? [customer.name, customer.surname].filter(Boolean).join(' ') : '',
+    email: customer?.email ?? '',
+    phone: customer?.phone ?? '',
     paymentMethod: 'CARD',
     cardNumber: '',
     cardExpiry: '',
@@ -34,7 +36,8 @@ function initialForm(user) {
 // Checkout: delivery type, contact data and simulated payment. The order is placed with POST /api/v1/orders
 // and the confirmation page shows its number. A customer sees their saved data instead of the contact form
 // (they can change it) and chooses one of their addresses or writes a new one, which the server saves in
-// their profile.
+// their profile. An employee places counter orders: only the name of the customer is required, and a card is
+// paid with the card reader of the restaurant.
 export default function CheckoutPage() {
   const { loading } = useAuth();
   // The form starts with the data of the session: after reloading the page, it waits until the session is known
@@ -54,6 +57,7 @@ function Checkout() {
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState(null);
   const isCustomer = user?.role === 'CUSTOMER';
+  const isCounter = user?.role === 'EMPLOYEE';
   // A customer starts with the summary of their data; anonymous users and employees fill in the form
   const [editingContact, setEditingContact] = useState(!isCustomer);
   const savedAddresses = isCustomer ? (user.addresses ?? []) : [];
@@ -77,7 +81,7 @@ function Checkout() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const formErrors = validateCheckout({ ...form, address: deliveryAddress });
+    const formErrors = validateCheckout({ ...form, address: deliveryAddress }, new Date(), { counter: isCounter });
     setErrors(formErrors);
     if (Object.keys(formErrors).length > 0) {
       // The saved data of a customer can be wrong (for example, no phone): show the form to fix it
@@ -122,7 +126,7 @@ function Checkout() {
   return (
     <section aria-labelledby="checkout-title">
       <Link to="/cart" className="back-link">← Volver al carrito</Link>
-      <h1 id="checkout-title" className="page-title">Tramitar pedido</h1>
+      <h1 id="checkout-title" className="page-title">{isCounter ? 'Pedido en mostrador' : 'Tramitar pedido'}</h1>
       <Row className="g-4">
         <Col lg={8}>
           <Form noValidate onSubmit={handleSubmit} className="panel" aria-labelledby="checkout-title">
@@ -190,7 +194,7 @@ function Checkout() {
             </fieldset>
 
             <fieldset className="checkout-section">
-              <legend className="h4">2. Datos de contacto</legend>
+              <legend className="h4">{isCounter ? '2. Datos del cliente' : '2. Datos de contacto'}</legend>
               {editingContact ? (
                 <>
                 <Form.Group className="mb-3" controlId="checkout-name">
@@ -200,12 +204,16 @@ function Checkout() {
                 </Form.Group>
                 <Row>
                   <Form.Group as={Col} md={7} className="mb-3" controlId="checkout-email">
-                    <Form.Label>Correo electrónico</Form.Label>
+                    <Form.Label>
+                      Correo electrónico {isCounter && <span className="text-secondary small">(opcional)</span>}
+                    </Form.Label>
                     <Form.Control type="email" autoComplete="email" maxLength={255} {...field('email')} />
                     <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
                   </Form.Group>
                   <Form.Group as={Col} md={5} className="mb-3" controlId="checkout-phone">
-                    <Form.Label>Teléfono</Form.Label>
+                    <Form.Label>
+                      Teléfono {isCounter && <span className="text-secondary small">(opcional)</span>}
+                    </Form.Label>
                     <Form.Control type="tel" autoComplete="tel" {...field('phone')} />
                     <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
                   </Form.Group>
@@ -241,7 +249,14 @@ function Checkout() {
                   label={label}
                 />
               ))}
-              {form.paymentMethod === 'CARD' ? (
+              {isCounter && (
+                <p className="mt-3 mb-0">
+                  {form.paymentMethod === 'CARD'
+                    ? 'Cobra con el datáfono del restaurante: el pedido queda pagado.'
+                    : 'Cobra en efectivo y márcalo como pagado en el panel de pedidos.'}
+                </p>
+              )}
+              {isCounter ? null : form.paymentMethod === 'CARD' ? (
                 <Row className="mt-3">
                   <Form.Group as={Col} md={6} className="mb-3" controlId="checkout-card-number">
                     <Form.Label>Número de tarjeta</Form.Label>
@@ -266,7 +281,7 @@ function Checkout() {
 
             <Button type="submit" variant="primary" size="lg" disabled={submitting}>
               {submitting && <Spinner animation="border" size="sm" className="me-2" aria-hidden="true" />}
-              Confirmar y pagar {formatPrice(orderTotal(subtotal, deliveryCost))}
+              {isCounter ? 'Confirmar pedido' : 'Confirmar y pagar'} {formatPrice(orderTotal(subtotal, deliveryCost))}
             </Button>
           </Form>
         </Col>

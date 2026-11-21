@@ -25,6 +25,16 @@ describe('validateCheckout', () => {
     expect(Object.keys(errors)).toEqual(['name', 'email', 'phone']);
   });
 
+  it('asks only for the name of the customer in a counter order, without card data', () => {
+    const counterOrder = { ...VALID, email: '', phone: '', cardNumber: '', cardExpiry: '', cardCvv: '' };
+
+    expect(validateCheckout(counterOrder, TODAY, { counter: true })).toEqual({});
+    expect(validateCheckout({ ...counterOrder, name: ' ', phone: '12' }, TODAY, { counter: true })).toEqual({
+      name: 'Escribe el nombre del cliente.',
+      phone: 'Escribe un teléfono de 9 a 15 cifras.',
+    });
+  });
+
   it('requires the address only for home deliveries', () => {
     expect(validateCheckout({ ...VALID, deliveryType: 'DELIVERY' }, TODAY)).toEqual({
       address: 'Escribe la dirección de entrega.',

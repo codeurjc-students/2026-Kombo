@@ -811,6 +811,17 @@ img.user-avatar {
   text-decoration: none;
 }
 
+/* Header of an order in the dashboard: "Pedido nº 1005 - 9 min", the number and the time each with its own font */
+.order-card-title {
+  font-size: 1.05rem;
+  color: var(--kombo-ink);
+}
+
+.order-card-time {
+  font-family: var(--kombo-font-display);
+  font-weight: 800;
+}
+
 .order-card:hover {
   border-color: var(--kombo-orange-light);
 }
