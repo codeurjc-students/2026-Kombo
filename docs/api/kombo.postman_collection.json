@@ -494,7 +494,7 @@
                 "{{userId}}"
               ]
             },
-            "description": "Profile of a user. 200 for the user themselves or the administrator, 403 for another user, 401 without login."
+            "description": "Account of any user. Only the administrator: 403 for other roles (also with their own id; they use /auth/me), 401 without login."
           },
           "response": []
         },
@@ -558,7 +558,441 @@
                 "orders"
               ]
             },
-            "description": "Order history of a user, the most recent first (paginated). 200 for the user themselves or the administrator, 403 for another user."
+            "description": "Order history of any user, the most recent first (paginated). Only the administrator: 403 for other roles (they use /users/me/orders)."
+          },
+          "response": []
+        },
+        {
+          "name": "Change my personal data",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lucía\",\n  \"surname\": \"García López\",\n  \"phone\": \"600111222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Name, surname and phone of the logged in user (the email cannot be changed and is ignored if sent). 200 with the user, 400 with the invalid fields, 401 without session."
+          },
+          "response": []
+        },
+        {
+          "name": "Change my password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{password}}\",\n  \"newPassword\": \"new-secret-password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "password"
+              ]
+            },
+            "description": "The current password and the new one (8 to 72 characters). 204, or 400 if the current password is wrong or the new one is not valid. With the sample customer, change it back afterwards."
+          },
+          "response": []
+        },
+        {
+          "name": "Change my addresses",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addresses\": [\n    \"Calle Tulipán s/n, 28933 Móstoles, Madrid\",\n    \"Calle Mayor 1, 28013 Madrid\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "addresses"
+              ]
+            },
+            "description": "The whole list of saved addresses: sending the list with or without an address adds or deletes it. 200 with the user, 400 for a blank address."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload my picture",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG, PNG, GIF or WebP picture of 1 MB at most"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "image"
+              ]
+            },
+            "description": "Multipart form with the field \"image\" (choose a file in the Body tab). 200 with the user and the imageId of the picture, 400 if the file is not a JPEG, PNG, GIF or WebP picture, 413 if it is bigger than 1 MB."
+          },
+          "response": []
+        },
+        {
+          "name": "Get my picture",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "image"
+              ]
+            },
+            "description": "The profile picture as binary content with its type in Content-Type (Cache-Control: no-cache). 404 without picture."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete my picture",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "image"
+              ]
+            },
+            "description": "204. The initial of the name is shown again."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete my account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me"
+              ]
+            },
+            "description": "Deletes the account of the logged in user with their addresses and picture and deletes the session cookie (204). The orders are kept without the customer data. 403 for the administrator. Do not use it with the sample users."
+          },
+          "response": []
+        },
+        {
+          "name": "Change the personal data of a user (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Lucía\",\n  \"surname\": \"García\",\n  \"phone\": \"600111222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Only the administrator: same body as \"Change my personal data\". 403 for other roles."
+          },
+          "response": []
+        },
+        {
+          "name": "Change the addresses of a user (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"addresses\": [\n    \"Calle Tulipán s/n, 28933 Móstoles, Madrid\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "addresses"
+              ]
+            },
+            "description": "Only the administrator: same body as \"Change my addresses\"."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload the picture of a user (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG, PNG, GIF or WebP picture of 1 MB at most"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "image"
+              ]
+            },
+            "description": "Only the administrator: same form as \"Upload my picture\"."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the picture of a user (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "image"
+              ]
+            },
+            "description": "Only the administrator. 404 without picture."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete the picture of a user (administrator)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}",
+                "image"
+              ]
+            },
+            "description": "Only the administrator. 204."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a user (administrator)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Only the administrator: deletes any account (204) except the one of the administrator (403). The orders are kept without the customer data."
           },
           "response": []
         }
@@ -666,6 +1100,208 @@
               ]
             },
             "description": "Detail of an order. Employees and the administrator can read any order; a customer only their own (403 otherwise). 404 if it does not exist."
+          },
+          "response": []
+        },
+        {
+          "name": "Place a counter order (employee)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    { \"productId\": 8, \"quantity\": 1 }\n  ],\n  \"deliveryType\": \"EAT_IN\",\n  \"paymentMethod\": \"CASH\",\n  \"customerName\": \"Mesa 4\",\n  \"customerEmail\": \"\",\n  \"customerPhone\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "Log in as employee@kombo.com first. Counter order: only the name of the customer is required (email and phone can be empty). Not paid until it is marked as paid if it is paid in cash."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the pending orders (employee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders?status=IN_PREPARATION&status=READY&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "IN_PREPARATION"
+                },
+                {
+                  "key": "status",
+                  "value": "READY"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Order dashboard (employees and administrator; 403 for customers): orders in preparation and ready, oldest first."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the finished orders of a day (employee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders?status=DELIVERED&status=CANCELLED&since=2026-11-22T00:00:00&sort=createdAt,desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "DELIVERED"
+                },
+                {
+                  "key": "status",
+                  "value": "CANCELLED"
+                },
+                {
+                  "key": "since",
+                  "value": "2026-11-22T00:00:00"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
+              ]
+            },
+            "description": "Orders delivered and cancelled placed from a local date and time (since), the most recent first. 400 for a date that is not valid."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark a cash order as paid (employee)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paid\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "Employees and administrator. Only for cash orders that are not cancelled; marking it again changes nothing."
+          },
+          "response": []
+        },
+        {
+          "name": "Change the status of an order (employee)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"READY\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "Employees and administrator. IN_PREPARATION → READY → DELIVERED, or CANCELLED before it is delivered. 409 for a change that is not possible (for example, delivering an order that is not paid), 400 without status or paid."
           },
           "response": []
         }

@@ -139,21 +139,22 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | View the menu, the product detail and the recommendations | X | X | X | X |
 | Sign up | X | | | |
 | Log in | | X | X | X |
-| Create an order and pay it (simulated payment) | X | X | X | |
+| Create an order and pay it (simulated payment); employees create counter orders | X | X | X | |
 | Check out without filling in the data form | | X | | |
 | Download the PDF ticket of their own order | X | X | | |
 | View their order history and repeat the last one | | X | | |
-| Manage their profile | | X | X | |
+| Manage their profile (personal data, password and picture) | | X | X | X |
+| Delete their account | | X | X | |
 | Manage their saved addresses | | X | | |
 | View all the orders | | | X | X |
-| Change the status of an order and mark a cash payment as paid | | | X | |
+| Change the status of an order and mark a cash payment as paid | | | X | X |
 | Download the PDF ticket of any order | | | X | X |
 | View the ingredient inventory | | | X | X |
 | View the cash register closing | | | X | X |
 | Manage products (create, edit, delete, picture) | | | | X |
 | Change the delivery cost | | | | X |
 | Manage ingredients and restock | | | | X |
-| Manage employees | | | | X |
+| Manage employees (and see and change the account of any user) | | | | X |
 | View the dashboard and the sales reports | | | | X |
 
 
