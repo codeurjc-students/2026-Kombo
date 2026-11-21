@@ -51,9 +51,12 @@ gantt
     Product detail and sign up                       :done, f3d, 2026-11-12, 3d
     Cart, checkout and simulated payment             :done, f3k, 2026-11-15, 1d
     Order history, order detail and saved addresses  :done, f3h, 2026-11-16, 1d
-    Personal data and address management             :f3u, 2026-11-17, 2d
-    Order dashboard and product and user management  :f3e, after f3u, 3d
-    Release 0.1 and Phase 3 documentation            :f3r, after f3e, 1d
+    Kombo name in the interface                      :done, f3q, 2026-11-21, 1d
+    Profile settings, picture and account deletion   :done, f3u, 2026-11-21, 1d
+    Order dashboard and counter orders               :done, f3e, 2026-11-21, 2d
+    Documentation of the profile and the dashboard   :done, f3x, 2026-11-22, 1d
+    Product, combo and employee management           :f3g, 2026-11-22, 1d
+    Quality review, release 0.1 and Phase 3 docs     :f3r, 2026-11-23, 1d
 
     section Phase 4 - Version 0.2
     Search, filters and customisation                :f4a, 2026-11-23, 5d

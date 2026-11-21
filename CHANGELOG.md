@@ -73,6 +73,19 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - *Repetir pedido* button in the last orders of the profile and in the order detail: adds the products of the order to the cart with the current prices.
 - Tests of the checkout with saved data and of the order history: server unit, server-database integration, REST API, client unit, client integration with a real session (`test-session.js`) and Selenium (`OrderHistoryE2E` and a new `CheckoutE2E` test).
 - `Get my orders` request in the Postman collection.
+- Profile settings page (`/profile/settings`, *Configuración* button of the profile) with a header (picture, name and email) and one tab for each group of settings, each saved on its own: *Perfil* (personal data and profile picture), *Seguridad* (password), *Direcciones* (only customers) and *Cuenta* (delete the account, not for the administrator).
+- `PUT /api/v1/users/me` (name, surname and phone; the email cannot be changed) and `PUT /api/v1/users/me/password` (needs the current password; 400 if it is wrong).
+- `PUT /api/v1/users/me/addresses`: the whole list of saved addresses, to add and delete them.
+- Profile pictures stored in the database: `PUT`, `GET` and `DELETE /api/v1/users/me/image` (multipart, field `image`). `ImageService` accepts JPEG, PNG, GIF and WebP pictures of 1 MB at most and takes the type from the first bytes of the file, not from its name; 400 for other files and 413 for bigger ones. `UserDTO` has the `imageId` of the picture, used in its URL so the browser shows a new picture at once. The picture (or the initial) is shown in the profile, the settings and the navigation bar (`UserAvatar`).
+- `DELETE /api/v1/users/me`: deletes the account with its addresses and picture and closes the session; the orders are kept for the sales, without the user, name, email and phone. The account of the administrator cannot be deleted (403).
+- Administrator endpoints for any user: `GET` and `PUT /api/v1/users/{id}`, `PUT /api/v1/users/{id}/addresses`, `PUT`, `GET` and `DELETE /api/v1/users/{id}/image` and `DELETE /api/v1/users/{id}`.
+- *Mi perfil* link for the administrator in the navigation bar.
+- Order dashboard for employees and the administrator (`/orders`, *Pedidos* link): *Pendientes* tab with the orders in preparation and ready, oldest first, with the minutes they have been waiting (in red after 10 minutes, updated every 30 seconds); *Terminados* tab with the orders delivered and cancelled of today, most recent first, with the time they were placed; buttons to charge a cash order, mark an order as ready, deliver it (only when paid) and cancel it (with a confirmation).
+- `GET /api/v1/orders` (employees and administrator): paginated, filtered by `status` (one or more) and `since` (local date and time) in the database, sorted by age (oldest first by default).
+- `PATCH /api/v1/orders/{id}` (employees and administrator): `{ "status" }` and `{ "paid": true }`. The status only moves forward (in preparation → ready → delivered, or cancelled before it is delivered), an order is delivered only when it is paid, and only cash orders are marked as paid; 409 for a change that is not possible.
+- Counter orders: an employee uses the menu, the cart and the checkout (*Pedido en mostrador*, *Nuevo pedido en mostrador* button of the dashboard); only the name of the customer is required and a card is paid with the card reader of the restaurant (no card data). The confirmation has an *Ir a los pedidos* button.
+- Tests (the six types) of the personal data and the password, the addresses, the profile picture, the deletion of the account, the order dashboard and the counter orders: `UserServiceTest`, `ImageServiceTest`, `OrderServiceTest`, `UserServiceIT`, `OrderServiceIT`, `UserApiIT`, `OrderDashboardApiIT`, `ProfileSettingsPage.test.jsx`, `OrdersDashboardPage.test.jsx`, the service and validation tests of the client, `userService.integration.test.js`, `orderService.integration.test.js`, `ProfileSettingsE2E` and `OrderDashboardE2E`.
+- Profile, order dashboard and counter order requests in the Postman collection.
 
 ### Changed
 
@@ -113,6 +126,13 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - The profile shows the last 4 orders of the customer (with *Más resultados*), and each one opens its detail; the client uses `GET /users/me/orders` instead of `GET /users/{id}/orders`.
 - The checkout waits for the session to be checked before showing the form, so after reloading the page it starts with the data of the customer.
 - Gantt chart of the methodology updated with the real dates of the Phase 3 tasks done until 15 November (from the Git history and the AI sessions) and the plan of the remaining tasks until the release 0.1 on 22 November.
+- The combos are called *kombos* in the interface: the *Kombos* category of the menu, *Productos del kombo* in the detail, the home banner and the sample combos (*Kombo clásico*, *Kombo de pollo* and *Kombo familiar*). The code still uses `Combo`.
+- `GET /api/v1/users/{id}` and `GET /api/v1/users/{id}/orders` are only for the administrator: the users read and manage their own account with the `/me` paths.
+- Employees go to the order dashboard after logging in.
+- In the checkout, the email and the phone are only optional in the counter orders of the employees (checked in `OrderService`), and an employee starts with an empty form instead of their own data.
+- `ProductService` reads the pictures with `ImageService`; the client HTTP client sends `FormData` bodies (file uploads) as multipart.
+- `spring.servlet.multipart.max-file-size=1MB` written in `application.properties`.
+- Development guide (access rules, client pages, tests, sample data), analysis (permissions), README of the sample pictures, OpenAPI documentation and Gantt chart updated with the profile settings and the order dashboard.
 
 ## Phase 2 - 2026-10-29
 

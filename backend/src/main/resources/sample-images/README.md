@@ -15,9 +15,9 @@ Each file is named after the key of its product in `SampleDataLoader` (in Englis
 | `orange-soda` | Refresco de naranja | `orange-soda.jpg` |
 | `water` | Agua | `water.jpeg` |
 | `chocolate-sundae` | Sundae de chocolate | `chocolate-sundae.jpg` |
-| `classic-menu` | Menú clásico | `classic-menu.jpeg` |
-| `chicken-menu` | Menú de pollo | `chicken-menu.jpg` |
-| `family-menu` | Menú familiar | `family-menu.jpeg` |
+| `classic-menu` | Kombo clásico | `classic-menu.jpeg` |
+| `chicken-menu` | Kombo de pollo | `chicken-menu.jpg` |
+| `family-menu` | Kombo familiar | `family-menu.jpeg` |
 
 Format of the pictures:
 
