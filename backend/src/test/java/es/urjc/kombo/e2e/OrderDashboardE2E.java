@@ -34,7 +34,7 @@ class OrderDashboardE2E extends E2ETestSupport {
 
         // The order is pending in the dashboard, not paid yet
         click(By.linkText("Ir a los pedidos"));
-        By card = By.cssSelector("li[aria-label='Pedido nº " + number + "']");
+        By card = pendingCard(number);
         wait.until(ExpectedConditions.textToBePresentInElementLocated(card, "Pendiente de pago"));
         // "Pedido nº 1005 - 0 min": the minutes it has been waiting
         assertThat(driver.findElement(card).getText())
@@ -67,7 +67,7 @@ class OrderDashboardE2E extends E2ETestSupport {
         wait.until(ExpectedConditions.urlMatches(".*/orders$"));
         String number = placeCounterOrder("Mesa 7");
         driver.get(BASE_URL + "/orders");
-        By card = By.cssSelector("li[aria-label='Pedido nº " + number + "']");
+        By card = pendingCard(number);
         wait.until(ExpectedConditions.visibilityOfElementLocated(card));
 
         clickInCard(card, "Cancelar");
@@ -102,6 +102,12 @@ class OrderDashboardE2E extends E2ETestSupport {
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("confirmation-title"),
                 "Pedido confirmado"));
         return driver.findElement(By.cssSelector("[data-testid='order-number']")).getText();
+    }
+
+    // The card of an order in the Pendientes tab. Both tabs are in the page (the hidden one too), and a delivered or
+    // cancelled order of today is also in Terminados, so the card is looked for only in the list of pending orders.
+    private static By pendingCard(String number) {
+        return By.cssSelector("ul[aria-label='Pedidos pendientes'] li[aria-label='Pedido nº " + number + "']");
     }
 
     private void clickInCard(By card, String button) {
