@@ -589,6 +589,22 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   margin-bottom: 1.75rem;
 }
 
+.saved-addresses {
+  border: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.contact-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--kombo-line);
+  border-radius: var(--kombo-radius-card);
+  padding: 1rem 1.25rem;
+}
+
 .confirmation-kicker {
   color: var(--kombo-teal);
   font-weight: 700;
@@ -746,6 +762,43 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   border: 1px solid var(--kombo-line);
   border-radius: var(--kombo-radius-card);
   padding: 1rem 1.25rem;
+}
+
+.order-card {
+  position: relative;
+}
+
+.order-card-link {
+  color: var(--kombo-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.order-card:hover {
+  border-color: var(--kombo-orange-light);
+}
+
+/* Above the stretched link of the card, so the button repeats the order instead of opening it */
+.order-card-action {
+  position: relative;
+  z-index: 2;
+}
+
+.order-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.order-facts dt {
+  color: var(--kombo-slate);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.order-facts dd {
+  margin: 0;
 }
 
 .order-total {

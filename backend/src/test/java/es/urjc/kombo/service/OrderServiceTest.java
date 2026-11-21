@@ -16,6 +16,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -172,6 +176,37 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.create(request, null))
                 .isInstanceOf(InvalidOrderException.class)
                 .hasMessageContaining("Product 7");
+    }
+
+    @Test
+    void aNewDeliveryAddressIsSavedInTheProfileOfTheCustomer() {
+        when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        owner.addAddress("Calle Tulipán s/n");
+        KomboUserDetails customer = new KomboUserDetails(owner);
+
+        placeOrder(request(Order.DeliveryType.DELIVERY, " Calle Mayor 1 ", Order.PaymentMethod.CARD,
+                new OrderLineRequestDTO(5L, 1)), customer);
+        // A saved address is not added again
+        placeOrder(request(Order.DeliveryType.DELIVERY, "Calle Tulipán s/n", Order.PaymentMethod.CARD,
+                new OrderLineRequestDTO(5L, 1)), customer);
+
+        assertThat(owner.getAddresses()).containsExactly("Calle Tulipán s/n", "Calle Mayor 1");
+    }
+
+    @Test
+    void theHistoryOfAUserIsReadPageByPage() {
+        Pageable firstPage = PageRequest.of(0, 4);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        when(orderRepository.findByUserOrderByCreatedAtDesc(owner, firstPage))
+                .thenReturn(new PageImpl<>(List.of(order), firstPage, 5));
+
+        Page<OrderDTO> history = orderService.findByUser(1L, firstPage);
+
+        assertThat(history.getContent()).hasSize(1);
+        assertThat(history.getTotalElements()).isEqualTo(5);
+        assertThatThrownBy(() -> orderService.findByUser(99L, firstPage))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     // Places the order with a delivery cost of 3.00 and returns the order that was saved (with the id 42)

@@ -14,8 +14,12 @@ vi.mock('../services/authService', () => ({ getCurrentUser: vi.fn(), login: vi.f
 
 vi.mock('../services/userService', () => ({
   getUsers: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 1 } }),
-  getUserOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
   signUp: vi.fn(),
+}));
+
+vi.mock('../services/orderService', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getMyOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
 }));
 
 // The page has two forms (sign up and log in): each test looks inside the one it uses

@@ -7,6 +7,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import es.urjc.kombo.dto.OrderDTO;
 import es.urjc.kombo.dto.SignUpRequestDTO;
 import es.urjc.kombo.dto.UserDTO;
+import es.urjc.kombo.security.KomboUserDetails;
 import es.urjc.kombo.service.OrderService;
 import es.urjc.kombo.service.UserService;
 import jakarta.validation.Valid;
@@ -53,13 +55,20 @@ public class UserController {
         return ResponseEntity.created(location).body(user);
     }
 
+    // Order history of the logged in user, the most recent first (any role; 401 without session)
+    @GetMapping("/me/orders")
+    public PagedModel<OrderDTO> getMyOrders(@AuthenticationPrincipal KomboUserDetails user,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return new PagedModel<>(orderService.findByUser(user.getId(), pageable));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize(OWNER_OR_ADMIN)
     public UserDTO getUser(@PathVariable long id) {
         return userService.findById(id);
     }
 
-    // Order history of the user, the most recent first
+    // Order history of any user, the most recent first: the user themselves or the administrator
     @GetMapping("/{id}/orders")
     @PreAuthorize(OWNER_OR_ADMIN)
     public PagedModel<OrderDTO> getUserOrders(@PathVariable long id,

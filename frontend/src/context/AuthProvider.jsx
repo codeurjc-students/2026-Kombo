@@ -32,6 +32,15 @@ export default function AuthProvider({ children }) {
     [login],
   );
 
+  // Reads the session again, for example after the server saved a new address in the profile
+  const refreshUser = useCallback(async () => {
+    try {
+      setUser(await authService.getCurrentUser());
+    } catch {
+      // The data on screen is still valid; it is read again on the next start
+    }
+  }, []);
+
   const logout = useCallback(async () => {
     try {
       await authService.logout();
@@ -41,8 +50,8 @@ export default function AuthProvider({ children }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, signUp, logout }),
-    [user, loading, login, signUp, logout],
+    () => ({ user, loading, login, signUp, logout, refreshUser }),
+    [user, loading, login, signUp, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

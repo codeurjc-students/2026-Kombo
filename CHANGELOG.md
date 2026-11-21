@@ -67,6 +67,12 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Checkout page (`/checkout`): delivery type (eat in, take away or home delivery with address), contact form with validation (filled in with the data of the logged in customer) and simulated payment by card or cash; confirmation page with the order number.
 - Tests of the cart and the checkout: server unit (`OrderServiceTest`, `SettingsServiceTest`), server-database integration (`OrderServiceIT`), REST API (`OrderApiIT`), client unit (cart logic, cart, checkout and settings pages), client integration with the REST API (`CheckoutPage.integration.test.jsx`) and Selenium from the cart to the confirmation (`CheckoutE2E`).
 - Checkout and settings requests in the Postman collection.
+- Checkout with the saved data of the customer: their contact data is shown instead of the form (with a *Cambiar* button), and a home delivery goes to one of their saved addresses or to a new one, which the server saves in their profile when the order is placed.
+- `GET /api/v1/users/me/orders`: order history of the logged in user, paginated, the most recent first.
+- Order detail page (`/orders/{id}`) with the products and the price paid, the delivery, the payment and the totals, and 403 for the order of another user.
+- *Repetir pedido* button in the last orders of the profile and in the order detail: adds the products of the order to the cart with the current prices.
+- Tests of the checkout with saved data and of the order history: server unit, server-database integration, REST API, client unit, client integration with a real session (`test-session.js`) and Selenium (`OrderHistoryE2E` and a new `CheckoutE2E` test).
+- `Get my orders` request in the Postman collection.
 
 ### Changed
 
@@ -104,6 +110,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - SonarQube Cloud issues fixed: the promise of `navigate` in the log in page, repeated texts of the sample data as constants, the binary field of `Image` renamed to `data` (same database column), `LocalDateTime.now()` with the time zone, a duplicated CSS selector, `!important` in the navigation bar, `<fieldset>` and `<output>` instead of the `group` and `status` roles, and `findByText` in a test. `test-utils.jsx` is analysed as test code.
 - Analysis, development guide (domain model and tests table) and OpenAPI documentation updated with the checkout and the settings.
 - The entity relationship diagram of the analysis is drawn from left to right and has a legend of its symbols.
+- The profile shows the last 4 orders of the customer (with *Más resultados*), and each one opens its detail; the client uses `GET /users/me/orders` instead of `GET /users/{id}/orders`.
+- The checkout waits for the session to be checked before showing the form, so after reloading the page it starts with the data of the customer.
 - Gantt chart of the methodology updated with the real dates of the Phase 3 tasks done until 15 November (from the Git history and the AI sessions) and the plan of the remaining tasks until the release 0.1 on 22 November.
 
 ## Phase 2 - 2026-10-29

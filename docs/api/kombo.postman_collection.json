@@ -499,6 +499,43 @@
           "response": []
         },
         {
+          "name": "Get my orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/me/orders?page=0&size=4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "me",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "4"
+                }
+              ]
+            },
+            "description": "Order history of the logged in user, the most recent first, paginated. 401 without session."
+          },
+          "response": []
+        },
+        {
           "name": "Get the orders of a user",
           "request": {
             "method": "GET",

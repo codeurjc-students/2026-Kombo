@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiFetch } from './httpClient';
-import { createOrder, orderLinesFromCart } from './orderService';
+import { createOrder, getMyOrders, getOrder, orderLinesFromCart } from './orderService';
 import { getSettings, updateDeliveryCost } from './settingsService';
 
 vi.mock('./httpClient', () => ({ apiFetch: vi.fn() }));
@@ -16,6 +16,18 @@ describe('orderService and settingsService', () => {
     await createOrder(order);
 
     expect(apiFetch).toHaveBeenCalledWith('/api/v1/orders', { method: 'POST', body: order });
+  });
+
+  it('reads an order and the history of the logged in user', async () => {
+    await getOrder(7);
+    await getMyOrders();
+    await getMyOrders({ page: 2, size: 10 });
+
+    expect(apiFetch.mock.calls.map((call) => call[0])).toEqual([
+      '/api/v1/orders/7',
+      '/api/v1/users/me/orders?page=0&size=4',
+      '/api/v1/users/me/orders?page=2&size=10',
+    ]);
   });
 
   it('sends only the ids and units of the cart, never the prices', () => {

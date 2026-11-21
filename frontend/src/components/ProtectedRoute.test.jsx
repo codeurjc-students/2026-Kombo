@@ -4,7 +4,11 @@ import { CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
 vi.mock('../services/userService', () => ({
   getUsers: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 1 } }),
-  getUserOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
+}));
+
+vi.mock('../services/orderService', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getMyOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
 }));
 
 describe('ProtectedRoute', () => {

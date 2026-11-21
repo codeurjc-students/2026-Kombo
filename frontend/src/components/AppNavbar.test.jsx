@@ -9,8 +9,9 @@ import { ADMIN, CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
 vi.mock('../services/authService', () => ({ getCurrentUser: vi.fn(), login: vi.fn(), logout: vi.fn() }));
 
-vi.mock('../services/userService', () => ({
-  getUserOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
+vi.mock('../services/orderService', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getMyOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
 }));
 
 vi.mock('../services/productService', async (importOriginal) => ({

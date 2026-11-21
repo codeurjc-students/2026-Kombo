@@ -3,6 +3,7 @@ package es.urjc.kombo.controller;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasItem;
 
 import org.junit.jupiter.api.AfterEach;
@@ -13,28 +14,40 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import es.urjc.kombo.TestcontainersConfiguration;
 import es.urjc.kombo.repository.OrderRepository;
+import es.urjc.kombo.repository.UserRepository;
 import es.urjc.kombo.security.JwtService;
 import io.restassured.http.ContentType;
 
 // System tests of the checkout: real server over HTTPS and database with the sample data.
 // The whole flow goes through HTTP: read the menu and the delivery cost, place the order and read it back.
-// The orders placed here are deleted after each test, because the other system tests share the database
-// and count the sample orders (for example the order history of the customer in AccessRulesApiIT).
+// The orders placed here, the addresses they save in the profile of the customer and the users they sign up
+// are deleted after each test, because the other system tests share the database and count the sample data
+// (for example the order history of the customer in AccessRulesApiIT).
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Import(TestcontainersConfiguration.class)
 class OrderApiIT {
 
     // Every order of these tests uses this email; the sample orders do not
     private static final String TEST_EMAIL = "ana@example.com";
+    // Home deliveries of the customer use this address, which is saved in their profile
+    private static final String TEST_ADDRESS = "Calle de las Pruebas 1";
+    private static final String OTHER_CUSTOMER = "other-customer@example.com";
 
     @LocalServerPort
     private int port;
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +59,10 @@ class OrderApiIT {
         orderRepository.deleteAll(orderRepository.findAll().stream()
                 .filter(order -> TEST_EMAIL.equals(order.getCustomerEmail()))
                 .toList());
+        // The addresses are loaded lazily, so they are changed inside a transaction
+        transactionTemplate.executeWithoutResult(status -> userRepository.findByEmail("customer@kombo.com")
+                .ifPresent(customer -> customer.removeAddress(TEST_ADDRESS)));
+        userRepository.findByEmail(OTHER_CUSTOMER).ifPresent(userRepository::delete);
     }
 
     @Test
@@ -58,7 +75,7 @@ class OrderApiIT {
                 .then().statusCode(200).extract().path("deliveryCost");
 
         String location = given().cookie(JwtService.COOKIE_NAME, token).contentType(ContentType.JSON)
-                .body(order(burgerId, 2, "DELIVERY", "\"Calle Tulipán s/n\"", "CASH"))
+                .body(order(burgerId, 2, "DELIVERY", "\"" + TEST_ADDRESS + "\"", "CASH"))
                 .when().post("/api/v1/orders")
                 .then().statusCode(201)
                 .header("Location", containsString("/api/v1/orders/"))
@@ -80,6 +97,49 @@ class OrderApiIT {
         given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/users/{id}/orders", customerId)
                 .then().statusCode(200)
                 .body("content.id", hasItem(orderId));
+    }
+
+    @Test
+    void aCustomerReadsTheirHistoryAndKeepsTheNewAddress() {
+        String token = ApiTestSupport.login("customer@kombo.com", "customer");
+        int customerId = given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/auth/me")
+                .then().extract().path("id");
+        int orderId = given().cookie(JwtService.COOKIE_NAME, token).contentType(ContentType.JSON)
+                .body(order(productId("Agua"), 1, "DELIVERY", "\"" + TEST_ADDRESS + "\"", "CARD"))
+                .when().post("/api/v1/orders")
+                .then().statusCode(201).extract().path("id");
+
+        // The newest order comes first, and the history only has orders of the customer
+        given().cookie(JwtService.COOKIE_NAME, token).queryParam("size", 4)
+                .when().get("/api/v1/users/me/orders")
+                .then().statusCode(200)
+                .body("content[0].id", equalTo(orderId))
+                .body("content[0].lines[0].productName", equalTo("Agua"))
+                .body("content.userId", everyItem(equalTo(customerId)))
+                .body("page.size", equalTo(4));
+        // The new address is now in the profile, to be chosen in the next checkout
+        given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/auth/me")
+                .then().body("addresses", hasItem(TEST_ADDRESS));
+    }
+
+    @Test
+    void theHistoryNeedsASessionAndOnlyTheOwnerReadsAnOrder() {
+        given().when().get("/api/v1/users/me/orders").then().statusCode(401);
+
+        String customer = ApiTestSupport.login("customer@kombo.com", "customer");
+        int orderOfTheCustomer = given().cookie(JwtService.COOKIE_NAME, customer)
+                .when().get("/api/v1/users/me/orders")
+                .then().extract().path("content[0].id");
+        given().contentType(ContentType.JSON)
+                .body("{\"name\":\"Otro\",\"email\":\"" + OTHER_CUSTOMER + "\",\"password\":\"secret-password\"}")
+                .when().post("/api/v1/users").then().statusCode(201);
+        String other = ApiTestSupport.login(OTHER_CUSTOMER, "secret-password");
+
+        given().cookie(JwtService.COOKIE_NAME, other).when().get("/api/v1/orders/{id}", orderOfTheCustomer)
+                .then().statusCode(403);
+        given().cookie(JwtService.COOKIE_NAME, other).when().get("/api/v1/users/me/orders")
+                .then().statusCode(200)
+                .body("page.totalElements", equalTo(0));
     }
 
     @Test

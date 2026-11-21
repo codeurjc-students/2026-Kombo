@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import UsersPage from './pages/UsersPage';
@@ -27,7 +28,10 @@ export const routes = [
       { path: 'order-confirmation', element: <OrderConfirmationPage /> },
       {
         element: <ProtectedRoute roles={['CUSTOMER', 'EMPLOYEE', 'ADMIN']} />,
-        children: [{ path: 'profile', element: <ProfilePage /> }],
+        children: [
+          { path: 'profile', element: <ProfilePage /> },
+          { path: 'orders/:id', element: <OrderDetailPage /> },
+        ],
       },
       {
         element: <ProtectedRoute roles={['ADMIN']} />,

@@ -1,8 +1,10 @@
 import { fireEvent, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CART_STORAGE_KEY } from '../context/CartProvider';
+import { getCurrentUser } from '../services/authService';
 import { getProductPage } from '../services/productService';
 import { getSettings } from '../services/settingsService';
+import { startCustomerSession } from '../test-session';
 import { renderApp } from '../test-utils';
 
 // Integration test: real checkout page, real services and real REST API (backend running with the sample data).
@@ -11,6 +13,16 @@ describe('CheckoutPage with the real REST API', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_API_URL', process.env.KOMBO_BACKEND_URL ?? 'https://localhost');
   });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  async function storeWaterInTheCart(quantity) {
+    const page = await getProductPage({ category: 'Drinks', size: 20 });
+    const water = page.content.find((product) => product.name === 'Agua');
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([{ product: water, quantity }]));
+  }
 
   function type(label, value) {
     fireEvent.change(screen.getByLabelText(label), { target: { value } });
@@ -38,5 +50,24 @@ describe('CheckoutPage with the real REST API', () => {
     expect(screen.getByTestId('summary-total').textContent.replaceAll(' ', ' '))
       .toBe(`${total.toFixed(2).replace('.', ',')} €`);
     expect(screen.getByText(/pendiente de pago/)).toBeInTheDocument();
+  });
+
+  it('places the order of a customer with their saved data and keeps the new address in the profile', async () => {
+    const customer = await startCustomerSession('checkout-test');
+    await storeWaterInTheCart(1);
+    const refreshUser = vi.fn();
+    renderApp('/checkout', { user: customer, refreshUser });
+
+    // The contact data comes from the profile: no form to fill in
+    expect(screen.getByTestId('contact-summary')).toHaveTextContent('Ana Pruebas');
+    fireEvent.click(screen.getByLabelText(/A domicilio/));
+    type('Dirección de entrega', 'Calle Nueva 3, Móstoles');
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar y pagar/ }));
+
+    expect(await screen.findByRole('heading', { name: 'Pedido confirmado' }, { timeout: 5000 })).toBeInTheDocument();
+    expect(refreshUser).toHaveBeenCalled();
+    const profile = await getCurrentUser();
+    expect(profile.addresses).toEqual(['Calle Nueva 3, Móstoles']);
   });
 });

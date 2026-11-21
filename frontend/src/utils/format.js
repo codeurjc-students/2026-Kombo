@@ -21,3 +21,8 @@ export const ORDER_STATUS = {
   DELIVERED: { label: 'Entregado', bg: 'success' },
   CANCELLED: { label: 'Cancelado', bg: 'secondary' },
 };
+
+// "2 × Hamburguesa clásica, 1 × Agua": the name of each line is the one it had when the order was placed
+export function orderLinesSummary(order) {
+  return order.lines.map((line) => `${line.quantity} × ${line.productName ?? line.product.name}`).join(', ');
+}

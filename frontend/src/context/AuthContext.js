@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-// Session state shared by the whole application: { user, loading, login, signUp, logout }
+// Session state shared by the whole application: { user, loading, login, signUp, logout, refreshUser }
 export const AuthContext = createContext(null);
 
 export function useAuth() {

@@ -39,7 +39,8 @@ public class OrderService {
 
     // Places an order from the checkout. The prices come from the database (never from the client) and are
     // copied into the lines; the delivery cost comes from the settings. currentUser is null for anonymous users;
-    // the order of a customer is saved in their history, and an employee places counter orders without a user.
+    // the order of a customer is saved in their history (and a new delivery address in their profile), and an
+    // employee places counter orders without a user.
     // The payment is simulated: a card payment is always accepted, and cash is paid when the order is collected.
     @Transactional
     public OrderDTO create(OrderRequestDTO request, KomboUserDetails currentUser) {
@@ -51,7 +52,9 @@ public class OrderService {
             if (request.deliveryAddress() == null || request.deliveryAddress().isBlank()) {
                 throw new InvalidOrderException("deliveryAddress: is required for home deliveries");
             }
-            order.setDeliveryAddress(request.deliveryAddress().trim());
+            String address = request.deliveryAddress().trim();
+            order.setDeliveryAddress(address);
+            saveNewAddress(order.getUser(), address);
         }
         order.setDeliveryCost(settingsService.findSettings().deliveryCostFor(request.deliveryType(), order.getSubtotal()));
         order.setCustomerName(request.customerName().trim());
@@ -79,6 +82,13 @@ public class OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User " + userId + " not found"));
         return orderRepository.findByUserOrderByCreatedAtDesc(user, pageable).map(orderMapper::toDTO);
+    }
+
+    // A customer who delivers to a new address keeps it in their profile, so it can be chosen next time
+    private static void saveNewAddress(User customer, String address) {
+        if (customer != null && !customer.getAddresses().contains(address)) {
+            customer.addAddress(address);
+        }
     }
 
     private User customerOf(KomboUserDetails currentUser) {
