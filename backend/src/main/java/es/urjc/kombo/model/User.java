@@ -126,6 +126,11 @@ public class User {
         addresses.remove(address);
     }
 
+    public void replaceAddresses(List<String> newAddresses) {
+        addresses.clear();
+        addresses.addAll(newAddresses);
+    }
+
     public Image getImage() {
         return image;
     }

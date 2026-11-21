@@ -623,6 +623,31 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   margin: 1rem auto;
 }
 
+/* Settings of the account: header with the picture, name and email, and one tab for each group of settings */
+.profile-settings {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.settings-tabs {
+  margin-bottom: 1.5rem;
+  --bs-nav-link-color: var(--kombo-ink);
+  --bs-nav-link-hover-color: var(--kombo-orange-strong);
+  --bs-nav-tabs-link-active-color: var(--kombo-orange-strong);
+}
+
+.settings-divider {
+  margin: 2rem 0;
+  opacity: 0.1;
+}
+
 /* ---------- Product detail ---------- */
 .product-detail-media {
   border-radius: var(--kombo-radius-card);
@@ -755,6 +780,18 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   width: 3.5rem;
   height: 3.5rem;
   font-size: 1.3rem;
+  margin: 0;
+}
+
+/* Profile picture uploaded by the user, in the same circle as the initial */
+img.user-avatar {
+  object-fit: cover;
+}
+
+.settings-avatar .user-avatar {
+  width: 5rem;
+  height: 5rem;
+  font-size: 1.8rem;
   margin: 0;
 }
 

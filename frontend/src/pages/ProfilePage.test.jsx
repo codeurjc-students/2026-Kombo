@@ -64,4 +64,17 @@ describe('ProfilePage', () => {
     expect(screen.queryByText('Mis pedidos', { selector: 'h2' })).not.toBeInTheDocument();
     expect(getMyOrders).not.toHaveBeenCalled();
   });
+
+  it('links to the settings of the account', () => {
+    renderApp('/profile', { user: EMPLOYEE });
+    expect(screen.getByRole('button', { name: 'Configuración' })).toHaveAttribute('href', '/profile/settings');
+  });
+
+  it('shows the profile picture of the user', () => {
+    renderApp('/profile', { user: { ...EMPLOYEE, imageId: 4 } });
+    expect(within(screen.getByRole('main')).getByRole('img', { name: 'Foto de perfil de Carlos' })).toHaveAttribute(
+      'src',
+      '/api/v1/users/me/image?v=4',
+    );
+  });
 });

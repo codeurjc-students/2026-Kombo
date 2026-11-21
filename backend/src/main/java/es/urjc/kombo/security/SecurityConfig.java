@@ -58,7 +58,7 @@ public class SecurityConfig {
                         // The delivery cost is shown to everyone, and only the administrator changes it
                         .requestMatchers(HttpMethod.GET, "/api/v1/settings").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/settings").hasRole("ADMIN")
-                        // Ownership of /users/{id} and /orders/{id} is checked in the controllers and services
+                        // The rules of /users/{id} (administrator) and /orders/{id} (owner) are in the controllers and services
                         .requestMatchers("/api/**").authenticated()
                         // The React application (static files), Swagger UI and the OpenAPI document are public
                         .anyRequest().permitAll())

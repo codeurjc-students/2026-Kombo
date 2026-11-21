@@ -3,6 +3,7 @@ import { Badge, Button, Col, Row } from 'react-bootstrap';
 import { Link } from 'react-router';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
+import UserAvatar from '../components/UserAvatar';
 import { useAuth } from '../context/AuthContext';
 import usePagedList from '../hooks/usePagedList';
 import useRepeatOrder from '../hooks/useRepeatOrder';
@@ -21,7 +22,7 @@ export default function ProfilePage() {
       <Col lg={4}>
         <section className="panel" aria-labelledby="profile-title">
           <div className="profile-header">
-            <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
+            <UserAvatar user={user} />
             <div>
               <h1 id="profile-title" className="h3 mb-1">
                 {user.name} {user.surname}
@@ -47,6 +48,9 @@ export default function ProfilePage() {
               </>
             )}
           </dl>
+          <Button as={Link} to="/profile/settings" variant="outline-ink" className="mt-3">
+            Configuración
+          </Button>
         </section>
       </Col>
       <Col lg={8}>{user.role === 'CUSTOMER' && <RecentOrders />}</Col>

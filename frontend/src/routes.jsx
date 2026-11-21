@@ -11,6 +11,7 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import ProfilePage from './pages/ProfilePage';
+import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import UsersPage from './pages/UsersPage';
 
 // Routes of the application, shared by App (browser router) and the tests (memory router)
@@ -30,6 +31,7 @@ export const routes = [
         element: <ProtectedRoute roles={['CUSTOMER', 'EMPLOYEE', 'ADMIN']} />,
         children: [
           { path: 'profile', element: <ProfilePage /> },
+          { path: 'profile/settings', element: <ProfileSettingsPage /> },
           { path: 'orders/:id', element: <OrderDetailPage /> },
         ],
       },

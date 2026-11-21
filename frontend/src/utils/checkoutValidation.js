@@ -2,8 +2,8 @@
 // an empty object means the form is valid. The server validates the order again.
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Same pattern as the server (OrderRequestDTO) and the sign up form
-const PHONE = /^\+?[0-9 ]{9,15}$/;
+// Same pattern as the server (OrderRequestDTO, SignUpRequestDTO and ProfileUpdateDTO)
+export const PHONE = /^\+?[0-9 ]{9,15}$/;
 const CARD_NUMBER = /^[0-9]{16}$/;
 const EXPIRY = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
 const CVV = /^[0-9]{3}$/;
