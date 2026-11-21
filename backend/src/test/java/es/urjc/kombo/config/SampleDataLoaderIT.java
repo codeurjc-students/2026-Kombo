@@ -52,7 +52,7 @@ class SampleDataLoaderIT {
     void loadsProductsCombosAndIngredients() {
         assertThat(productRepository.count()).isEqualTo(12);
         assertThat(comboRepository.findAll()).extracting(Combo::getName)
-                .containsExactlyInAnyOrder("Menú clásico", "Menú de pollo", "Menú familiar");
+                .containsExactlyInAnyOrder("Kombo clásico", "Kombo de pollo", "Kombo familiar");
         assertThat(ingredientRepository.count()).isEqualTo(15);
         assertThat(ingredientRepository.findAll()).filteredOn(Ingredient::isLowStock)
                 .extracting(Ingredient::getName).containsExactly("Bacon");

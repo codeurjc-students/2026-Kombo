@@ -62,7 +62,7 @@ class ProductApiIT {
         given().queryParam("category", "Combos").queryParam("page", 1).queryParam("size", 2)
                 .when().get("/api/v1/products")
                 .then().statusCode(200)
-                .body("content.name", contains("Menú familiar"))
+                .body("content.name", contains("Kombo familiar"))
                 .body("page.number", equalTo(1))
                 .body("page.totalElements", equalTo(3))
                 .body("page.totalPages", equalTo(2));
@@ -80,7 +80,7 @@ class ProductApiIT {
                 .body("combo", equalTo(false));
     }
 
-    // "Menú clásico" of the sample data: a classic burger, fries and a cola
+    // "Kombo clásico" of the sample data: a classic burger, fries and a cola
     @Test
     void getProductOfAComboReturnsItsProductsAndIngredients() {
         int id = given().queryParam("category", "Combos").queryParam("sort", "name")
@@ -89,7 +89,7 @@ class ProductApiIT {
 
         given().when().get("/api/v1/products/{id}", id)
                 .then().statusCode(200)
-                .body("name", equalTo("Menú clásico"))
+                .body("name", equalTo("Kombo clásico"))
                 .body("combo", equalTo(true))
                 .body("products.product.name", contains("Hamburguesa clásica", "Patatas fritas", "Refresco de cola"))
                 .body("products.quantity", contains(1, 1, 1))

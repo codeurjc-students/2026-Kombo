@@ -25,7 +25,7 @@ const BURGER = {
 
 const MENU = {
   id: 3,
-  name: 'Menú clásico',
+  name: 'Kombo clásico',
   price: 11.5,
   description: 'Hamburguesa clásica, patatas fritas y refresco de cola',
   category: 'Combos',
@@ -53,14 +53,14 @@ describe('ProductDetailPage', () => {
     expect(screen.getByText(BURGER.description)).toBeInTheDocument();
     const ingredients = within(screen.getByRole('list', { name: 'Ingredientes' }));
     expect(ingredients.getAllByRole('listitem').map((item) => item.textContent)).toEqual(['Carne de ternera', 'Lechuga']);
-    expect(screen.queryByRole('list', { name: 'Productos del menú' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: 'Productos del kombo' })).not.toBeInTheDocument();
   });
 
   it('lists the products of a combo with links to their detail', async () => {
     getProduct.mockResolvedValue(MENU);
     renderApp('/products/3');
 
-    const products = within(await screen.findByRole('list', { name: 'Productos del menú' }));
+    const products = within(await screen.findByRole('list', { name: 'Productos del kombo' }));
     expect(products.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       '1 × Hamburguesa clásica',
       '1 × Patatas fritas',

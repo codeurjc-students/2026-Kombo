@@ -20,27 +20,27 @@ describe('ProductList with the real REST API', () => {
     expect(screen.getByRole('heading', { name: 'Refresco de cola' })).toBeInTheDocument();
   });
 
-  it('shows only the combos of the "Menús" category', async () => {
+  it('shows only the combos of the "Kombos" category', async () => {
     render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByRole('heading', { name: 'Hamburguesa clásica' });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Menús' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Kombos' }));
 
-    expect(await screen.findByRole('heading', { name: 'Menú familiar' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Menú clásico' })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Menú de pollo' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Kombo familiar' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Kombo clásico' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Kombo de pollo' })).toBeInTheDocument();
     expect(screen.queryByRole('heading', { name: 'Hamburguesa clásica' })).not.toBeInTheDocument();
   });
 
-  // The first page has the 10 first sample products; "Menú de pollo" (the 11th) comes with the next page
+  // The first page has the 10 first sample products; "Kombo de pollo" (the 11th) comes with the next page
   it('loads the next products with "Más resultados"', async () => {
     render(<ProductList />, { wrapper: MemoryRouter });
     await screen.findByRole('heading', { name: 'Hamburguesa clásica' });
-    expect(screen.queryByRole('heading', { name: 'Menú de pollo' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Kombo de pollo' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Más resultados' }));
 
-    expect(await screen.findByRole('heading', { name: 'Menú de pollo' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Kombo de pollo' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Hamburguesa clásica' })).toBeInTheDocument();
   });
 });

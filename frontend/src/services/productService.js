@@ -5,7 +5,7 @@ const PRODUCTS_PATH = '/api/v1/products';
 // Categories of the menu, with the text shown to the user
 export const CATEGORIES = [
   { value: 'Burgers', label: 'Hamburguesas' },
-  { value: 'Combos', label: 'Menús' },
+  { value: 'Combos', label: 'Kombos' },
   { value: 'Sides', label: 'Acompañamientos' },
   { value: 'Drinks', label: 'Bebidas' },
   { value: 'Desserts', label: 'Postres' },

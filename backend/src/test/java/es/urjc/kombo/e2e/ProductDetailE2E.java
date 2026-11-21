@@ -42,11 +42,11 @@ class ProductDetailE2E extends E2ETestSupport {
     @Test
     void comboDetailListsItsProductsWithLinksToTheirDetail() {
         driver.get(BASE_URL);
-        click(By.xpath("//button[normalize-space()='Menús']"));
-        click(By.linkText("Menú clásico"));
+        click(By.xpath("//button[normalize-space()='Kombos']"));
+        click(By.linkText("Kombo clásico"));
 
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(TITLE, "Menú clásico"));
-        By products = By.cssSelector("[aria-label='Productos del menú']");
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(TITLE, "Kombo clásico"));
+        By products = By.cssSelector("[aria-label='Productos del kombo']");
         assertThat(driver.findElement(products).getText())
                 .contains("1 × Hamburguesa clásica", "1 × Patatas fritas", "1 × Refresco de cola");
 

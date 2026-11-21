@@ -139,12 +139,12 @@ public class SampleDataLoader implements CommandLineRunner {
     }
 
     private void createCombos() {
-        saveCombo("classic-menu", "Menú clásico", "11.50", "Hamburguesa clásica, patatas fritas y refresco de cola",
+        saveCombo("classic-menu", "Kombo clásico", "11.50", "Hamburguesa clásica, patatas fritas y refresco de cola",
                 Map.of(CLASSIC_BURGER, 1, FRENCH_FRIES, 1, "cola", 1));
-        saveCombo("chicken-menu", "Menú de pollo", "10.90",
+        saveCombo("chicken-menu", "Kombo de pollo", "10.90",
                 "Hamburguesa de pollo, patatas fritas y refresco de naranja",
                 Map.of(CHICKEN_BURGER, 1, FRENCH_FRIES, 1, "orange-soda", 1));
-        saveCombo("family-menu", "Menú familiar", "29.90",
+        saveCombo("family-menu", "Kombo familiar", "29.90",
                 "Dos hamburguesas clásicas, dos de pollo, cuatro raciones de patatas fritas y cuatro refrescos de cola",
                 Map.of(CLASSIC_BURGER, 2, CHICKEN_BURGER, 2, FRENCH_FRIES, 4, "cola", 4));
     }

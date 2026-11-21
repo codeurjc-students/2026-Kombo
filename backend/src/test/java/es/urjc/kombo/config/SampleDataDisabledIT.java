@@ -40,7 +40,7 @@ class SampleDataDisabledIT {
     void sampleDataIsNotLoaded() {
         assertThat(context.getBeansOfType(SampleDataLoader.class)).isEmpty();
         assertThat(productRepository.findAll()).extracting(Product::getName)
-                .doesNotContain("Hamburguesa clásica", "Hamburguesa de pollo", "Patatas fritas", "Refresco de cola", "Menú clásico");
+                .doesNotContain("Hamburguesa clásica", "Hamburguesa de pollo", "Patatas fritas", "Refresco de cola", "Kombo clásico");
     }
 
     @Test

@@ -24,9 +24,9 @@ describe('ProductDetailPage with the real REST API', () => {
   });
 
   it('shows the products of a sample combo', async () => {
-    renderApp(`/products/${await idOf('Combos', 'Menú clásico')}`);
+    renderApp(`/products/${await idOf('Combos', 'Kombo clásico')}`);
 
-    const products = within(await screen.findByRole('list', { name: 'Productos del menú' }));
+    const products = within(await screen.findByRole('list', { name: 'Productos del kombo' }));
     expect(products.getAllByRole('link').map((link) => link.textContent)).toEqual([
       'Hamburguesa clásica',
       'Patatas fritas',
