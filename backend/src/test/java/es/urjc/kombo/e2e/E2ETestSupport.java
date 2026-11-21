@@ -112,4 +112,18 @@ abstract class E2ETestSupport {
         driver.findElement(By.id("login-password")).sendKeys(password);
         click(By.cssSelector("form[aria-labelledby='login-title'] button[type='submit']"));
     }
+
+    // Signs up a new customer called Ana with the sign up form and returns their email, unique in every run so the
+    // tests can be repeated against the same database. The application logs in with the new account.
+    protected String signUpNewCustomer(String prefix, String password) {
+        String email = prefix + "-" + System.currentTimeMillis() + "@example.com";
+        driver.get(BASE_URL + "/login");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("sign-up-name"))).sendKeys("Ana");
+        driver.findElement(By.id("sign-up-email")).sendKeys(email);
+        driver.findElement(By.id("sign-up-password")).sendKeys(password);
+        driver.findElement(By.id("sign-up-repeat-password")).sendKeys(password);
+        click(By.xpath("//button[normalize-space()='Crear cuenta']"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(".navbar"), "Cerrar sesión"));
+        return email;
+    }
 }

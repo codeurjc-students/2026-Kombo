@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ROLE_LABELS } from '../utils/format';
 import BrandLogo from './BrandLogo';
+import UserAvatar from './UserAvatar';
 
 // Links shown to each role. Pages that do not exist yet are not linked.
 const LINKS = {
@@ -21,6 +22,7 @@ const LINKS = {
     { to: '/', label: 'Carta', end: true },
     { to: '/admin/users', label: 'Usuarios' },
     { to: '/admin/settings', label: 'Ajustes' },
+    { to: '/profile', label: 'Mi perfil' },
   ],
 };
 
@@ -86,7 +88,7 @@ export default function AppNavbar() {
             {user && (
               <div className="nav-user">
                 <span className="nav-user-name" title={user.email}>
-                  <span className="user-avatar" aria-hidden="true">{user.name.charAt(0)}</span>
+                  <UserAvatar user={user} />
                   {user.name} <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
                 </span>
                 <Button variant="outline-ink" size="sm" onClick={handleLogout}>

@@ -25,6 +25,18 @@ describe('httpClient', () => {
     expect(options.body).toBe('{"email":"a@b.c"}');
   });
 
+  it('sends a FormData as it is, so the browser sets the multipart Content-Type', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve({}) }));
+    const form = new FormData();
+    form.append('image', new Blob(['x'], { type: 'image/png' }), 'photo.png');
+
+    await apiFetch('/api/v1/users/me/image', { method: 'PUT', body: form });
+
+    const options = fetch.mock.calls[0][1];
+    expect(options.headers['Content-Type']).toBeUndefined();
+    expect(options.body).toBe(form);
+  });
+
   it('returns null for 204 No Content', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 204 }));
 

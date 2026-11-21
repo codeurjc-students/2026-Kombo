@@ -79,20 +79,24 @@ class AccessRulesApiIT {
                 .body("page.totalElements", greaterThanOrEqualTo(3));
     }
 
-    // 403 when reading the data of another user
+    // A user manages their own account with the /me paths; /users/{id} is only for the administrator
 
     @Test
-    void aUserReadsTheirOwnProfile() {
-        given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/{id}", customerId)
+    void aUserReadsTheirOwnProfileWithMe() {
+        given().cookie(COOKIE, customerToken()).when().get("/api/v1/auth/me")
                 .then().statusCode(200)
                 .body("email", equalTo("customer@kombo.com"));
     }
 
     @Test
-    void aUserCannotReadTheProfileOfAnotherUser() {
+    void onlyTheAdministratorUsesTheIdOfAUser() {
+        given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/{id}", customerId)
+                .then().statusCode(403);
         given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/{id}", employeeId)
                 .then().statusCode(403);
         given().cookie(COOKIE, employeeToken()).when().get("/api/v1/users/{id}", customerId)
+                .then().statusCode(403);
+        given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/{id}/orders", customerId)
                 .then().statusCode(403);
     }
 
@@ -104,16 +108,17 @@ class AccessRulesApiIT {
 
     @Test
     void aCustomerReadsTheirOwnOrderHistory() {
-        given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/{id}/orders", customerId)
+        given().cookie(COOKIE, customerToken()).when().get("/api/v1/users/me/orders")
                 .then().statusCode(200)
                 .body("page.totalElements", equalTo(2))
                 .body("content.userId", everyItem(equalTo((int) customerId)));
     }
 
     @Test
-    void aUserCannotReadTheOrderHistoryOfAnotherUser() {
-        given().cookie(COOKIE, employeeToken()).when().get("/api/v1/users/{id}/orders", customerId)
-                .then().statusCode(403);
+    void theAdministratorReadsTheOrderHistoryOfAnyUser() {
+        given().cookie(COOKIE, adminToken()).when().get("/api/v1/users/{id}/orders", customerId)
+                .then().statusCode(200)
+                .body("page.totalElements", equalTo(2));
     }
 
     @Test

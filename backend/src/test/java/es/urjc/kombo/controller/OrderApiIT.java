@@ -94,7 +94,7 @@ class OrderApiIT {
                 .then().statusCode(200)
                 .body("id", equalTo(orderId))
                 .body("orderNumber", equalTo(1000 + orderId));
-        given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/users/{id}/orders", customerId)
+        given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/users/me/orders")
                 .then().statusCode(200)
                 .body("content.id", hasItem(orderId));
     }

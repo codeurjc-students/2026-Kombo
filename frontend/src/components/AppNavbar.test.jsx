@@ -65,9 +65,9 @@ describe('AppNavbar', () => {
     expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mi perfil']);
   });
 
-  it('shows the user management to the administrator', () => {
+  it('shows the user management and the profile to the administrator', () => {
     renderApp('/', { user: ADMIN });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios', 'Ajustes']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios', 'Ajustes', 'Mi perfil']);
   });
 
   it('links the cart counter to the cart page', () => {

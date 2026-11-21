@@ -15,16 +15,19 @@ export function apiUrl(path) {
   return `${import.meta.env.VITE_API_URL ?? ''}${path}`;
 }
 
+// body is sent as JSON, except FormData (file uploads), which the browser sends as multipart/form-data
+// with its own Content-Type header
 export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
   const headers = { Accept: 'application/json' };
-  if (body !== undefined) {
+  const isForm = body instanceof FormData;
+  if (body !== undefined && !isForm) {
     headers['Content-Type'] = 'application/json';
   }
   const response = await fetch(apiUrl(path), {
     method,
     headers,
     credentials: 'include',
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined || isForm ? body : JSON.stringify(body),
     signal,
   });
   if (!response.ok) {

@@ -1,9 +1,5 @@
 package es.urjc.kombo.service;
 
-import java.sql.Blob;
-import java.sql.SQLException;
-
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,10 +18,12 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
+    private final ImageService imageService;
 
-    public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
+    public ProductService(ProductRepository productRepository, ProductMapper productMapper, ImageService imageService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
+        this.imageService = imageService;
     }
 
     // Active products of the menu, optionally filtered by category, one page at a time
@@ -50,19 +48,11 @@ public class ProductService {
         if (image == null) {
             throw new ResourceNotFoundException("Product " + id + " has no image");
         }
-        return new ImageFileDTO(image.getContentType(), new ByteArrayResource(readBytes(image.getData())));
+        return imageService.toFile(image);
     }
 
     private Product findActiveProduct(long id) {
         return productRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
-    }
-
-    private static byte[] readBytes(Blob blob) {
-        try {
-            return blob.getBytes(1, (int) blob.length());
-        } catch (SQLException exception) {
-            throw new IllegalStateException("The image could not be read from the database", exception);
-        }
     }
 }
