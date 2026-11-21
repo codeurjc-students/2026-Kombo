@@ -37,7 +37,7 @@ class ProductListE2E extends E2ETestSupport {
         assertThat(driver.findElements(By.xpath("//button[normalize-space()='Más resultados']"))).isEmpty();
     }
 
-    // The "Menús" category shows only the 3 sample combos
+    // The "Kombos" category shows only the 3 sample combos
     @Test
     void categoryShowsOnlyItsProducts() {
         driver.get(BASE_URL);
@@ -45,12 +45,12 @@ class ProductListE2E extends E2ETestSupport {
         By cards = By.cssSelector("article.product-card");
         wait.until(ExpectedConditions.numberOfElementsToBe(cards, 10));
 
-        click(By.xpath("//button[normalize-space()='Menús']"));
+        click(By.xpath("//button[normalize-space()='Kombos']"));
 
         wait.until(ExpectedConditions.numberOfElementsToBe(cards, 3));
         // Names of the cards (the descriptions of the combos also name their products)
         assertThat(driver.findElements(By.cssSelector("article.product-card h3")))
                 .extracting(WebElement::getText)
-                .containsExactly("Menú clásico", "Menú de pollo", "Menú familiar");
+                .containsExactly("Kombo clásico", "Kombo de pollo", "Kombo familiar");
     }
 }

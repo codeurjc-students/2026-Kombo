@@ -85,7 +85,7 @@ function ProductDetail({ product }) {
           {product.combo && (
             <>
               <h2 className="product-detail-heading">Incluye</h2>
-              <ul className="detail-list" aria-label="Productos del menú">
+              <ul className="detail-list" aria-label="Productos del kombo">
                 {product.products.map((item) => (
                   <li key={item.product.id}>
                     <span className="detail-quantity">{item.quantity} ×</span>{' '}
