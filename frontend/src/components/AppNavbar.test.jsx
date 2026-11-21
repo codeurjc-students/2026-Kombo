@@ -60,14 +60,14 @@ describe('AppNavbar', () => {
     expect(screen.getByText('Cliente')).toBeInTheDocument();
   });
 
-  it('shows the profile to employees', () => {
+  it('shows the orders and the profile to employees', () => {
     renderApp('/', { user: EMPLOYEE });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mi perfil']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Mi perfil']);
   });
 
-  it('shows the user management and the profile to the administrator', () => {
+  it('shows the orders, the user management and the profile to the administrator', () => {
     renderApp('/', { user: ADMIN });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Usuarios', 'Ajustes', 'Mi perfil']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Usuarios', 'Ajustes', 'Mi perfil']);
   });
 
   it('links the cart counter to the cart page', () => {

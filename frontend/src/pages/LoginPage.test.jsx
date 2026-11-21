@@ -7,7 +7,7 @@ import { getCurrentUser, login } from '../services/authService';
 import { signUp as signUpRequest } from '../services/userService';
 import { ApiError } from '../services/httpClient';
 import { routes } from '../routes';
-import { ADMIN, CUSTOMER, renderApp } from '../test-utils';
+import { ADMIN, CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
 // The tests of the redirections use the real AuthProvider, with the services mocked
 vi.mock('../services/authService', () => ({ getCurrentUser: vi.fn(), login: vi.fn(), logout: vi.fn() }));
@@ -20,6 +20,7 @@ vi.mock('../services/userService', () => ({
 vi.mock('../services/orderService', async (importOriginal) => ({
   ...(await importOriginal()),
   getMyOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
+  getOrders: vi.fn().mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } }),
 }));
 
 // The page has two forms (sign up and log in): each test looks inside the one it uses
@@ -60,6 +61,22 @@ describe('LoginPage', () => {
     expect(login).toHaveBeenCalledWith('customer@kombo.com', 'customer');
     expect(router.state.location.pathname).toBe('/admin/users');
     expect(await screen.findByRole('heading', { name: 'Usuarios' })).toBeInTheDocument();
+  });
+
+  it('takes an employee to the orders', async () => {
+    getCurrentUser.mockResolvedValue(null);
+    login.mockResolvedValue(EMPLOYEE);
+    const router = createMemoryRouter(routes, { initialEntries: ['/login'] });
+    render(
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>,
+    );
+
+    fillAndSubmit();
+
+    expect(await screen.findByRole('heading', { name: 'Pedidos' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/orders');
   });
 
   it('shows an error with wrong credentials', async () => {

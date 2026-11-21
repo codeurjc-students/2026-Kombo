@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import es.urjc.kombo.service.EmailAlreadyUsedException;
 import es.urjc.kombo.service.InvalidImageException;
 import es.urjc.kombo.service.InvalidOrderException;
+import es.urjc.kombo.service.OrderStatusException;
 import es.urjc.kombo.service.ResourceNotFoundException;
 import es.urjc.kombo.service.WrongPasswordException;
 
@@ -62,6 +63,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidImageException.class)
     public ProblemDetail handleInvalidImage(InvalidImageException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(OrderStatusException.class)
+    public ProblemDetail handleOrderStatus(OrderStatusException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 
     @ExceptionHandler(EmailAlreadyUsedException.class)

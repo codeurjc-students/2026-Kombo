@@ -4,7 +4,7 @@ import { CART_STORAGE_KEY } from '../context/CartProvider';
 import { ApiError } from '../services/httpClient';
 import { createOrder } from '../services/orderService';
 import { getSettings } from '../services/settingsService';
-import { CUSTOMER, renderApp } from '../test-utils';
+import { CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
 vi.mock('../services/settingsService', () => ({ getSettings: vi.fn() }));
 vi.mock('../services/orderService', async (importOriginal) => ({
@@ -220,6 +220,36 @@ describe('CheckoutPage', () => {
 
     const items = within(screen.getByRole('list', { name: 'Productos del pedido' }));
     expect(items.getByText('2 × Hamburguesa clásica')).toBeInTheDocument();
+  });
+
+  it('lets an employee place a counter order with only the name of the customer', async () => {
+    createOrder.mockResolvedValue({ ...PLACED_ORDER, deliveryType: 'EAT_IN', paymentMethod: 'CASH', paid: false });
+    renderApp('/checkout', { user: EMPLOYEE });
+
+    expect(screen.getByRole('heading', { name: 'Pedido en mostrador' })).toBeInTheDocument();
+    // The form starts empty: it is the data of the customer, not of the employee
+    expect(screen.getByLabelText('Nombre')).toHaveValue('');
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+    expect(screen.getByText(/márcalo como pagado en el panel de pedidos/)).toBeInTheDocument();
+    type('Nombre', 'Mesa 4');
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/ }));
+
+    expect(await screen.findByTestId('order-number')).toHaveTextContent('1007');
+    expect(createOrder).toHaveBeenCalledWith(
+      expect.objectContaining({ customerName: 'Mesa 4', customerEmail: '', customerPhone: '', paymentMethod: 'CASH' }),
+    );
+    expect(screen.getByRole('button', { name: 'Ir a los pedidos' })).toHaveAttribute('href', '/orders');
+  });
+
+  it('does not ask an employee for the card data: the card reader of the restaurant is used', () => {
+    renderApp('/checkout', { user: EMPLOYEE });
+
+    expect(screen.getByLabelText('Tarjeta')).toBeChecked();
+    expect(screen.queryByLabelText('Número de tarjeta')).not.toBeInTheDocument();
+    expect(screen.getByText(/Cobra con el datáfono del restaurante/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/ }));
+    expect(screen.getByText('Escribe el nombre del cliente.')).toBeInTheDocument();
+    expect(createOrder).not.toHaveBeenCalled();
   });
 });
 

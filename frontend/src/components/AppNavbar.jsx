@@ -16,10 +16,12 @@ const LINKS = {
   ],
   EMPLOYEE: [
     { to: '/', label: 'Carta', end: true },
+    { to: '/orders', label: 'Pedidos', end: true },
     { to: '/profile', label: 'Mi perfil' },
   ],
   ADMIN: [
     { to: '/', label: 'Carta', end: true },
+    { to: '/orders', label: 'Pedidos', end: true },
     { to: '/admin/users', label: 'Usuarios' },
     { to: '/admin/settings', label: 'Ajustes' },
     { to: '/profile', label: 'Mi perfil' },

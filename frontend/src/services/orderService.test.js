@@ -1,6 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiFetch } from './httpClient';
-import { createOrder, getMyOrders, getOrder, orderLinesFromCart } from './orderService';
+import {
+  PENDING_STATUSES,
+  createOrder,
+  getMyOrders,
+  getOrder,
+  getOrders,
+  orderLinesFromCart,
+  startOfToday,
+  updateOrder,
+} from './orderService';
 import { getSettings, updateDeliveryCost } from './settingsService';
 
 vi.mock('./httpClient', () => ({ apiFetch: vi.fn() }));
@@ -8,6 +17,26 @@ vi.mock('./httpClient', () => ({ apiFetch: vi.fn() }));
 describe('orderService and settingsService', () => {
   beforeEach(() => {
     apiFetch.mockReset().mockResolvedValue({});
+  });
+
+  it('reads the orders of the dashboard by status and age', async () => {
+    await getOrders({ statuses: PENDING_STATUSES });
+    await getOrders({ statuses: ['DELIVERED'], since: '2026-11-22T00:00:00', page: 1, sort: 'createdAt,desc' });
+
+    expect(apiFetch.mock.calls.map((call) => call[0])).toEqual([
+      '/api/v1/orders?page=0&size=10&sort=createdAt%2Casc&status=IN_PREPARATION&status=READY',
+      '/api/v1/orders?page=1&size=10&sort=createdAt%2Cdesc&status=DELIVERED&since=2026-11-22T00%3A00%3A00',
+    ]);
+  });
+
+  it('gives 00:00 of today in local time', () => {
+    expect(startOfToday(new Date(2026, 0, 5, 18, 30))).toBe('2026-01-05T00:00:00');
+  });
+
+  it('changes an order with PATCH', async () => {
+    await updateOrder(7, { paid: true });
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/v1/orders/7', { method: 'PATCH', body: { paid: true } });
   });
 
   it('sends the order with POST', async () => {

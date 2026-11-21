@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../services/httpClient';
 
 // Page each role goes to after logging in, when they did not come from a protected page
-const HOME_BY_ROLE = { CUSTOMER: '/profile', EMPLOYEE: '/profile', ADMIN: '/admin/users' };
+const HOME_BY_ROLE = { CUSTOMER: '/profile', EMPLOYEE: '/orders', ADMIN: '/admin/users' };
 
 const EMPTY_SIGN_UP = { name: '', surname: '', email: '', phone: '', password: '', repeatPassword: '' };
 

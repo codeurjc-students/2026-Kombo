@@ -10,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,7 @@ import es.urjc.kombo.dto.OrderDTO;
 import es.urjc.kombo.dto.OrderLineRequestDTO;
 import es.urjc.kombo.dto.OrderMapper;
 import es.urjc.kombo.dto.OrderRequestDTO;
+import es.urjc.kombo.dto.OrderUpdateDTO;
 import es.urjc.kombo.model.Order;
 import es.urjc.kombo.model.Product;
 import es.urjc.kombo.model.Settings;
@@ -207,6 +210,135 @@ class OrderServiceTest {
         assertThat(history.getTotalElements()).isEqualTo(5);
         assertThatThrownBy(() -> orderService.findByUser(99L, firstPage))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void anEmployeePlacesACounterOrderWithoutEmailOrPhone() {
+        when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
+        OrderRequestDTO request = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
+                Order.DeliveryType.EAT_IN, null, Order.PaymentMethod.CASH, " Mesa 4 ", "", null);
+
+        Order saved = placeOrder(request, new KomboUserDetails(user(3L, User.Role.EMPLOYEE)));
+
+        assertThat(saved.getCustomerName()).isEqualTo("Mesa 4");
+        assertThat(saved.getCustomerEmail()).isNull();
+        assertThat(saved.getCustomerPhone()).isNull();
+        assertThat(saved.getUser()).isNull();
+    }
+
+    @Test
+    void customersAndAnonymousUsersGiveTheirEmailAndPhone() {
+        when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
+        OrderRequestDTO withoutEmail = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
+                Order.DeliveryType.EAT_IN, null, Order.PaymentMethod.CASH, "Ana", " ", "600123456");
+        OrderRequestDTO withoutPhone = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
+                Order.DeliveryType.EAT_IN, null, Order.PaymentMethod.CASH, "Ana", "ana@example.com", null);
+
+        assertThatThrownBy(() -> orderService.create(withoutEmail, null)).hasMessage("customerEmail: is required");
+        assertThatThrownBy(() -> orderService.create(withoutPhone, null)).hasMessage("customerPhone: is required");
+    }
+
+    // Dashboard of the employees
+
+    @Test
+    void theDashboardReadsTheOrdersOfTheStatusesOrAllOfThem() {
+        Pageable firstPage = PageRequest.of(0, 10);
+        List<Order.OrderStatus> pending = List.of(Order.OrderStatus.IN_PREPARATION, Order.OrderStatus.READY);
+        when(orderRepository.findByStatusIn(pending, firstPage)).thenReturn(new PageImpl<>(List.of(order)));
+        when(orderRepository.findAll(firstPage)).thenReturn(new PageImpl<>(List.of(order, order)));
+
+        assertThat(orderService.findByStatus(pending, null, firstPage).getContent()).hasSize(1);
+        assertThat(orderService.findByStatus(List.of(), null, firstPage).getContent()).hasSize(2);
+        assertThat(orderService.findByStatus(null, null, firstPage).getContent()).hasSize(2);
+    }
+
+    @Test
+    void theDashboardReadsOnlyTheOrdersPlacedFromADate() {
+        Pageable firstPage = PageRequest.of(0, 10);
+        LocalDateTime today = LocalDate.now().atStartOfDay();
+        List<Order.OrderStatus> finished = List.of(Order.OrderStatus.DELIVERED, Order.OrderStatus.CANCELLED);
+        when(orderRepository.findByStatusInAndCreatedAtGreaterThanEqual(finished, today, firstPage))
+                .thenReturn(new PageImpl<>(List.of(order)));
+        when(orderRepository.findByCreatedAtGreaterThanEqual(today, firstPage))
+                .thenReturn(new PageImpl<>(List.of(order, order, order)));
+
+        assertThat(orderService.findByStatus(finished, today, firstPage).getContent()).hasSize(1);
+        assertThat(orderService.findByStatus(null, today, firstPage).getContent()).hasSize(3);
+    }
+
+    @Test
+    void anOrderMovesForwardUntilItIsDelivered() {
+        Order cash = new Order(null, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
+        when(orderRepository.findById(12L)).thenReturn(Optional.of(cash));
+
+        orderService.update(12L, new OrderUpdateDTO(Order.OrderStatus.READY, null));
+        assertThat(cash.getStatus()).isEqualTo(Order.OrderStatus.READY);
+
+        orderService.update(12L, new OrderUpdateDTO(Order.OrderStatus.DELIVERED, true));
+        assertThat(cash.isPaid()).isTrue();
+        assertThat(cash.getStatus()).isEqualTo(Order.OrderStatus.DELIVERED);
+        assertThat(cash.getDeliveredAt()).isNotNull();
+    }
+
+    @Test
+    void aCashOrderIsNotDeliveredBeforeItIsPaid() {
+        Order cash = new Order(null, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
+        cash.setStatus(Order.OrderStatus.READY);
+        when(orderRepository.findById(12L)).thenReturn(Optional.of(cash));
+        OrderUpdateDTO deliver = new OrderUpdateDTO(Order.OrderStatus.DELIVERED, null);
+
+        assertThatThrownBy(() -> orderService.update(12L, deliver))
+                .isInstanceOf(OrderStatusException.class)
+                .hasMessageContaining("must be paid");
+        assertThat(cash.getStatus()).isEqualTo(Order.OrderStatus.READY);
+    }
+
+    @Test
+    void anOrderCannotGoBackOrChangeOnceItIsFinished() {
+        order.setStatus(Order.OrderStatus.READY);
+        OrderUpdateDTO back = new OrderUpdateDTO(Order.OrderStatus.IN_PREPARATION, null);
+        assertThatThrownBy(() -> orderService.update(10L, back)).isInstanceOf(OrderStatusException.class);
+
+        orderService.update(10L, new OrderUpdateDTO(Order.OrderStatus.CANCELLED, null));
+        OrderUpdateDTO deliver = new OrderUpdateDTO(Order.OrderStatus.DELIVERED, null);
+        assertThatThrownBy(() -> orderService.update(10L, deliver))
+                .isInstanceOf(OrderStatusException.class)
+                .hasMessageContaining("cannot change from CANCELLED to DELIVERED");
+        // The same status again changes nothing
+        assertThat(orderService.update(10L, new OrderUpdateDTO(Order.OrderStatus.CANCELLED, null))).isNotNull();
+    }
+
+    @Test
+    void theCashPaymentIsMarkedOnlyOnce() {
+        Order cash = new Order(null, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
+        when(orderRepository.findById(12L)).thenReturn(Optional.of(cash));
+
+        orderService.update(12L, new OrderUpdateDTO(null, true));
+        orderService.update(12L, new OrderUpdateDTO(null, true));
+
+        assertThat(cash.isPaid()).isTrue();
+        OrderUpdateDTO notPaid = new OrderUpdateDTO(null, false);
+        assertThatThrownBy(() -> orderService.update(12L, notPaid)).isInstanceOf(InvalidOrderException.class);
+    }
+
+    @Test
+    void aCancelledOrderCannotBePaid() {
+        Order cash = new Order(null, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CASH);
+        cash.setStatus(Order.OrderStatus.CANCELLED);
+        when(orderRepository.findById(12L)).thenReturn(Optional.of(cash));
+        OrderUpdateDTO paid = new OrderUpdateDTO(null, true);
+
+        assertThatThrownBy(() -> orderService.update(12L, paid)).isInstanceOf(OrderStatusException.class);
+        assertThat(cash.isPaid()).isFalse();
+    }
+
+    @Test
+    void anUpdateNeedsAChangeAndAnOrderThatExists() {
+        OrderUpdateDTO empty = new OrderUpdateDTO(null, null);
+        OrderUpdateDTO ready = new OrderUpdateDTO(Order.OrderStatus.READY, null);
+
+        assertThatThrownBy(() -> orderService.update(10L, empty)).isInstanceOf(InvalidOrderException.class);
+        assertThatThrownBy(() -> orderService.update(99L, ready)).isInstanceOf(ResourceNotFoundException.class);
     }
 
     // Places the order with a delivery cost of 3.00 and returns the order that was saved (with the id 42)

@@ -2,6 +2,8 @@ package es.urjc.kombo.repository;
 
 
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +23,15 @@ public interface OrderRepository extends JpaRepository<Order, Long>  {
     Optional<Order> findFirstByUserOrderByCreatedAtDesc(User user);
 
     List<Order> findByStatusOrderByCreatedAtAsc(OrderStatus status);
+
+    // Orders in any of the statuses, one page at a time with the order of the Pageable (for example, oldest first)
+    Page<Order> findByStatusIn(Collection<OrderStatus> statuses, Pageable pageable);
+
+    // The same, only with the orders placed from a date and time
+    Page<Order> findByStatusInAndCreatedAtGreaterThanEqual(Collection<OrderStatus> statuses, LocalDateTime since,
+            Pageable pageable);
+
+    Page<Order> findByCreatedAtGreaterThanEqual(LocalDateTime since, Pageable pageable);
 
     // When a customer deletes their account their orders are kept for the sales, without the customer data
     @Modifying
