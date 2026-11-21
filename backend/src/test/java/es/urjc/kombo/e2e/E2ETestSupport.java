@@ -104,4 +104,12 @@ abstract class E2ETestSupport {
         WebElement element = wait.until(ExpectedConditions.elementToBeClickable(locator));
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", element);
     }
+
+    // Logs in with the log in form (the page also has the sign up form)
+    protected void logIn(String email, String password) {
+        driver.get(BASE_URL + "/login");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-email"))).sendKeys(email);
+        driver.findElement(By.id("login-password")).sendKeys(password);
+        click(By.cssSelector("form[aria-labelledby='login-title'] button[type='submit']"));
+    }
 }

@@ -99,11 +99,14 @@ describe('CheckoutPage', () => {
     expect(createOrder).not.toHaveBeenCalled();
   });
 
-  it('starts with the data of the customer, who can pay in cash without card data', async () => {
-    renderApp('/checkout', { user: { ...CUSTOMER, phone: '600111222', addresses: ['Calle Tulipán s/n'] } });
-    expect(screen.getByLabelText('Nombre')).toHaveValue('Lucía García');
-    expect(screen.getByLabelText('Correo electrónico')).toHaveValue('customer@kombo.com');
-    expect(screen.getByLabelText('Teléfono')).toHaveValue('600111222');
+  it('shows the saved data of the customer, who can pay in cash without card data', async () => {
+    const refreshUser = vi.fn();
+    renderApp('/checkout', { user: { ...CUSTOMER, phone: '600111222', addresses: ['Calle Tulipán s/n'] }, refreshUser });
+    const summary = within(screen.getByTestId('contact-summary'));
+    expect(summary.getByText('Lucía García')).toBeInTheDocument();
+    expect(summary.getByText('customer@kombo.com')).toBeInTheDocument();
+    expect(summary.getByText('600111222')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Efectivo'));
     expect(screen.queryByLabelText('Número de tarjeta')).not.toBeInTheDocument();
@@ -115,7 +118,79 @@ describe('CheckoutPage', () => {
       deliveryAddress: null,
       paymentMethod: 'CASH',
       customerName: 'Lucía García',
+      customerEmail: 'customer@kombo.com',
+      customerPhone: '600111222',
     });
+    expect(refreshUser).not.toHaveBeenCalled();
+  });
+
+  it('waits for the session before showing the form', () => {
+    renderApp('/checkout', { loading: true });
+
+    expect(screen.getByText('Comprobando tu sesión…')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Nombre')).not.toBeInTheDocument();
+  });
+
+  it('lets the customer change their saved data for this order', async () => {
+    renderApp('/checkout', { user: { ...CUSTOMER, phone: '600111222' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cambiar' }));
+    expect(screen.getByLabelText('Nombre')).toHaveValue('Lucía García');
+    type('Teléfono', '699999999');
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+    submit();
+
+    await screen.findByRole('heading', { name: 'Pedido confirmado' });
+    expect(createOrder.mock.calls[0][0].customerPhone).toBe('699999999');
+  });
+
+  it('opens the contact form when the saved data of the customer is not complete', () => {
+    renderApp('/checkout', { user: { ...CUSTOMER, phone: null } });
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+
+    submit();
+
+    expect(screen.getByText('Escribe un teléfono de 9 a 15 cifras.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Teléfono')).toHaveClass('is-invalid');
+    expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it('delivers to a saved address chosen by the customer', async () => {
+    const refreshUser = vi.fn();
+    const user = { ...CUSTOMER, phone: '600111222', addresses: ['Calle Tulipán s/n', 'Calle Mayor 1'] };
+    renderApp('/checkout', { user, refreshUser });
+    fireEvent.click(screen.getByLabelText(/A domicilio/));
+
+    // The first saved address is chosen at first
+    expect(screen.getByLabelText('Calle Tulipán s/n')).toBeChecked();
+    expect(screen.queryByLabelText('Nueva dirección')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Calle Mayor 1'));
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+    submit();
+
+    await screen.findByRole('heading', { name: 'Pedido confirmado' });
+    expect(createOrder.mock.calls[0][0].deliveryAddress).toBe('Calle Mayor 1');
+    expect(refreshUser).not.toHaveBeenCalled();
+  });
+
+  it('delivers to a new address, which is saved in the profile of the customer', async () => {
+    const refreshUser = vi.fn();
+    renderApp('/checkout', { user: { ...CUSTOMER, phone: '600111222', addresses: ['Calle Tulipán s/n'] }, refreshUser });
+    fireEvent.click(screen.getByLabelText(/A domicilio/));
+    fireEvent.click(screen.getByLabelText('Otra dirección'));
+    expect(screen.getByText('Se guardará en tu perfil para tus próximos pedidos.')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+
+    submit();
+    expect(screen.getByText('Escribe la dirección de entrega.')).toBeInTheDocument();
+
+    type('Nueva dirección', ' Calle Nueva 3 ');
+    submit();
+
+    await screen.findByRole('heading', { name: 'Pedido confirmado' });
+    expect(createOrder.mock.calls[0][0].deliveryAddress).toBe('Calle Nueva 3');
+    // The session is read again to have the new address
+    expect(refreshUser).toHaveBeenCalled();
   });
 
   it('shows the error of the server and keeps the cart', async () => {

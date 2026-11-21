@@ -18,6 +18,7 @@ function Probe() {
         sign up
       </button>
       <button type="button" onClick={() => auth.logout()}>logout</button>
+      <button type="button" onClick={() => auth.refreshUser()}>refresh</button>
     </>
   );
 }
@@ -54,6 +55,20 @@ describe('AuthProvider', () => {
     authService.getCurrentUser.mockRejectedValue(new Error('offline'));
     render(<AuthProvider><Probe /></AuthProvider>);
     expect(await screen.findByText('anonymous')).toBeInTheDocument();
+  });
+
+  it('reads the session again and keeps the user when it cannot', async () => {
+    authService.getCurrentUser.mockResolvedValueOnce({ name: 'Lucía' }).mockResolvedValueOnce({ name: 'Lucía G.' });
+    render(<AuthProvider><Probe /></AuthProvider>);
+    await screen.findByText('Lucía');
+
+    fireEvent.click(screen.getByRole('button', { name: 'refresh' }));
+    expect(await screen.findByText('Lucía G.')).toBeInTheDocument();
+
+    authService.getCurrentUser.mockRejectedValueOnce(new Error('offline'));
+    fireEvent.click(screen.getByRole('button', { name: 'refresh' }));
+    await vi.waitFor(() => expect(authService.getCurrentUser).toHaveBeenCalledTimes(3));
+    expect(screen.getByText('Lucía G.')).toBeInTheDocument();
   });
 
   it('fails when used outside the provider', () => {

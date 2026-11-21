@@ -1,44 +1,60 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { getUserOrders } from '../services/userService';
+import { CART_STORAGE_KEY } from '../context/CartProvider';
+import { getMyOrders } from '../services/orderService';
 import { CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
-vi.mock('../services/userService', () => ({ getUserOrders: vi.fn() }));
+vi.mock('../services/orderService', () => ({ getMyOrders: vi.fn(), getOrder: vi.fn() }));
 
 const order = (id, status) => ({
   id,
-  orderNumber: id,
+  orderNumber: 1000 + id,
   status,
   total: 12.5,
   createdAt: '2026-11-09T10:00:00',
-  lines: [{ id, quantity: 2, product: { name: 'Hamburguesa clásica' } }],
+  lines: [{ id, quantity: 2, productName: 'Hamburguesa clásica', product: { id: 1, name: 'Hamburguesa clásica', price: 8.5 } }],
 });
 
 describe('ProfilePage', () => {
   beforeEach(() => {
-    getUserOrders.mockReset();
+    getMyOrders.mockReset();
   });
 
-  it('shows the data and the orders of the customer', async () => {
-    getUserOrders
+  it('shows the data and the last orders of the customer, 4 at a time', async () => {
+    getMyOrders
       .mockResolvedValueOnce({ content: [order(2, 'READY')], page: { number: 0, totalPages: 2 } })
       .mockResolvedValueOnce({ content: [order(1, 'DELIVERED')], page: { number: 1, totalPages: 2 } });
     renderApp('/profile', { user: { ...CUSTOMER, phone: '600111222', addresses: ['Calle Mayor 1'] } });
 
     expect(screen.getByText('customer@kombo.com')).toBeInTheDocument();
     expect(screen.getByText('Calle Mayor 1')).toBeInTheDocument();
-    expect(await screen.findByText('Pedido nº 2')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Pedido nº 1002' })).toHaveAttribute('href', '/orders/2');
     expect(screen.getByText('Listo')).toBeInTheDocument();
-    expect(screen.getAllByText('2 × Hamburguesa clásica')).toHaveLength(1);
+    expect(screen.getByText('2 × Hamburguesa clásica')).toBeInTheDocument();
+    expect(getMyOrders).toHaveBeenCalledWith({ page: 0, size: 4 });
 
     fireEvent.click(screen.getByRole('button', { name: 'Más resultados' }));
 
     expect(await screen.findByText('Entregado')).toBeInTheDocument();
-    expect(getUserOrders).toHaveBeenLastCalledWith(CUSTOMER.id, { page: 1 });
+    expect(getMyOrders).toHaveBeenLastCalledWith({ page: 1, size: 4 });
+  });
+
+  it('repeats an order: its products go to the cart', async () => {
+    getMyOrders.mockResolvedValue({ content: [order(2, 'DELIVERED')], page: { number: 0, totalPages: 1 } });
+    const { router } = renderApp('/profile', { user: CUSTOMER });
+    const card = within((await screen.findByRole('link', { name: 'Pedido nº 1002' })).closest('li'));
+
+    fireEvent.click(card.getByRole('button', { name: 'Repetir pedido' }));
+
+    expect(router.state.location.pathname).toBe('/cart');
+    expect(await screen.findByText(/Hemos añadido al carrito los productos del pedido nº 1002/)).toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem(CART_STORAGE_KEY))).toEqual([
+      { product: { id: 1, name: 'Hamburguesa clásica', price: 8.5 }, quantity: 2 },
+    ]);
   });
 
   it('invites the customer to order when there are no orders', async () => {
-    getUserOrders.mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } });
+    getMyOrders.mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } });
     renderApp('/profile', { user: CUSTOMER });
     expect(await screen.findByText(/Todavía no has hecho ningún pedido/)).toBeInTheDocument();
   });
@@ -46,6 +62,6 @@ describe('ProfilePage', () => {
   it('does not show order history to employees', () => {
     renderApp('/profile', { user: EMPLOYEE });
     expect(screen.queryByText('Mis pedidos', { selector: 'h2' })).not.toBeInTheDocument();
-    expect(getUserOrders).not.toHaveBeenCalled();
+    expect(getMyOrders).not.toHaveBeenCalled();
   });
 });

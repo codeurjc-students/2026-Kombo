@@ -161,6 +161,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PagedModelOrderDTO"
+  /api/v1/users/me/orders:
+    get:
+      tags:
+      - user-controller
+      operationId: getMyOrders
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelOrderDTO"
   /api/v1/products:
     get:
       tags:

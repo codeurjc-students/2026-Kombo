@@ -1,13 +1,18 @@
 import { useCallback } from 'react';
-import { Badge, Button, Col, ListGroup, Row } from 'react-bootstrap';
+import { Badge, Button, Col, Row } from 'react-bootstrap';
+import { Link } from 'react-router';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import { useAuth } from '../context/AuthContext';
 import usePagedList from '../hooks/usePagedList';
-import { getUserOrders } from '../services/userService';
-import { ORDER_STATUS, ROLE_LABELS, formatDateTime, formatPrice } from '../utils/format';
+import useRepeatOrder from '../hooks/useRepeatOrder';
+import { getMyOrders } from '../services/orderService';
+import { ORDER_STATUS, ROLE_LABELS, formatDateTime, formatPrice, orderLinesSummary } from '../utils/format';
 
-// Profile of the logged in user and, for customers, their order history
+// Orders shown at a time in the profile
+const RECENT_ORDERS = 4;
+
+// Profile of the logged in user and, for customers, their last orders
 export default function ProfilePage() {
   const { user } = useAuth();
 
@@ -44,14 +49,16 @@ export default function ProfilePage() {
           </dl>
         </section>
       </Col>
-      <Col lg={8}>{user.role === 'CUSTOMER' && <OrderHistory userId={user.id} />}</Col>
+      <Col lg={8}>{user.role === 'CUSTOMER' && <RecentOrders />}</Col>
     </Row>
   );
 }
 
-function OrderHistory({ userId }) {
-  const fetchPage = useCallback((page) => getUserOrders(userId, { page }), [userId]);
+// The last orders of the customer, 4 at a time, with a link to their detail and a "Repetir pedido" button
+function RecentOrders() {
+  const fetchPage = useCallback((page) => getMyOrders({ page, size: RECENT_ORDERS }), []);
   const { items: orders, loading, error, hasMore, loadMore, retry } = usePagedList(fetchPage);
+  const repeatOrder = useRepeatOrder();
 
   return (
     <section className="panel" aria-labelledby="orders-title">
@@ -61,14 +68,17 @@ function OrderHistory({ userId }) {
       {!loading && !error && orders.length === 0 && (
         <p className="text-secondary mb-0">Todavía no has hecho ningún pedido. Echa un vistazo a la carta.</p>
       )}
-      <ListGroup as="ul" className="list-unstyled d-grid gap-2 mb-0">
+      <ul className="list-unstyled d-grid gap-2 mb-0" aria-label="Últimos pedidos">
         {orders.map((order) => {
           const status = ORDER_STATUS[order.status] ?? { label: order.status, bg: 'secondary' };
           return (
-            <ListGroup.Item as="li" key={order.id} className="order-item">
+            <li key={order.id} className="order-item order-card">
               <div className="d-flex flex-wrap justify-content-between gap-2">
                 <div>
-                  <strong>Pedido nº {order.orderNumber}</strong>
+                  {/* Stretched link: the whole card opens the detail of the order */}
+                  <Link to={`/orders/${order.id}`} className="order-card-link stretched-link">
+                    Pedido nº {order.orderNumber}
+                  </Link>
                   <div className="small text-secondary">{formatDateTime(order.createdAt)}</div>
                 </div>
                 <div className="text-end">
@@ -76,13 +86,16 @@ function OrderHistory({ userId }) {
                   <div className="order-total">{formatPrice(order.total)}</div>
                 </div>
               </div>
-              <div className="small text-secondary mt-1">
-                {order.lines.map((line) => `${line.quantity} × ${line.product.name}`).join(', ')}
+              <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
+                <span className="small text-secondary">{orderLinesSummary(order)}</span>
+                <Button variant="outline-ink" size="sm" className="order-card-action" onClick={() => repeatOrder(order)}>
+                  Repetir pedido
+                </Button>
               </div>
-            </ListGroup.Item>
+            </li>
           );
         })}
-      </ListGroup>
+      </ul>
       {hasMore && (
         <Button variant="outline-ink" className="mt-3" onClick={loadMore} disabled={loading}>
           {loading ? 'Cargando…' : 'Más resultados'}

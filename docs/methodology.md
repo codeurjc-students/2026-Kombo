@@ -50,7 +50,8 @@ gantt
     Menu by category                                 :done, f3b, 2026-11-10, 1d
     Product detail and sign up                       :done, f3d, 2026-11-12, 3d
     Cart, checkout and simulated payment             :done, f3k, 2026-11-15, 1d
-    Personal data and saved addresses                :f3u, 2026-11-17, 2d
+    Order history, order detail and saved addresses  :done, f3h, 2026-11-16, 1d
+    Personal data and address management             :f3u, 2026-11-17, 2d
     Order dashboard and product and user management  :f3e, after f3u, 3d
     Release 0.1 and Phase 3 documentation            :f3r, after f3e, 1d
 

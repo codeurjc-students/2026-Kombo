@@ -62,6 +62,33 @@ class CheckoutE2E extends E2ETestSupport {
     }
 
     @Test
+    void aCustomerOrdersWithTheirSavedDataAndAddress() {
+        logIn("customer@kombo.com", "customer");
+        wait.until(ExpectedConditions.urlMatches(".*/profile$"));
+        driver.get(BASE_URL);
+        click(By.linkText("Agua"));
+        click(By.xpath("//button[normalize-space()='Añadir al carrito +']"));
+        wait.until(ExpectedConditions.textToBe(CART_COUNT, "1"));
+        driver.get(BASE_URL + "/checkout");
+
+        // No contact form: the data of the profile is shown
+        WebElement contact = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("[data-testid='contact-summary']")));
+        assertThat(contact.getText()).contains("Lucía García", "customer@kombo.com", "600111222");
+        assertThat(driver.findElements(By.id("checkout-name"))).isEmpty();
+
+        // Home delivery: the saved address is chosen at first
+        click(By.id("delivery-DELIVERY"));
+        assertThat(driver.findElement(By.id("address-0")).isSelected()).isTrue();
+        assertThat(driver.findElement(By.cssSelector("label[for='address-0']")).getText()).contains("Calle Tulipán");
+        click(By.id("payment-CASH"));
+        click(By.xpath("//button[starts-with(normalize-space(), 'Confirmar y pagar')]"));
+
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("confirmation-title"), "Pedido confirmado"));
+        assertThat(driver.findElement(By.cssSelector("main")).getText()).contains("Calle Tulipán");
+    }
+
+    @Test
     void theCheckoutShowsTheWrongFields() {
         driver.get(BASE_URL);
         click(By.linkText("Agua"));
