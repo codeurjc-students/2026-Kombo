@@ -283,6 +283,147 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/SettingsDTO"
+  /api/v1/admin/products/{id}:
+    get:
+      tags:
+      - admin-product-controller
+      operationId: getProduct
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
+    put:
+      tags:
+      - admin-product-controller
+      operationId: updateProduct
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
+    patch:
+      tags:
+      - admin-product-controller
+      operationId: changeActive
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductStatusDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
+  /api/v1/admin/products/{id}/image:
+    get:
+      tags:
+      - admin-product-controller
+      operationId: getImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+    put:
+      tags:
+      - admin-product-controller
+      operationId: updateImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+              - image
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
+  /api/v1/admin/combos/{id}:
+    put:
+      tags:
+      - admin-product-controller
+      operationId: updateCombo
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComboRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
   /api/v1/users:
     get:
       tags:
@@ -415,6 +556,69 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/admin/products:
+    get:
+      tags:
+      - admin-product-controller
+      operationId: getProducts
+      parameters:
+      - name: active
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: combo
+        in: query
+        required: false
+        schema:
+          type: boolean
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelAdminProductDTO"
+    post:
+      tags:
+      - admin-product-controller
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
+  /api/v1/admin/combos:
+    post:
+      tags:
+      - admin-product-controller
+      operationId: createCombo
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComboRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AdminProductDTO"
   /api/v1/orders/{id}:
     get:
       tags:
@@ -504,7 +708,7 @@ paths:
     get:
       tags:
       - product-controller
-      operationId: getProducts
+      operationId: getProducts_1
       parameters:
       - name: category
         in: query
@@ -527,7 +731,7 @@ paths:
     get:
       tags:
       - product-controller
-      operationId: getProduct
+      operationId: getProduct_1
       parameters:
       - name: id
         in: path
@@ -574,6 +778,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/admin/ingredients:
+    get:
+      tags:
+      - admin-ingredient-controller
+      operationId: getIngredients
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PagedModelIngredientDTO"
 components:
   schemas:
     ProfileUpdateDTO:
@@ -659,6 +881,145 @@ components:
           type: number
         freeDeliveryThreshold:
           type: number
+    IngredientQuantityDTO:
+      type: object
+      properties:
+        ingredientId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+          maximum: 10000
+      required:
+      - ingredientId
+    ProductRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 0
+        price:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+          maxLength: 255
+          minLength: 0
+        category:
+          type: string
+          pattern: Burgers|Sides|Drinks|Desserts
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/IngredientQuantityDTO"
+      required:
+      - category
+      - ingredients
+      - name
+      - price
+    AdminProductDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
+        combo:
+          type: boolean
+        active:
+          type: boolean
+        imageId:
+          type: integer
+          format: int64
+        ingredients:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductIngredientDTO"
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComboItemDTO"
+    ComboItemDTO:
+      type: object
+      properties:
+        product:
+          $ref: "#/components/schemas/ProductDTO"
+        quantity:
+          type: integer
+          format: int32
+    ProductDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
+    ProductIngredientDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        unit:
+          type: string
+        quantity:
+          type: integer
+          format: int32
+    ComboItemRequestDTO:
+      type: object
+      properties:
+        productId:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int32
+          exclusiveMinimum: 0
+          maximum: 20
+      required:
+      - productId
+    ComboRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 0
+        price:
+          type: number
+          minimum: 0.01
+        description:
+          type: string
+          maxLength: 255
+          minLength: 0
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComboItemRequestDTO"
+          minItems: 1
+      required:
+      - name
+      - price
+      - products
     SignUpRequestDTO:
       type: object
       properties:
@@ -813,20 +1174,6 @@ components:
           type: number
         subtotal:
           type: number
-    ProductDTO:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        price:
-          type: number
-        description:
-          type: string
-        category:
-          type: string
     LoginRequestDTO:
       type: object
       properties:
@@ -877,6 +1224,13 @@ components:
           - CANCELLED
         paid:
           type: boolean
+    ProductStatusDTO:
+      type: object
+      properties:
+        active:
+          type: boolean
+      required:
+      - active
     Pageable:
       type: object
       properties:
@@ -934,14 +1288,6 @@ components:
             $ref: "#/components/schemas/ProductDTO"
         page:
           $ref: "#/components/schemas/PageMetadata"
-    ComboItemDTO:
-      type: object
-      properties:
-        product:
-          $ref: "#/components/schemas/ProductDTO"
-        quantity:
-          type: integer
-          format: int32
     ProductDetailDTO:
       type: object
       properties:
@@ -966,7 +1312,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ComboItemDTO"
-    ProductIngredientDTO:
+    PagedModelAdminProductDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/AdminProductDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+    IngredientDTO:
       type: object
       properties:
         id:
@@ -976,9 +1331,23 @@ components:
           type: string
         unit:
           type: string
-        quantity:
+        stock:
           type: integer
           format: int32
+        alertLimit:
+          type: integer
+          format: int32
+        lowStock:
+          type: boolean
+    PagedModelIngredientDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/IngredientDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
   securitySchemes:
     sessionCookie:
       type: apiKey

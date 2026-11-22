@@ -67,9 +67,9 @@ describe('AppNavbar', () => {
     expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
   });
 
-  it('shows the orders, the user management and the profile to the administrator', () => {
+  it('shows the orders, the products, the user management and the profile to the administrator', () => {
     renderApp('/', { user: ADMIN });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Usuarios', 'Ajustes', 'Mi perfil']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Productos', 'Usuarios', 'Ajustes', 'Mi perfil']);
     expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
   });
 

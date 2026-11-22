@@ -23,6 +23,13 @@ public interface ProductMapper {
     @Mapping(target = "products", expression = "java(toComboItemDTOs(product))")
     ProductDetailDTO toDetailDTO(Product product);
 
+    // Management of the administrator: also whether it is active and the id of its picture
+    @Mapping(target = "combo", expression = "java(product instanceof Combo)")
+    @Mapping(target = "imageId", source = "image.id")
+    @Mapping(target = "ingredients", source = "ingredientUsage")
+    @Mapping(target = "products", expression = "java(toComboItemDTOs(product))")
+    AdminProductDTO toAdminDTO(Product product);
+
     // Converts the ingredients map (ingredient -> quantity) into a list sorted by name
     default List<ProductIngredientDTO> toIngredientDTOs(Map<Ingredient, Integer> ingredients) {
         return ingredients.entrySet().stream()

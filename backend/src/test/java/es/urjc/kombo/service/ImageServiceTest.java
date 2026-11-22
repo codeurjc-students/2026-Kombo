@@ -17,6 +17,8 @@ import es.urjc.kombo.model.Image;
 
 class ImageServiceTest {
 
+    private static final long PROFILE = ImageService.PROFILE_PICTURE_MAX_SIZE;
+
     // First bytes of a real JPEG file
     static final byte[] JPEG = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 0x10, 'J', 'F', 'I', 'F' };
 
@@ -25,7 +27,8 @@ class ImageServiceTest {
     @Test
     void createImageKeepsTheContentAndTheDetectedType() throws Exception {
         // The browser says it is a PNG, but the bytes are a JPEG: the bytes decide
-        Image image = imageService.createImage(new MockMultipartFile("image", "photo.png", "image/png", JPEG), "Ana");
+        Image image = imageService.createImage(new MockMultipartFile("image", "photo.png", "image/png", JPEG), "Ana",
+                PROFILE);
 
         assertThat(image.getContentType()).isEqualTo("image/jpeg");
         assertThat(image.getText()).isEqualTo("Ana");
@@ -49,24 +52,43 @@ class ImageServiceTest {
                 .getBytes(StandardCharsets.UTF_8);
 
         assertThatThrownBy(() -> imageService.createImage(
-                new MockMultipartFile("image", "photo.jpg", "image/jpeg", svg), "Ana"))
+                new MockMultipartFile("image", "photo.jpg", "image/jpeg", svg), "Ana", PROFILE))
                 .isInstanceOf(InvalidImageException.class)
                 .hasMessage("image: the file must be a JPEG, PNG, GIF or WebP picture");
     }
 
     @Test
-    void rejectsAnEmptyFileAndAFileBiggerThan1Megabyte() {
+    void rejectsAnEmptyFile() {
         assertThatThrownBy(() -> imageService.createImage(
-                new MockMultipartFile("image", "empty.jpg", "image/jpeg", new byte[0]), "Ana"))
+                new MockMultipartFile("image", "empty.jpg", "image/jpeg", new byte[0]), "Ana", PROFILE))
                 .hasMessage("image: the file is empty");
-        assertThatThrownBy(() -> imageService.createImage(null, "Ana"))
+        assertThatThrownBy(() -> imageService.createImage(null, "Ana", PROFILE))
                 .hasMessage("image: the file is empty");
+    }
 
-        byte[] big = new byte[(int) ImageService.MAX_SIZE + 1];
-        System.arraycopy(JPEG, 0, big, 0, JPEG.length);
+    // The limits are independent: 1 MB for profile pictures and 10 MB for products and kombos
+    @Test
+    void eachKindOfPictureHasItsOwnLimit() {
+        byte[] twoMegabytes = jpegOfSize(2 * 1024 * 1024);
+
         assertThatThrownBy(() -> imageService.createImage(
-                new MockMultipartFile("image", "big.jpg", "image/jpeg", big), "Ana"))
+                new MockMultipartFile("image", "big.jpg", "image/jpeg", twoMegabytes), "Ana", PROFILE))
+                .isInstanceOf(ImageTooLargeException.class)
                 .hasMessage("image: the file is bigger than 1 MB");
+        assertThat(imageService.createImage(new MockMultipartFile("image", "big.jpg", "image/jpeg", twoMegabytes),
+                "Hamburguesa", ImageService.PRODUCT_PICTURE_MAX_SIZE).getContentType()).isEqualTo("image/jpeg");
+
+        byte[] tooBig = jpegOfSize((int) ImageService.PRODUCT_PICTURE_MAX_SIZE + 1);
+        assertThatThrownBy(() -> imageService.createImage(new MockMultipartFile("image", "big.jpg", "image/jpeg",
+                tooBig), "Hamburguesa", ImageService.PRODUCT_PICTURE_MAX_SIZE))
+                .isInstanceOf(ImageTooLargeException.class)
+                .hasMessage("image: the file is bigger than 10 MB");
+    }
+
+    private static byte[] jpegOfSize(int size) {
+        byte[] content = new byte[size];
+        System.arraycopy(JPEG, 0, content, 0, JPEG.length);
+        return content;
     }
 
     @Test

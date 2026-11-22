@@ -116,6 +116,12 @@ public class Product{
         ingredients.put(ingredient, quantity);
     }
 
+    // The administrator replaces the whole list of ingredients when editing the product
+    public void replaceIngredients(Map<Ingredient, Integer> newIngredients) {
+        ingredients.clear();
+        ingredients.putAll(newIngredients);
+    }
+
     public Map<Ingredient, Integer> getIngredientUsage() {
         return new HashMap<>(ingredients);
     }

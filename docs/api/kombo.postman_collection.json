@@ -24,6 +24,14 @@
     {
       "key": "orderId",
       "value": "1"
+    },
+    {
+      "key": "productId",
+      "value": "1"
+    },
+    {
+      "key": "comboId",
+      "value": "10"
     }
   ],
   "item": [
@@ -324,6 +332,374 @@
               ]
             },
             "description": "Example of error: returns 400 Bad Request in ProblemDetail format."
+          },
+          "response": []
+        },
+        {
+          "name": "Get products and kombos (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products?active=true&combo=false&page=0&size=12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "active",
+                  "value": "true"
+                },
+                {
+                  "key": "combo",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "12"
+                }
+              ]
+            },
+            "description": "Every product and kombo, also the deactivated ones. Optional filters active (true or false) and combo (true: only kombos; false: only products). Log in as the administrator first."
+          },
+          "response": []
+        },
+        {
+          "name": "Get a product (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "A product or kombo, also when it is deactivated, with active and imageId."
+          },
+          "response": []
+        },
+        {
+          "name": "Create a product (administrator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hamburguesa vegetal\",\n  \"price\": 7.50,\n  \"description\": \"Con hamburguesa de garbanzos\",\n  \"category\": \"Burgers\",\n  \"ingredients\": [\n    { \"ingredientId\": 1, \"quantity\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "description": "201 with the new product and the Location header. The category is Burgers, Sides, Drinks or Desserts (Combos is only for kombos); the ingredients are existing ones (400 otherwise)."
+          },
+          "response": []
+        },
+        {
+          "name": "Change a product (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Hamburguesa vegetal\",\n  \"price\": 7.90,\n  \"description\": \"Con hamburguesa de garbanzos\",\n  \"category\": \"Burgers\",\n  \"ingredients\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "Replaces the data and the ingredients of a product. 400 for a kombo (use Change a kombo)."
+          },
+          "response": []
+        },
+        {
+          "name": "Deactivate a product (administrator)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{productId}}"
+              ]
+            },
+            "description": "A deactivated product leaves the menu. 409 if an active kombo includes it, with the ids and names of the kombos in the \"products\" property. Send true to activate it again (409 for a kombo with a deactivated product)."
+          },
+          "response": []
+        },
+        {
+          "name": "Upload the picture of a product (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": [],
+                  "description": "JPEG, PNG, GIF or WebP picture of 1 MB at most"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products/{{productId}}/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{productId}}",
+                "image"
+              ]
+            },
+            "description": "Picture of a product or kombo as multipart/form-data in the field \"image\": JPEG, PNG, GIF or WebP of 10 MB at most (400 if it is not a picture, 413 if it is bigger). Choose the file in the body."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the picture of a product (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/products/{{productId}}/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{productId}}",
+                "image"
+              ]
+            },
+            "description": "The picture also of a deactivated product (no-cache)."
+          },
+          "response": []
+        },
+        {
+          "name": "Create a kombo (administrator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kombo vegetal\",\n  \"price\": 9.90,\n  \"description\": \"Hamburguesa, patatas y bebida\",\n  \"products\": [\n    { \"productId\": 1, \"quantity\": 1 },\n    { \"productId\": 3, \"quantity\": 1 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/combos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "combos"
+              ]
+            },
+            "description": "201 with the new kombo (category Combos) and the Location header. Only active products that are not kombos, each once, with at least 2 units in total (400 otherwise)."
+          },
+          "response": []
+        },
+        {
+          "name": "Change a kombo (administrator)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Kombo vegetal\",\n  \"price\": 8.90,\n  \"description\": \"Hamburguesa, patatas y bebida\",\n  \"products\": [\n    { \"productId\": 1, \"quantity\": 2 }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/combos/{{comboId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "combos",
+                "{{comboId}}"
+              ]
+            },
+            "description": "Replaces the data and the products of a kombo."
+          },
+          "response": []
+        },
+        {
+          "name": "Get the ingredients (administrator)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/ingredients?size=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "ingredients"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": "Every ingredient sorted by name, to choose the ingredients of a product."
           },
           "response": []
         }

@@ -21,9 +21,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import es.urjc.kombo.service.EmailAlreadyUsedException;
+import es.urjc.kombo.service.ImageTooLargeException;
 import es.urjc.kombo.service.InvalidImageException;
 import es.urjc.kombo.service.InvalidOrderException;
+import es.urjc.kombo.service.InvalidProductException;
 import es.urjc.kombo.service.OrderStatusException;
+import es.urjc.kombo.service.ProductInUseException;
 import es.urjc.kombo.service.ResourceNotFoundException;
 import es.urjc.kombo.service.WrongPasswordException;
 
@@ -63,6 +66,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(InvalidImageException.class)
     public ProblemDetail handleInvalidImage(InvalidImageException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(ImageTooLargeException.class)
+    public ProblemDetail handleImageTooLarge(ImageTooLargeException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidProductException.class)
+    public ProblemDetail handleInvalidProduct(InvalidProductException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    // The ids and names of the kombos (or products) that prevent the change are also sent in the "products"
+    // property, so the client can show them and link to them
+    @ExceptionHandler(ProductInUseException.class)
+    public ProblemDetail handleProductInUse(ProductInUseException exception) {
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+        problem.setProperty("products", exception.getProducts());
+        return problem;
     }
 
     @ExceptionHandler(OrderStatusException.class)

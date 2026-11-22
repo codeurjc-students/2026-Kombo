@@ -87,16 +87,19 @@ export function validateAddress(address, savedAddresses) {
 // Types and size accepted by the server (ImageService), which also checks the content of the file
 export const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 export const MAX_IMAGE_SIZE = 1024 * 1024;
+// Pictures of products and kombos (ProductService)
+export const MAX_PRODUCT_IMAGE_SIZE = 10 * 1024 * 1024;
 
-export function validateImageFile(file) {
+// maxSize: 1 MB for profile pictures by default, 10 MB for products
+export function validateImageFile(file, maxSize = MAX_IMAGE_SIZE) {
   if (!file) {
     return 'Elige una imagen.';
   }
   if (!IMAGE_TYPES.includes(file.type)) {
     return 'La foto tiene que ser una imagen JPG, PNG, GIF o WebP.';
   }
-  if (file.size > MAX_IMAGE_SIZE) {
-    return 'La foto ocupa más de 1 MB.';
+  if (file.size > maxSize) {
+    return `La foto ocupa más de ${maxSize / (1024 * 1024)} MB.`;
   }
   return null;
 }

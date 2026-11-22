@@ -98,7 +98,7 @@ public class UserService {
     @Transactional
     public UserDTO updateImage(long id, MultipartFile file) {
         User user = findUser(id);
-        user.setImage(imageService.createImage(file, user.getName()));
+        user.setImage(imageService.createImage(file, user.getName(), ImageService.PROFILE_PICTURE_MAX_SIZE));
         userRepository.flush();
         return userMapper.toDTO(user);
     }

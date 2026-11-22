@@ -1,11 +1,14 @@
 // Common HTTP client of the REST API.
 // credentials: 'include' sends the httpOnly session cookie, which JavaScript cannot read.
 
+// problem: the whole ProblemDetail of the answer, with the extra properties of some errors (for example the names
+// of the kombos that prevent deactivating a product)
 export class ApiError extends Error {
-  constructor(status, message) {
+  constructor(status, message, problem = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.problem = problem;
   }
 }
 
@@ -31,7 +34,8 @@ export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
     signal,
   });
   if (!response.ok) {
-    throw new ApiError(response.status, await readErrorDetail(response));
+    const problem = await readProblem(response);
+    throw new ApiError(response.status, problem.detail ?? `Error ${response.status}`, problem);
   }
   if (response.status === 204) {
     return null;
@@ -39,12 +43,11 @@ export async function apiFetch(path, { method = 'GET', body, signal } = {}) {
   return response.json();
 }
 
-// The REST API answers errors in ProblemDetail format: { status, title, detail }
-async function readErrorDetail(response) {
+// The REST API answers errors in ProblemDetail format: { status, title, detail } and sometimes more properties
+async function readProblem(response) {
   try {
-    const problem = await response.json();
-    return problem.detail ?? `Error ${response.status}`;
+    return (await response.json()) ?? {};
   } catch {
-    return `Error ${response.status}`;
+    return {};
   }
 }

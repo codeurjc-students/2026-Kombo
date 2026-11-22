@@ -23,6 +23,7 @@ const LINKS = {
   ADMIN: [
     { to: '/', label: 'Carta', end: true },
     { to: '/orders', label: 'Pedidos', end: true },
+    { to: '/admin/products', label: 'Productos' },
     { to: '/admin/users', label: 'Usuarios' },
     { to: '/admin/settings', label: 'Ajustes' },
     { to: '/profile/settings', label: 'Mi perfil' },
@@ -48,21 +49,21 @@ export default function AppNavbar() {
   }
 
   return (
-    <Navbar expand="md" sticky="top" className="app-navbar py-2" expanded={expanded} onToggle={setExpanded}>
+    <Navbar expand="lg" sticky="top" className="app-navbar py-2" expanded={expanded} onToggle={setExpanded}>
       <Container>
         <Navbar.Brand as={Link} to="/" onClick={() => setExpanded(false)}>
           <BrandLogo />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="main-nav" label="Abrir menú" />
         <Navbar.Collapse id="main-nav">
-          <Nav className="me-auto ms-md-3 gap-1">
+          <Nav className="me-auto ms-lg-3 gap-1">
             {links.map((link) => (
               <Nav.Link key={link.to} as={NavLink} to={link.to} end={link.end} onClick={() => setExpanded(false)}>
                 {link.label}
               </Nav.Link>
             ))}
           </Nav>
-          <Nav className="align-items-md-center gap-2">
+          <Nav className="align-items-lg-center gap-2">
             {/* Units in the cart, with a link to the cart page */}
             <Link
               to="/cart"
