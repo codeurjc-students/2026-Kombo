@@ -151,7 +151,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | Download the PDF ticket of any order | | | X | X |
 | View the ingredient inventory | | | X | X |
 | View the cash register closing | | | X | X |
-| Manage products (create, edit, delete, picture) | | | | X |
+| Manage products and kombos (create, edit, deactivate and activate again, picture) | | | | X |
 | Change the delivery cost | | | | X |
 | Manage ingredients and restock | | | | X |
 | Manage employees and customers: create, see, change and delete their accounts | | | | X |

@@ -1,8 +1,10 @@
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProductsPage from './pages/AdminProductsPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import ComboFormPage from './pages/ComboFormPage';
 import ErrorPage from './pages/ErrorPage';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -12,6 +14,7 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import OrdersDashboardPage from './pages/OrdersDashboardPage';
 import ProductDetailPage from './pages/ProductDetailPage';
+import ProductFormPage from './pages/ProductFormPage';
 import ProfilePage from './pages/ProfilePage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import UserEditPage from './pages/UserEditPage';
@@ -45,6 +48,11 @@ export const routes = [
       {
         element: <ProtectedRoute roles={['ADMIN']} />,
         children: [
+          { path: 'admin/products', element: <AdminProductsPage /> },
+          { path: 'admin/products/new', element: <ProductFormPage /> },
+          { path: 'admin/products/:id', element: <ProductFormPage /> },
+          { path: 'admin/combos/new', element: <ComboFormPage /> },
+          { path: 'admin/combos/:id', element: <ComboFormPage /> },
           { path: 'admin/users', element: <UsersPage /> },
           { path: 'admin/users/new', element: <NewUserPage /> },
           { path: 'admin/users/:id', element: <UserEditPage /> },

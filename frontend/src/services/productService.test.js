@@ -1,5 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getProduct, getProductPage, getProducts, productImageUrl } from './productService';
+import {
+  PRODUCT_CATEGORIES,
+  adminProductImageUrl,
+  createCombo,
+  createProduct,
+  getAdminProduct,
+  getAdminProducts,
+  getIngredients,
+  getProduct,
+  getProductPage,
+  getProducts,
+  productImageUrl,
+  setProductActive,
+  updateCombo,
+  updateProduct,
+  uploadProductImage,
+} from './productService';
 
 const page = {
   content: [{ id: 1, name: 'Test Burger', price: 5 }],
@@ -48,5 +64,42 @@ describe('productService', () => {
 
   it('builds the URL of the product image', () => {
     expect(productImageUrl(7)).toBe('/api/v1/products/7/image');
+  });
+
+  it('calls the endpoints of the management of products and kombos', async () => {
+    mockFetch({ ok: true, status: 200, json: () => Promise.resolve(page) });
+    const product = { name: 'Hamburguesa', price: 5, category: 'Burgers', ingredients: [] };
+    const combo = { name: 'Kombo', price: 8, products: [] };
+    const file = new File(['x'], 'photo.png', { type: 'image/png' });
+
+    await getAdminProducts({ page: 1, active: true, combo: false });
+    await getAdminProduct(3);
+    await createProduct(product);
+    await updateProduct(3, product);
+    await createCombo(combo);
+    await updateCombo(4, combo);
+    await setProductActive(3, false);
+    await uploadProductImage(3, file);
+    expect(await getIngredients()).toEqual(page.content);
+
+    const calls = fetch.mock.calls.map(([url, options]) => [url, options.method]);
+    expect(calls).toEqual([
+      ['/api/v1/admin/products?page=1&size=12&active=true&combo=false', 'GET'],
+      ['/api/v1/admin/products/3', 'GET'],
+      ['/api/v1/admin/products', 'POST'],
+      ['/api/v1/admin/products/3', 'PUT'],
+      ['/api/v1/admin/combos', 'POST'],
+      ['/api/v1/admin/combos/4', 'PUT'],
+      ['/api/v1/admin/products/3', 'PATCH'],
+      ['/api/v1/admin/products/3/image', 'PUT'],
+      ['/api/v1/admin/ingredients?size=100', 'GET'],
+    ]);
+    expect(JSON.parse(fetch.mock.calls[6][1].body)).toEqual({ active: false });
+    expect(fetch.mock.calls[7][1].body.get('image')).toBe(file);
+  });
+
+  it('builds the URL of the picture for the administrator and has no kombo category for products', () => {
+    expect(adminProductImageUrl(3, 9)).toBe('/api/v1/admin/products/3/image?v=9');
+    expect(PRODUCT_CATEGORIES.map((category) => category.value)).toEqual(['Burgers', 'Sides', 'Drinks', 'Desserts']);
   });
 });

@@ -32,6 +32,12 @@ public class Combo extends Product {
         products.put(product, quantity);
     }
 
+    // The administrator replaces the whole list of products when editing the kombo
+    public void replaceProducts(Map<Product, Integer> newProducts) {
+        products.clear();
+        products.putAll(newProducts);
+    }
+
     public Map<Product, Integer> getProducts() {
         return Collections.unmodifiableMap(products);
     }

@@ -16,13 +16,19 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import es.urjc.kombo.TestcontainersConfiguration;
+import es.urjc.kombo.dto.AdminProductDTO;
 import es.urjc.kombo.dto.ComboItemDTO;
+import es.urjc.kombo.dto.ComboItemRequestDTO;
+import es.urjc.kombo.dto.ComboRequestDTO;
 import es.urjc.kombo.dto.ImageFileDTO;
+import es.urjc.kombo.dto.IngredientQuantityDTO;
 import es.urjc.kombo.dto.ProductDTO;
 import es.urjc.kombo.dto.ProductDetailDTO;
 import es.urjc.kombo.dto.ProductIngredientDTO;
+import es.urjc.kombo.dto.ProductRequestDTO;
 import es.urjc.kombo.model.Combo;
 import es.urjc.kombo.model.Image;
 import es.urjc.kombo.model.Ingredient;
@@ -51,6 +57,8 @@ class ProductServiceIT {
     private static final byte[] IMAGE_CONTENT = {1, 2, 3, 4};
 
     private Product burger;
+    private Product drink;
+    private Ingredient bread;
     private Combo menu;
 
     @BeforeEach
@@ -60,14 +68,14 @@ class ProductServiceIT {
         productRepository.deleteAll();
         ingredientRepository.deleteAll();
 
-        Ingredient bread = ingredientRepository.save(new Ingredient("Bread", "units", 100, 20));
+        bread = ingredientRepository.save(new Ingredient("Bread", "units", 100, 20));
         Ingredient beef = ingredientRepository.save(new Ingredient("Beef", "g", 5000, 1000));
 
         burger = new Product("Test Burger", new BigDecimal("5.00"), "Test description", "Burgers");
         burger.addIngredient(bread, 1);
         burger.addIngredient(beef, 150);
         burger.setImage(new Image(BlobProxy.generateProxy(IMAGE_CONTENT), "image/png", "Test Burger"));
-        Product drink = new Product("Test Drink", new BigDecimal("1.50"), "Test description", "Drinks");
+        drink = new Product("Test Drink", new BigDecimal("1.50"), "Test description", "Drinks");
         Product hidden = new Product("Hidden Burger", new BigDecimal("6.00"), "Not shown in the menu", "Burgers");
         hidden.setActive(false);
         productRepository.saveAll(List.of(burger, drink, hidden));
@@ -149,5 +157,74 @@ class ProductServiceIT {
         assertThatThrownBy(() -> productService.findImage(menuId))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("Product " + menuId + " has no image");
+    }
+
+    // Management of the administrator
+
+    @Test
+    void createAndUpdateProductStoreItsIngredientsInTheDatabase() {
+        AdminProductDTO created = productService.createProduct(new ProductRequestDTO("New Burger",
+                new BigDecimal("6.25"), "New", "Burgers", List.of(new IngredientQuantityDTO(bread.getId(), 2))));
+
+        assertThat(productService.findForManagement(created.id()).ingredients())
+                .extracting(ProductIngredientDTO::name, ProductIngredientDTO::quantity)
+                .containsExactly(tuple("Bread", 2));
+
+        productService.updateProduct(created.id(), new ProductRequestDTO("New Burger XL", new BigDecimal("7.00"),
+                null, "Burgers", List.of()));
+
+        Product stored = productRepository.findById(created.id()).orElseThrow();
+        assertThat(stored.getName()).isEqualTo("New Burger XL");
+        assertThat(stored.getPrice()).isEqualByComparingTo("7.00");
+        assertThat(productService.findForManagement(created.id()).ingredients()).isEmpty();
+    }
+
+    @Test
+    void createComboStoresItsProductsAndUpdateComboReplacesThem() {
+        AdminProductDTO combo = productService.createCombo(new ComboRequestDTO("New Menu", new BigDecimal("6.00"),
+                null, List.of(new ComboItemRequestDTO(burger.getId(), 1), new ComboItemRequestDTO(drink.getId(), 1))));
+
+        assertThat(productService.findById(combo.id()).products())
+                .extracting(item -> item.product().name()).containsExactly("Test Burger", "Test Drink");
+        assertThat(productRepository.findById(combo.id()).orElseThrow().getCategory()).isEqualTo("Combos");
+
+        productService.updateCombo(combo.id(), new ComboRequestDTO("New Menu", new BigDecimal("4.00"), null,
+                List.of(new ComboItemRequestDTO(drink.getId(), 2))));
+
+        assertThat(productService.findById(combo.id()).products())
+                .extracting(item -> item.product().name(), ComboItemDTO::quantity)
+                .containsExactly(tuple("Test Drink", 2));
+    }
+
+    @Test
+    void aProductCanOnlyBeDeactivatedWhenNoActiveKomboIncludesIt() {
+        assertThatThrownBy(() -> productService.changeActive(burger.getId(), false))
+                .isInstanceOf(ProductInUseException.class)
+                .hasMessage("The product is in active combos: Test Menu");
+
+        productService.changeActive(menu.getId(), false);
+        productService.changeActive(burger.getId(), false);
+
+        assertThat(productRepository.findById(burger.getId()).orElseThrow().isActive()).isFalse();
+        assertThat(productService.findActive(null, PageRequest.of(0, 10)).getContent()).extracting(ProductDTO::name)
+                .containsExactly("Test Drink");
+        // The kombo cannot be activated again while it includes the deactivated burger
+        assertThatThrownBy(() -> productService.changeActive(menu.getId(), true))
+                .isInstanceOf(ProductInUseException.class)
+                .hasMessage("The combo includes deactivated products: Test Burger");
+    }
+
+    @Test
+    void theManagementListsActiveAndInactiveProductsAndKombos() {
+        PageRequest page = PageRequest.of(0, 10, Sort.by("name"));
+
+        assertThat(productService.findForManagement(null, null, page).getContent()).extracting(AdminProductDTO::name)
+                .containsExactly("Hidden Burger", "Test Burger", "Test Drink", "Test Menu");
+        assertThat(productService.findForManagement(true, false, page).getContent()).extracting(AdminProductDTO::name)
+                .containsExactly("Test Burger", "Test Drink");
+        assertThat(productService.findForManagement(false, null, page).getContent()).extracting(AdminProductDTO::name)
+                .containsExactly("Hidden Burger");
+        assertThat(productService.findForManagement(null, true, page).getContent()).extracting(AdminProductDTO::name)
+                .containsExactly("Test Menu");
     }
 }

@@ -19,18 +19,20 @@ import es.urjc.kombo.model.Image;
 @Service
 public class ImageService {
 
-    // Same limit as spring.servlet.multipart.max-file-size
-    public static final long MAX_SIZE = 1024L * 1024L;
+    // Each kind of picture has its own limit. spring.servlet.multipart.max-file-size is the biggest one (10 MB):
+    // a bigger file is rejected by Spring before reaching this class.
+    public static final long PROFILE_PICTURE_MAX_SIZE = 1024L * 1024L;
+    public static final long PRODUCT_PICTURE_MAX_SIZE = 10L * 1024L * 1024L;
 
     // The type is taken from the first bytes of the file (its signature), never from the name or the type sent by
     // the browser, so a file that is not really a JPEG, PNG, GIF or WebP picture (for example an SVG with scripts or
     // a renamed document) is rejected
-    public Image createImage(MultipartFile file, String text) {
+    public Image createImage(MultipartFile file, String text, long maxSize) {
         if (file == null || file.isEmpty()) {
             throw new InvalidImageException("image: the file is empty");
         }
-        if (file.getSize() > MAX_SIZE) {
-            throw new InvalidImageException("image: the file is bigger than 1 MB");
+        if (file.getSize() > maxSize) {
+            throw new ImageTooLargeException("image: the file is bigger than " + maxSize / (1024 * 1024) + " MB");
         }
         byte[] content = readBytes(file);
         String contentType = detectContentType(content);

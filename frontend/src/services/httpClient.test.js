@@ -56,6 +56,17 @@ describe('httpClient', () => {
     expect(error.message).toBe('Access denied');
   });
 
+  it('keeps the extra properties of the ProblemDetail', async () => {
+    const problem = { status: 409, detail: 'The product is in active combos: Kombo', products: [{ id: 3, name: 'Kombo' }] };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 409, json: () => Promise.resolve(problem) }));
+
+    const error = await apiFetch('/api/v1/admin/products/1', { method: 'PATCH', body: { active: false } }).catch(
+      (err) => err,
+    );
+
+    expect(error.problem.products).toEqual([{ id: 3, name: 'Kombo' }]);
+  });
+
   it('throws an ApiError when the error has no JSON body', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 502, json: () => Promise.reject(new Error()) }));
 
