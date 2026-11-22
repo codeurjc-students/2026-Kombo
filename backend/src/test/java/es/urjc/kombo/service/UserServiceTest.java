@@ -26,6 +26,7 @@ import es.urjc.kombo.dto.AddressesUpdateDTO;
 import es.urjc.kombo.dto.PasswordChangeDTO;
 import es.urjc.kombo.dto.ProfileUpdateDTO;
 import es.urjc.kombo.dto.SignUpRequestDTO;
+import es.urjc.kombo.dto.UserCreationRequestDTO;
 import es.urjc.kombo.dto.UserDTO;
 import es.urjc.kombo.dto.UserMapper;
 import es.urjc.kombo.model.Image;
@@ -92,6 +93,44 @@ class UserServiceTest {
                 "secret-password")))
                 .isInstanceOf(EmailAlreadyUsedException.class)
                 .hasMessage("The email customer@kombo.com is already registered");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void createUserSavesAnEmployeeWithTheEncodedPassword() {
+        when(userRepository.existsByEmail("luis@kombo.com")).thenReturn(false);
+        when(passwordEncoder.encode("secret-password")).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDTO user = userService.createUser(new UserCreationRequestDTO(" Luis ", "", " luis@kombo.com ", null,
+                "secret-password", "EMPLOYEE"));
+
+        ArgumentCaptor<User> saved = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(saved.capture());
+        assertThat(saved.getValue().getPassword()).isEqualTo("encoded-password");
+        assertThat(user.role()).isEqualTo(User.Role.EMPLOYEE);
+        assertThat(user.name()).isEqualTo("Luis");
+        assertThat(user.surname()).isNull();
+        assertThat(user.email()).isEqualTo("luis@kombo.com");
+    }
+
+    @Test
+    void createUserCanAlsoCreateACustomer() {
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserDTO user = userService.createUser(new UserCreationRequestDTO("Ana", null, "ana@example.com", null,
+                "secret-password", "CUSTOMER"));
+
+        assertThat(user.role()).isEqualTo(User.Role.CUSTOMER);
+    }
+
+    @Test
+    void createUserRejectsAnEmailThatIsAlreadyRegistered() {
+        when(userRepository.existsByEmail("employee@kombo.com")).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.createUser(new UserCreationRequestDTO("Luis", null, "employee@kombo.com",
+                null, "secret-password", "EMPLOYEE")))
+                .isInstanceOf(EmailAlreadyUsedException.class);
         verify(userRepository, never()).save(any());
     }
 

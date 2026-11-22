@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Loads the pages of a paginated REST API resource ({ content, page }).
 // fetchPage(pageNumber) must be stable (useCallback): when it changes, the list starts again from page 0.
 // loadMore() adds the next page to the items already loaded (the "Más resultados" button).
+// refresh() reads the first page again and replaces the items when it arrives, without the loading state, so the
+// list does not flicker (used to reload a list automatically).
 // State is only set when a request finishes, as the React hooks rules recommend.
 export default function usePagedList(fetchPage) {
   const [request, setRequest] = useState({ fetchPage, page: 0, attempt: 0 });
@@ -37,6 +39,12 @@ export default function usePagedList(fetchPage) {
     };
   }, [request]);
 
+  // Stable, so it can be used in the dependencies of an effect (a timer)
+  const refresh = useCallback(
+    () => setRequest((current) => ({ ...current, page: 0, attempt: current.attempt + 1 })),
+    [],
+  );
+
   const sameList = state.request?.fetchPage === fetchPage;
   const pageInfo = sameList ? state.pageInfo : null;
 
@@ -48,5 +56,6 @@ export default function usePagedList(fetchPage) {
     hasMore: Boolean(pageInfo && pageInfo.number + 1 < pageInfo.totalPages),
     loadMore: () => setRequest((current) => ({ ...current, page: (pageInfo?.number ?? 0) + 1, attempt: 0 })),
     retry: () => setRequest((current) => ({ ...current, attempt: current.attempt + 1 })),
+    refresh,
   };
 }

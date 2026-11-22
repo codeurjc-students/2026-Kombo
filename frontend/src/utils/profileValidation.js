@@ -1,6 +1,6 @@
 // Validation of the forms of the profile settings. Each function returns an object with a message (in Spanish)
 // for each wrong field; an empty object means the form is valid. The server validates the data again.
-import { PHONE } from './checkoutValidation';
+import { EMAIL, PHONE } from './checkoutValidation';
 
 // Same limits as the server (ProfileUpdateDTO and PasswordChangeDTO)
 const MAX_NAME = 50;
@@ -37,6 +37,30 @@ export function validatePasswordChange(passwords) {
     errors.newPassword = `La contraseña nueva tiene entre ${MIN_PASSWORD} y ${MAX_PASSWORD} caracteres.`;
   }
   if (passwords.repeatPassword !== passwords.newPassword) {
+    errors.repeatPassword = 'Las contraseñas no coinciden.';
+  }
+  return errors;
+}
+
+const MAX_EMAIL = 100;
+
+// New user created by the administrator: { name, surname, email, phone, password, repeatPassword } (same limits as
+// UserCreationRequestDTO; the role is chosen from a list)
+export function validateNewUser(user) {
+  const errors = validateProfile(user);
+  if (!user.name.trim()) {
+    errors.name = 'Escribe el nombre.';
+  }
+  const email = user.email.trim();
+  if (!EMAIL.test(email)) {
+    errors.email = 'Escribe un correo electrónico válido.';
+  } else if (email.length > MAX_EMAIL) {
+    errors.email = `El correo electrónico tiene como máximo ${MAX_EMAIL} caracteres.`;
+  }
+  if (user.password.length < MIN_PASSWORD || user.password.length > MAX_PASSWORD) {
+    errors.password = `La contraseña tiene entre ${MIN_PASSWORD} y ${MAX_PASSWORD} caracteres.`;
+  }
+  if (user.repeatPassword !== user.password) {
     errors.repeatPassword = 'Las contraseñas no coinciden.';
   }
   return errors;

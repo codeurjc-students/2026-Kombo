@@ -7,7 +7,8 @@ import { ROLE_LABELS } from '../utils/format';
 import BrandLogo from './BrandLogo';
 import UserAvatar from './UserAvatar';
 
-// Links shown to each role. Pages that do not exist yet are not linked.
+// Links shown to each role. Pages that do not exist yet are not linked. Employees and the administrator have no
+// orders of their own, so "Mi perfil" opens the settings of their account directly.
 const LINKS = {
   ANONYMOUS: [{ to: '/', label: 'Carta', end: true }],
   CUSTOMER: [
@@ -17,14 +18,14 @@ const LINKS = {
   EMPLOYEE: [
     { to: '/', label: 'Carta', end: true },
     { to: '/orders', label: 'Pedidos', end: true },
-    { to: '/profile', label: 'Mi perfil' },
+    { to: '/profile/settings', label: 'Mi perfil' },
   ],
   ADMIN: [
     { to: '/', label: 'Carta', end: true },
     { to: '/orders', label: 'Pedidos', end: true },
     { to: '/admin/users', label: 'Usuarios' },
     { to: '/admin/settings', label: 'Ajustes' },
-    { to: '/profile', label: 'Mi perfil' },
+    { to: '/profile/settings', label: 'Mi perfil' },
   ],
 };
 

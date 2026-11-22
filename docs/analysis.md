@@ -154,7 +154,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | Manage products (create, edit, delete, picture) | | | | X |
 | Change the delivery cost | | | | X |
 | Manage ingredients and restock | | | | X |
-| Manage employees (and see and change the account of any user) | | | | X |
+| Manage employees and customers: create, see, change and delete their accounts | | | | X |
 | View the dashboard and the sales reports | | | | X |
 
 

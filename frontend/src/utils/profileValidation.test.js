@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { validateAddress, validateImageFile, validatePasswordChange, validateProfile } from './profileValidation';
+import {
+  validateAddress,
+  validateImageFile,
+  validateNewUser,
+  validatePasswordChange,
+  validateProfile,
+} from './profileValidation';
 
 describe('validateProfile', () => {
   it('accepts a name with an empty surname and phone', () => {
@@ -60,5 +66,32 @@ describe('validateImageFile', () => {
       'La foto tiene que ser una imagen JPG, PNG, GIF o WebP.',
     );
     expect(validateImageFile({ type: 'image/jpeg', size: 1024 * 1024 + 1 })).toBe('La foto ocupa más de 1 MB.');
+  });
+});
+
+describe('validateNewUser', () => {
+  const USER = { name: 'Luis', surname: '', email: 'luis@kombo.com', phone: '', password: 'secret-password' };
+
+  it('accepts a user with the required fields', () => {
+    expect(validateNewUser({ ...USER, repeatPassword: 'secret-password' })).toEqual({});
+  });
+
+  it('asks for the name, a valid email and the same password twice', () => {
+    expect(
+      validateNewUser({ ...USER, name: ' ', email: 'luis', password: 'short', repeatPassword: 'other' }),
+    ).toEqual({
+      name: 'Escribe el nombre.',
+      email: 'Escribe un correo electrónico válido.',
+      password: 'La contraseña tiene entre 8 y 72 caracteres.',
+      repeatPassword: 'Las contraseñas no coinciden.',
+    });
+  });
+
+  it('rejects an email that is too long', () => {
+    const email = `${'a'.repeat(95)}@kombo.com`;
+
+    expect(validateNewUser({ ...USER, email, repeatPassword: 'secret-password' })).toEqual({
+      email: 'El correo electrónico tiene como máximo 100 caracteres.',
+    });
   });
 });

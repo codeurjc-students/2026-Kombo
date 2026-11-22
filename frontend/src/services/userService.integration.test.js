@@ -3,16 +3,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCurrentUser, login } from './authService';
 import { ApiError } from './httpClient';
-import { startCustomerSession } from '../test-session';
+import { startCustomerSession, startSession } from '../test-session';
 import {
   changeMyPassword,
+  createUser,
   deleteMyAccount,
   deleteMyImage,
+  deleteUser,
+  deleteUserImage,
+  getUser,
   myImageUrl,
   signUp,
   updateMyAddresses,
   updateMyProfile,
+  updateUser,
+  updateUserAddresses,
   uploadMyImage,
+  uploadUserImage,
+  userImageUrl,
 } from './userService';
 
 // First bytes of a JPEG file: the server checks the signature of the picture, not its name
@@ -120,5 +128,48 @@ describe('userService with the real REST API', () => {
 
     const error = await login(user.email, 'secret-password').catch((err) => err);
     expect(error.status).toBe(401);
+  });
+
+  it('the administrator creates an employee, changes their data and picture and deletes them', async () => {
+    await startSession('admin@kombo.com', 'admin');
+    const email = `employee-test-${Date.now()}@kombo.com`;
+
+    const employee = await createUser({ name: 'Luis', email, password: 'secret-password', role: 'EMPLOYEE' });
+    expect(employee).toMatchObject({ name: 'Luis', email, role: 'EMPLOYEE' });
+
+    const profile = { name: 'Luis Miguel', surname: 'Gómez', phone: '600123456' };
+    expect(await updateUser(employee.id, profile)).toMatchObject({ name: 'Luis Miguel', email });
+    const withPicture = await uploadUserImage(employee.id, new File([JPEG], 'photo.jpg', { type: 'image/jpeg' }));
+    const response = await fetch(userImageUrl(employee.id, withPicture.imageId));
+    expect(new Uint8Array(await response.arrayBuffer())).toEqual(JPEG);
+    await deleteUserImage(employee.id);
+    expect((await getUser(employee.id)).imageId).toBeNull();
+
+    await deleteUser(employee.id);
+    const error = await getUser(employee.id).catch((err) => err);
+    expect(error.status).toBe(404);
+  });
+
+  it('the administrator creates a customer and changes their addresses, but not another administrator', async () => {
+    await startSession('admin@kombo.com', 'admin');
+    const email = `customer-test-${Date.now()}@example.com`;
+
+    const customer = await createUser({ name: 'Ana', email, password: 'secret-password', role: 'CUSTOMER' });
+    expect((await updateUserAddresses(customer.id, ['Calle Mayor 1'])).addresses).toEqual(['Calle Mayor 1']);
+    await deleteUser(customer.id);
+
+    const error = await createUser({ name: 'Ana', email, password: 'secret-password', role: 'ADMIN' }).catch(
+      (err) => err,
+    );
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.status).toBe(400);
+  });
+
+  it('a customer cannot create users', async () => {
+    await startCustomerSession('client-create-user');
+
+    const user = { name: 'Ana', email: 'other@example.com', password: 'secret-password', role: 'EMPLOYEE' };
+    const error = await createUser(user).catch((err) => err);
+    expect(error.status).toBe(403);
   });
 });

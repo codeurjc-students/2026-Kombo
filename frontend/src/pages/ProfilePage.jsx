@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Badge, Button, Col, Row } from 'react-bootstrap';
-import { Link } from 'react-router';
+import { Link, Navigate } from 'react-router';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import UserAvatar from '../components/UserAvatar';
@@ -13,9 +13,14 @@ import { ORDER_STATUS, ROLE_LABELS, formatDateTime, formatPrice, orderLinesSumma
 // Orders shown at a time in the profile
 const RECENT_ORDERS = 4;
 
-// Profile of the logged in user and, for customers, their last orders
+// Profile of the customer with their last orders. Employees and the administrator have no orders, so they go
+// straight to the settings of their account.
 export default function ProfilePage() {
   const { user } = useAuth();
+
+  if (user.role !== 'CUSTOMER') {
+    return <Navigate to="/profile/settings" replace />;
+  }
 
   return (
     <Row className="g-4">
@@ -53,7 +58,9 @@ export default function ProfilePage() {
           </Button>
         </section>
       </Col>
-      <Col lg={8}>{user.role === 'CUSTOMER' && <RecentOrders />}</Col>
+      <Col lg={8}>
+        <RecentOrders />
+      </Col>
     </Row>
   );
 }

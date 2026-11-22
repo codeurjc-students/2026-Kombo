@@ -13,6 +13,7 @@ import es.urjc.kombo.dto.ImageFileDTO;
 import es.urjc.kombo.dto.PasswordChangeDTO;
 import es.urjc.kombo.dto.ProfileUpdateDTO;
 import es.urjc.kombo.dto.SignUpRequestDTO;
+import es.urjc.kombo.dto.UserCreationRequestDTO;
 import es.urjc.kombo.dto.UserDTO;
 import es.urjc.kombo.dto.UserMapper;
 import es.urjc.kombo.model.Image;
@@ -51,13 +52,16 @@ public class UserService {
     // The email column is also unique in the database, which protects against two sign ups at the same time.
     @Transactional
     public UserDTO signUp(SignUpRequestDTO request) {
-        String email = request.email().trim();
-        if (userRepository.existsByEmail(email)) {
-            throw new EmailAlreadyUsedException(email);
-        }
-        User user = new User(request.name().trim(), blankToNull(request.surname()), email,
-                blankToNull(request.phone()), passwordEncoder.encode(request.password()), User.Role.CUSTOMER);
-        return userMapper.toDTO(userRepository.save(user));
+        return create(request.name(), request.surname(), request.email(), request.phone(), request.password(),
+                User.Role.CUSTOMER);
+    }
+
+    // The administrator creates a customer or an employee (the role is checked in UserCreationRequestDTO), with
+    // the same rules as the sign up
+    @Transactional
+    public UserDTO createUser(UserCreationRequestDTO request) {
+        return create(request.name(), request.surname(), request.email(), request.phone(), request.password(),
+                User.Role.valueOf(request.role()));
     }
 
     // Changes the personal data of a user (the user themselves or the administrator). The email cannot change.
@@ -123,6 +127,17 @@ public class UserService {
         }
         orderRepository.anonymizeOrdersOf(user);
         userRepository.delete(user);
+    }
+
+    private UserDTO create(String name, String surname, String email, String phone, String password,
+            User.Role role) {
+        String trimmedEmail = email.trim();
+        if (userRepository.existsByEmail(trimmedEmail)) {
+            throw new EmailAlreadyUsedException(trimmedEmail);
+        }
+        User user = new User(name.trim(), blankToNull(surname), trimmedEmail, blankToNull(phone),
+                passwordEncoder.encode(password), role);
+        return userMapper.toDTO(userRepository.save(user));
     }
 
     private User findUser(long id) {

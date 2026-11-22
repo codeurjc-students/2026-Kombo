@@ -397,6 +397,24 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserDTO"
+  /api/v1/admin/users:
+    post:
+      tags:
+      - admin-user-controller
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreationRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserDTO"
   /api/v1/orders/{id}:
     get:
       tags:
@@ -816,6 +834,37 @@ components:
           type: string
         password:
           type: string
+    UserCreationRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          minLength: 0
+        surname:
+          type: string
+          maxLength: 100
+          minLength: 0
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          minLength: 0
+        phone:
+          type: string
+          pattern: "^$|^\\+?[0-9 ]{9,15}$"
+        password:
+          type: string
+          maxLength: 72
+          minLength: 8
+        role:
+          type: string
+          pattern: CUSTOMER|EMPLOYEE
+      required:
+      - email
+      - name
+      - password
+      - role
     OrderUpdateDTO:
       type: object
       properties:

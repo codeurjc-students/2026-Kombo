@@ -63,11 +63,14 @@ describe('AppNavbar', () => {
   it('shows the orders and the profile to employees', () => {
     renderApp('/', { user: EMPLOYEE });
     expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Mi perfil']);
+    // No intermediate profile page: the settings of the account open directly
+    expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
   });
 
   it('shows the orders, the user management and the profile to the administrator', () => {
     renderApp('/', { user: ADMIN });
     expect(navLinks()).toEqual(['Kombo', 'Carta', 'Pedidos', 'Usuarios', 'Ajustes', 'Mi perfil']);
+    expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
   });
 
   it('links the cart counter to the cart page', () => {

@@ -20,6 +20,7 @@ import es.urjc.kombo.dto.ImageFileDTO;
 import es.urjc.kombo.dto.PasswordChangeDTO;
 import es.urjc.kombo.dto.ProfileUpdateDTO;
 import es.urjc.kombo.dto.SignUpRequestDTO;
+import es.urjc.kombo.dto.UserCreationRequestDTO;
 import es.urjc.kombo.dto.UserDTO;
 import es.urjc.kombo.model.Order;
 import es.urjc.kombo.model.User;
@@ -46,6 +47,18 @@ class UserServiceIT {
     @BeforeEach
     void setUp() {
         userRepository.findByEmail("ana@example.com").ifPresent(user -> userService.deleteAccount(user.getId()));
+        userRepository.findByEmail("luis@kombo.com").ifPresent(user -> userService.deleteAccount(user.getId()));
+    }
+
+    @Test
+    void createUserStoresTheEmployeeInTheDatabaseWithAnEncodedPassword() {
+        UserDTO user = userService.createUser(new UserCreationRequestDTO("Luis", "Gómez", "luis@kombo.com",
+                "600123456", "secret-password", "EMPLOYEE"));
+
+        User stored = userRepository.findById(user.id()).orElseThrow();
+        assertThat(stored.getRole()).isEqualTo(User.Role.EMPLOYEE);
+        assertThat(stored.getSurname()).isEqualTo("Gómez");
+        assertThat(passwordEncoder.matches("secret-password", stored.getPassword())).isTrue();
     }
 
     @Test

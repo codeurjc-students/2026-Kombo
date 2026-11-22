@@ -2,7 +2,7 @@ import { fireEvent, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CART_STORAGE_KEY } from '../context/CartProvider';
 import { getMyOrders } from '../services/orderService';
-import { CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
+import { ADMIN, CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
 vi.mock('../services/orderService', () => ({ getMyOrders: vi.fn(), getOrder: vi.fn() }));
 
@@ -59,22 +59,31 @@ describe('ProfilePage', () => {
     expect(await screen.findByText(/Todavía no has hecho ningún pedido/)).toBeInTheDocument();
   });
 
-  it('does not show order history to employees', () => {
-    renderApp('/profile', { user: EMPLOYEE });
-    expect(screen.queryByText('Mis pedidos', { selector: 'h2' })).not.toBeInTheDocument();
+  it.each([
+    ['employees', EMPLOYEE],
+    ['the administrator', ADMIN],
+  ])('sends %s straight to the settings of their account, without order history', async (_, user) => {
+    const { router } = renderApp('/profile', { user });
+
+    expect(await screen.findByRole('heading', { name: 'Configuración' })).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe('/profile/settings');
     expect(getMyOrders).not.toHaveBeenCalled();
   });
 
-  it('links to the settings of the account', () => {
-    renderApp('/profile', { user: EMPLOYEE });
+  it('links to the settings of the account', async () => {
+    getMyOrders.mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } });
+    renderApp('/profile', { user: CUSTOMER });
     expect(screen.getByRole('button', { name: 'Configuración' })).toHaveAttribute('href', '/profile/settings');
+    await screen.findByText(/Todavía no has hecho ningún pedido/);
   });
 
-  it('shows the profile picture of the user', () => {
-    renderApp('/profile', { user: { ...EMPLOYEE, imageId: 4 } });
-    expect(within(screen.getByRole('main')).getByRole('img', { name: 'Foto de perfil de Carlos' })).toHaveAttribute(
+  it('shows the profile picture of the user', async () => {
+    getMyOrders.mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } });
+    renderApp('/profile', { user: { ...CUSTOMER, imageId: 4 } });
+    expect(within(screen.getByRole('main')).getByRole('img', { name: 'Foto de perfil de Lucía' })).toHaveAttribute(
       'src',
       '/api/v1/users/me/image?v=4',
     );
+    await screen.findByText(/Todavía no has hecho ningún pedido/);
   });
 });
