@@ -86,6 +86,9 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Counter orders: an employee uses the menu, the cart and the checkout (*Pedido en mostrador*, *Nuevo pedido en mostrador* button of the dashboard); only the name of the customer is required and a card is paid with the card reader of the restaurant (no card data). The confirmation has an *Ir a los pedidos* button.
 - Tests (the six types) of the personal data and the password, the addresses, the profile picture, the deletion of the account, the order dashboard and the counter orders: `UserServiceTest`, `ImageServiceTest`, `OrderServiceTest`, `UserServiceIT`, `OrderServiceIT`, `UserApiIT`, `OrderDashboardApiIT`, `ProfileSettingsPage.test.jsx`, `OrdersDashboardPage.test.jsx`, the service and validation tests of the client, `userService.integration.test.js`, `orderService.integration.test.js`, `ProfileSettingsE2E` and `OrderDashboardE2E`.
 - Profile, order dashboard and counter order requests in the Postman collection.
+- `POST /api/v1/admin/users` (administrator): creates a customer or an employee with the same rules as the sign up and the role (`CUSTOMER` or `EMPLOYEE`; 400 for `ADMIN`, because there is only one administrator); answers 201 with the `Location` header of `/api/v1/users/{id}` and 409 if the email is already registered.
+- User management of the administrator: *Nuevo usuario* button and page (`/admin/users/new`) with the role, the personal data and the first password; *Editar* and *Borrar* buttons in the users list (not for the administrator); edit page (`/admin/users/{id}`) with the personal data, the profile picture, the addresses of customers and the deletion of the user, with a confirmation.
+- Tests (the six types) of the user management: `UserServiceTest`, `UserServiceIT`, `UserApiIT`, `UsersPage.test.jsx`, `NewUserPage.test.jsx`, `UserEditPage.test.jsx`, the service and validation tests of the client, `userService.integration.test.js` and `UserManagementE2E`.
 
 ### Changed
 
@@ -133,6 +136,10 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `ProductService` reads the pictures with `ImageService`; the client HTTP client sends `FormData` bodies (file uploads) as multipart.
 - `spring.servlet.multipart.max-file-size=1MB` written in `application.properties`.
 - Development guide (access rules, client pages, tests, sample data), analysis (permissions), README of the sample pictures, OpenAPI documentation and Gantt chart updated with the profile settings and the order dashboard.
+- The forms of the personal data, the profile picture and the addresses of the profile settings are shared components (`AccountForms.jsx`) used also by the user management of the administrator; `UserAvatar` can show the picture of any user.
+- The *Mi perfil* link of employees and the administrator opens the settings of their account directly, without the intermediate profile page (only customers have one, with their orders); `/profile` sends them to the settings, and the settings page only shows *Volver al perfil* to customers.
+- The order dashboard reads its lists again every 30 seconds, so new orders appear without pressing *Actualizar*; the list does not flicker and an open confirmation stays open (only the first page is read again).
+- Development guide (access rules, client pages and tests), OpenAPI documentation and Postman collection updated with the user management.
 
 ## Phase 2 - 2026-10-29
 

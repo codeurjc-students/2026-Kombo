@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, Badge, Button, Modal, Spinner, Tab, Tabs } from 'react-bootstrap';
 import { Link } from 'react-router';
 import ErrorState from '../components/ErrorState';
@@ -20,10 +20,12 @@ import {
 
 // A pending order that has waited longer than this is shown in red
 export const LATE_MINUTES = 10;
+// The lists are read again from the server every 30 seconds, so new orders appear without pressing "Actualizar"
+export const REFRESH_MS = 30000;
 
 // Dashboard of the employees and the administrator: the pending orders, oldest first (the next one to prepare is
 // on top), with the minutes they have been waiting, and the finished ones of today, most recent first, with the time
-// they were placed. Each change reloads both lists from the server.
+// they were placed. Each change reloads both lists from the server, and they are also read again every 30 seconds.
 export default function OrdersDashboardPage() {
   // A new version creates new fetch functions, so both lists start again from their first page
   const [version, setVersion] = useState(0);
@@ -88,8 +90,15 @@ function OrderList({ statuses, sort, onChange, today = false }) {
     (page) => getOrders({ statuses, page, sort, since: today ? startOfToday() : undefined }),
     [statuses, sort, today],
   );
-  const { items: orders, pageInfo, loading, error, hasMore, loadMore, retry } = usePagedList(fetchPage);
+  const { items: orders, pageInfo, loading, error, hasMore, loadMore, retry, refresh } = usePagedList(fetchPage);
   const pending = Boolean(onChange);
+
+  // Automatic reload: only the first page is read again (the next ones, if loaded, are left out until
+  // "Más resultados" is pressed again). The cards keep their key, so an open confirmation is not closed.
+  useEffect(() => {
+    const timer = setInterval(refresh, REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [refresh]);
   // The waiting time of the pending orders counts while the page is open
   const now = useNow(30000);
 

@@ -1,7 +1,7 @@
 // Validation of the checkout form. Returns an object with a message (in Spanish) for each wrong field;
 // an empty object means the form is valid. The server validates the order again.
 
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Same pattern as the server (OrderRequestDTO, SignUpRequestDTO and ProfileUpdateDTO)
 export const PHONE = /^\+?[0-9 ]{9,15}$/;
 const CARD_NUMBER = /^[0-9]{16}$/;

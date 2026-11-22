@@ -473,6 +473,84 @@
           "response": []
         },
         {
+          "name": "Create an employee (administrator)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luis\",\n  \"surname\": \"Gómez\",\n  \"email\": \"luis@kombo.com\",\n  \"phone\": \"600123456\",\n  \"password\": \"secret-password\",\n  \"role\": \"EMPLOYEE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "The administrator creates a customer or an employee (role CUSTOMER or EMPLOYEE) with their first password. 201 with the new user and the Location header (/api/v1/users/{id}); 409 if the email is already registered, 401 without session and 403 for other roles. Log in as the administrator first."
+          },
+          "response": []
+        },
+        {
+          "name": "Create another administrator (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Luis\",\n  \"email\": \"other-admin@kombo.com\",\n  \"password\": \"secret-password\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "users"
+              ]
+            },
+            "description": "There is only one administrator: the role ADMIN is rejected with 400 (\"role: must be CUSTOMER or EMPLOYEE\")."
+          },
+          "response": []
+        },
+        {
           "name": "Get a user",
           "request": {
             "method": "GET",

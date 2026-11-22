@@ -62,6 +62,13 @@ describe('ProfileSettingsPage', () => {
     expect(updateMyProfile).not.toHaveBeenCalled();
   });
 
+  it('has no profile page to go back to for employees and the administrator', () => {
+    renderApp('/profile/settings', { user: EMPLOYEE });
+
+    expect(screen.getByRole('heading', { name: 'Configuración' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Volver al perfil' })).not.toBeInTheDocument();
+  });
+
   it('saves only the personal data and reads the session again', async () => {
     updateMyProfile.mockResolvedValue({ ...USER, name: 'Lucía María' });
     const { auth } = renderApp('/profile/settings', { user: USER });

@@ -2,15 +2,22 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiFetch } from './httpClient';
 import {
   changeMyPassword,
+  createUser,
   deleteMyAccount,
   deleteMyImage,
+  deleteUser,
+  deleteUserImage,
   getUser,
   getUsers,
   myImageUrl,
   signUp,
   updateMyAddresses,
   updateMyProfile,
+  updateUser,
+  updateUserAddresses,
   uploadMyImage,
+  uploadUserImage,
+  userImageUrl,
 } from './userService';
 
 vi.mock('./httpClient', () => ({ apiFetch: vi.fn(), apiUrl: (path) => path }));
@@ -79,5 +86,31 @@ describe('userService', () => {
     await deleteMyAccount();
 
     expect(apiFetch).toHaveBeenCalledWith('/api/v1/users/me', { method: 'DELETE' });
+  });
+
+  it('calls the endpoints of the administrator to manage any user', async () => {
+    const user = { name: 'Luis', email: 'luis@kombo.com', password: 'secret-password', role: 'EMPLOYEE' };
+    const profile = { name: 'Luis', surname: '', phone: '' };
+    const file = new File(['x'], 'photo.png', { type: 'image/png' });
+
+    await createUser(user);
+    await updateUser(5, profile);
+    await updateUserAddresses(5, ['Calle Mayor 1']);
+    await uploadUserImage(5, file);
+    await deleteUserImage(5);
+    await deleteUser(5);
+
+    expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/admin/users', { method: 'POST', body: user });
+    expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/users/5', { method: 'PUT', body: profile });
+    expect(apiFetch).toHaveBeenNthCalledWith(3, '/api/v1/users/5/addresses', {
+      method: 'PUT',
+      body: { addresses: ['Calle Mayor 1'] },
+    });
+    const [path, options] = apiFetch.mock.calls[3];
+    expect(path).toBe('/api/v1/users/5/image');
+    expect(options.body.get('image')).toBe(file);
+    expect(apiFetch).toHaveBeenNthCalledWith(5, '/api/v1/users/5/image', { method: 'DELETE' });
+    expect(apiFetch).toHaveBeenNthCalledWith(6, '/api/v1/users/5', { method: 'DELETE' });
+    expect(userImageUrl(5, 7)).toBe('/api/v1/users/5/image?v=7');
   });
 });

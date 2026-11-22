@@ -103,6 +103,46 @@ describe('OrdersDashboardPage', () => {
     }
   });
 
+  it('reads the orders again every 30 seconds without hiding the list', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mockOrders([order(1, 'IN_PREPARATION')]);
+      renderApp('/orders', { user: EMPLOYEE });
+      await card(1001);
+      const calls = getOrders.mock.calls.length;
+      mockOrders([order(1, 'IN_PREPARATION'), order(2, 'IN_PREPARATION')]);
+
+      await act(() => vi.advanceTimersByTimeAsync(29000));
+      expect(getOrders).toHaveBeenCalledTimes(calls);
+
+      await act(() => vi.advanceTimersByTimeAsync(1000));
+
+      expect(await card(1002)).toBeTruthy();
+      expect(screen.queryByText('Cargando pedidos…')).not.toBeInTheDocument();
+      // Both lists (pending and finished) are read again, from their first page
+      expect(getOrders).toHaveBeenCalledTimes(calls + 2);
+      expect(getOrders.mock.calls.slice(calls).map(([options]) => options.page)).toEqual([0, 0]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('keeps the confirmation open when the orders are read again', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mockOrders([order(1, 'IN_PREPARATION')]);
+      renderApp('/orders', { user: EMPLOYEE });
+      fireEvent.click((await card(1001)).getByRole('button', { name: 'Cancelar' }));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      await act(() => vi.advanceTimersByTimeAsync(30000));
+
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('marks an order as ready and reloads the lists', async () => {
     mockOrders([order(1, 'IN_PREPARATION')]);
     renderApp('/orders', { user: EMPLOYEE });

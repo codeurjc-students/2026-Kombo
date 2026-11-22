@@ -35,6 +35,10 @@ class UserApiIT {
             {"name":"Ana","surname":"Martín","email":"ana@example.com","phone":"600123456","password":"secret-password"}
             """;
 
+    private static final String NEW_EMPLOYEE = """
+            {"name":"Luis","surname":"Gómez","email":"luis@kombo.com","password":"secret-password","role":"EMPLOYEE"}
+            """;
+
     @LocalServerPort
     private int port;
 
@@ -45,6 +49,7 @@ class UserApiIT {
     void setUp() {
         ApiTestSupport.configureHttps(port);
         userRepository.findByEmail("ana@example.com").ifPresent(userRepository::delete);
+        userRepository.findByEmail("luis@kombo.com").ifPresent(userRepository::delete);
     }
 
     @Test
@@ -317,6 +322,54 @@ class UserApiIT {
 
         given().cookie(JwtService.COOKIE_NAME, token).when().delete("/api/v1/users/{id}", employeeId)
                 .then().statusCode(403);
+    }
+
+    @Test
+    void theAdministratorCreatesAnEmployeeWhoCanLogIn() {
+        int id = given().cookie(JwtService.COOKIE_NAME, adminToken()).contentType(ContentType.JSON)
+                .body(NEW_EMPLOYEE)
+                .when().post("/api/v1/admin/users")
+                .then().statusCode(201)
+                .header("Location", containsString("/api/v1/users/"))
+                .body("email", equalTo("luis@kombo.com"))
+                .body("role", equalTo("EMPLOYEE"))
+                .body("$", not(hasKey("password")))
+                .extract().path("id");
+
+        String token = ApiTestSupport.login("luis@kombo.com", "secret-password");
+        given().cookie(JwtService.COOKIE_NAME, token).when().get("/api/v1/auth/me")
+                .then().statusCode(200)
+                .body("id", equalTo(id))
+                .body("role", equalTo("EMPLOYEE"));
+    }
+
+    @Test
+    void theAdministratorCannotCreateAnotherAdministratorOrARepeatedEmail() {
+        String admin = adminToken();
+
+        given().cookie(JwtService.COOKIE_NAME, admin).contentType(ContentType.JSON)
+                .body(NEW_EMPLOYEE.replace("EMPLOYEE", "ADMIN"))
+                .when().post("/api/v1/admin/users")
+                .then().statusCode(400)
+                .contentType("application/problem+json")
+                .body("detail", equalTo("role: must be CUSTOMER or EMPLOYEE"));
+        given().cookie(JwtService.COOKIE_NAME, admin).contentType(ContentType.JSON)
+                .body(NEW_EMPLOYEE.replace("luis@kombo.com", "employee@kombo.com"))
+                .when().post("/api/v1/admin/users")
+                .then().statusCode(409);
+        assertThat(userRepository.findByEmail("luis@kombo.com")).isEmpty();
+    }
+
+    @Test
+    void onlyTheAdministratorCreatesUsersWithARole() {
+        given().contentType(ContentType.JSON).body(NEW_EMPLOYEE)
+                .when().post("/api/v1/admin/users")
+                .then().statusCode(401);
+        given().cookie(JwtService.COOKIE_NAME, ApiTestSupport.login("employee@kombo.com", "employee"))
+                .contentType(ContentType.JSON).body(NEW_EMPLOYEE)
+                .when().post("/api/v1/admin/users")
+                .then().statusCode(403);
+        assertThat(userRepository.findByEmail("luis@kombo.com")).isEmpty();
     }
 
     private static String adminToken() {
