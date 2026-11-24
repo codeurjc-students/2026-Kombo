@@ -5,6 +5,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import ProductFormFields from '../components/ProductFormFields';
 import ProductPhotoField from '../components/ProductPhotoField';
+import SearchableSelect from '../components/SearchableSelect';
 import useSaveProduct from '../hooks/useSaveProduct';
 import { ApiError } from '../services/httpClient';
 import { createCombo, getAdminProduct, getAdminProducts, updateCombo } from '../services/productService';
@@ -72,6 +73,10 @@ function ComboForm({ combo, products }) {
       .map((item) => item.product)
       .filter((product) => !products.some((option) => option.id === product.id)),
   ];
+  const productOptions = options.map((product) => ({
+    value: product.id,
+    label: `${product.name} (${formatPrice(product.price)})`,
+  }));
   const prices = Object.fromEntries(options.map((product) => [String(product.id), Number(product.price)]));
   const sum = form.products.reduce(
     (total, item) => total + (prices[item.productId] ?? 0) * (Number(item.quantity) || 0),
@@ -131,19 +136,14 @@ function ComboForm({ combo, products }) {
           {form.products.length === 0 && <p className="text-secondary small mb-2">Añade al menos 2 unidades.</p>}
           {form.products.map((item, index) => (
             <div key={index} className="d-flex flex-wrap align-items-center gap-2 mb-2">
-              <Form.Select
-                className="w-auto flex-grow-1"
-                aria-label={`Producto ${index + 1}`}
+              <SearchableSelect
+                className="flex-grow-1"
+                ariaLabel={`Producto ${index + 1}`}
+                placeholder="Elige o escribe un producto"
+                options={productOptions}
                 value={item.productId}
-                onChange={(event) => changeProduct(index, 'productId', event.target.value)}
-              >
-                <option value="">Elige un producto</option>
-                {options.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} ({formatPrice(product.price)})
-                  </option>
-                ))}
-              </Form.Select>
+                onChange={(productId) => changeProduct(index, 'productId', productId)}
+              />
               <Form.Control
                 className="quantity-input"
                 type="number"

@@ -55,10 +55,14 @@ gantt
     Profile settings, picture and account deletion   :done, f3u, 2026-11-21, 1d
     Order dashboard and counter orders               :done, f3e, 2026-11-21, 2d
     Documentation of the profile and the dashboard   :done, f3x, 2026-11-22, 1d
-    Product, combo and employee management           :f3g, 2026-11-22, 1d
+    Product, combo and employee management           :done, f3g, 2026-11-22, 1d
     Quality review, release 0.1 and Phase 3 docs     :f3r, 2026-11-23, 1d
 
     section Phase 4 - Version 0.2
+    Profile link, long names and searchable lists    :active, f4e, 2026-11-24, 1d
+    Order phone, refunds and cancellation            :f4f, after f4e, 2d
+    Removing products from kombos                    :f4g, after f4f, 1d
+    Open kombos and sizes                            :f4h, after f4g, 4d
     Search, filters and customisation                :f4a, 2026-11-23, 5d
     Recommendation algorithm and PDF ticket          :f4b, after f4a, 5d
     Inventory and cash register closing              :f4c, after f4b, 5d

@@ -54,10 +54,26 @@ describe('AppNavbar', () => {
     expect(screen.getAllByRole('button', { name: 'Iniciar sesión' })).toHaveLength(1);
   });
 
-  it('shows the order history to customers', () => {
+  it('shows the order history and the profile to customers', () => {
     renderApp('/', { user: CUSTOMER });
-    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mis pedidos']);
+    expect(navLinks()).toEqual(['Kombo', 'Carta', 'Mis pedidos', 'Mi perfil']);
+    expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
     expect(screen.getByText('Cliente')).toBeInTheDocument();
+  });
+
+  it('marks only "Mi perfil" as the current page in the settings of a customer', async () => {
+    renderApp('/profile/settings', { user: CUSTOMER });
+    await screen.findByRole('heading', { name: 'Mi perfil' });
+    expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Mis pedidos' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('keeps a long name apart from the profile picture, so the name wraps and the picture keeps its size', () => {
+    const name = 'Maximiliana Guadalupe Fernández de la Concepción';
+    renderApp('/', { user: { ...CUSTOMER, name } });
+    const nameText = screen.getByText(name);
+    expect(nameText).toHaveClass('user-name-text');
+    expect(nameText.previousElementSibling).toHaveClass('user-avatar');
   });
 
   it('shows the orders and the profile to employees', () => {

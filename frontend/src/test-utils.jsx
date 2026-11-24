@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { vi } from 'vitest';
@@ -23,3 +23,11 @@ export function renderApp(
 export const CUSTOMER = { id: 2, name: 'Lucía', surname: 'García', email: 'customer@kombo.com', role: 'CUSTOMER', addresses: [] };
 export const EMPLOYEE = { id: 3, name: 'Carlos', surname: 'López', email: 'employee@kombo.com', role: 'EMPLOYEE', addresses: [] };
 export const ADMIN = { id: 1, name: 'Admin', surname: 'Kombo', email: 'admin@kombo.com', role: 'ADMIN', addresses: [] };
+
+// Chooses an option of a SearchableSelect as a user does: opens it, writes part of the text and clicks the option
+export function chooseOption(label, text) {
+  const input = screen.getByRole('combobox', { name: label });
+  fireEvent.focus(input);
+  fireEvent.change(input, { target: { value: text } });
+  fireEvent.mouseDown(screen.getByRole('option', { name: (name) => name.startsWith(text) }));
+}

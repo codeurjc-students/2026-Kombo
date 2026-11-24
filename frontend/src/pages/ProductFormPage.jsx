@@ -5,6 +5,7 @@ import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import ProductFormFields from '../components/ProductFormFields';
 import ProductPhotoField from '../components/ProductPhotoField';
+import SearchableSelect from '../components/SearchableSelect';
 import useSaveProduct from '../hooks/useSaveProduct';
 import { ApiError } from '../services/httpClient';
 import {
@@ -71,6 +72,7 @@ function ProductForm({ product, ingredients }) {
   const [fileError, setFileError] = useState(null);
   const { save, saving, error } = useSaveProduct((savedId) => `/admin/products/${savedId}`);
   const units = Object.fromEntries(ingredients.map((ingredient) => [String(ingredient.id), ingredient.unit]));
+  const ingredientOptions = ingredients.map((ingredient) => ({ value: ingredient.id, label: ingredient.name }));
 
   function changeField(field) {
     return (event) => setForm((current) => ({ ...current, [field]: event.target.value }));
@@ -143,19 +145,14 @@ function ProductForm({ product, ingredients }) {
           {form.ingredients.length === 0 && <p className="text-secondary small mb-2">Sin ingredientes.</p>}
           {form.ingredients.map((item, index) => (
             <div key={index} className="d-flex flex-wrap align-items-center gap-2 mb-2">
-              <Form.Select
-                className="w-auto flex-grow-1"
-                aria-label={`Ingrediente ${index + 1}`}
+              <SearchableSelect
+                className="flex-grow-1"
+                ariaLabel={`Ingrediente ${index + 1}`}
+                placeholder="Elige o escribe un ingrediente"
+                options={ingredientOptions}
                 value={item.ingredientId}
-                onChange={(event) => changeIngredient(index, 'ingredientId', event.target.value)}
-              >
-                <option value="">Elige un ingrediente</option>
-                {ingredients.map((ingredient) => (
-                  <option key={ingredient.id} value={ingredient.id}>
-                    {ingredient.name}
-                  </option>
-                ))}
-              </Form.Select>
+                onChange={(ingredientId) => changeIngredient(index, 'ingredientId', ingredientId)}
+              />
               <Form.Control
                 className="quantity-input"
                 type="number"

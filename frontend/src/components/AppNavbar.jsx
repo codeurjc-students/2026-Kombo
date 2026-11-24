@@ -7,13 +7,14 @@ import { ROLE_LABELS } from '../utils/format';
 import BrandLogo from './BrandLogo';
 import UserAvatar from './UserAvatar';
 
-// Links shown to each role. Pages that do not exist yet are not linked. Employees and the administrator have no
-// orders of their own, so "Mi perfil" opens the settings of their account directly.
+// Links shown to each role. Pages that do not exist yet are not linked. "Mi perfil" opens the settings of the
+// account for every role; customers also have "Mis pedidos" (end, so it is not active on /profile/settings).
 const LINKS = {
   ANONYMOUS: [{ to: '/', label: 'Carta', end: true }],
   CUSTOMER: [
     { to: '/', label: 'Carta', end: true },
-    { to: '/profile', label: 'Mis pedidos' },
+    { to: '/profile', label: 'Mis pedidos', end: true },
+    { to: '/profile/settings', label: 'Mi perfil' },
   ],
   EMPLOYEE: [
     { to: '/', label: 'Carta', end: true },
@@ -93,7 +94,8 @@ export default function AppNavbar() {
               <div className="nav-user">
                 <span className="nav-user-name" title={user.email}>
                   <UserAvatar user={user} />
-                  {user.name} <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
+                  <span className="user-name-text">{user.name}</span>
+                  <span className="role-badge ms-2">{ROLE_LABELS[user.role]}</span>
                 </span>
                 <Button variant="outline-ink" size="sm" onClick={handleLogout}>
                   Cerrar sesión

@@ -9,7 +9,7 @@ import {
   updateProduct,
   uploadProductImage,
 } from '../services/productService';
-import { ADMIN, renderApp } from '../test-utils';
+import { ADMIN, chooseOption, renderApp } from '../test-utils';
 
 vi.mock('../services/productService', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -60,7 +60,7 @@ describe('ProductFormPage', () => {
     type('Precio', '7,25');
     fireEvent.change(screen.getByLabelText('Categoría'), { target: { value: 'Burgers' } });
     fireEvent.click(screen.getByRole('button', { name: 'Añadir ingrediente' }));
-    fireEvent.change(screen.getByLabelText('Ingrediente 1'), { target: { value: '2' } });
+    chooseOption('Ingrediente 1', 'Queso');
     type('Cantidad del ingrediente 1', '30');
     expect(screen.getByText('g')).toBeInTheDocument();
     // A picture of 2 MB is accepted for a product (the limit is 10 MB)
@@ -87,7 +87,7 @@ describe('ProductFormPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Modificar Hamburguesa' })).toBeInTheDocument();
     expect(screen.getByLabelText('Precio')).toHaveValue('6,50');
-    expect(screen.getByLabelText('Ingrediente 1')).toHaveValue('1');
+    expect(screen.getByLabelText('Ingrediente 1')).toHaveValue('Pan');
     fireEvent.click(screen.getByRole('button', { name: 'Quitar' }));
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 

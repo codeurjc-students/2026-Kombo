@@ -93,6 +93,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Product form (`/admin/products/new` and `/admin/products/{id}`): name, price, description, category, the ingredients with their quantities (chosen from the existing ones) and the picture. Kombo form (`/admin/combos/new` and `/admin/combos/{id}`): name, the price written by the administrator (with the sum of its products as a reference), the active products that are not kombos with their units (at least 2 in total) and the picture.
 - REST API of the administrator: `GET /api/v1/admin/products` (also the deactivated ones, filters `active` and `combo`), `GET`, `PUT` and `PATCH /api/v1/admin/products/{id}` (`{ "active" }`), `POST /api/v1/admin/products`, `POST /api/v1/admin/combos`, `PUT /api/v1/admin/combos/{id}`, `PUT` and `GET /api/v1/admin/products/{id}/image` and `GET /api/v1/admin/ingredients`. A product in an active kombo cannot be deactivated, and a kombo with a deactivated product cannot be activated (409 with their ids and names in the `products` property).
 - Tests (the six types) of the management of products and kombos: `ProductServiceTest`, `ImageServiceTest`, `ProductServiceIT`, `AdminProductApiIT`, `AdminProductsPage.test.jsx`, `ProductFormPage.test.jsx`, `ComboFormPage.test.jsx`, the service, HTTP client and validation tests of the client, `productService.integration.test.js` and `ProductManagementE2E`.
+- `SearchableSelect` component: a drop-down list where the administrator can also write to filter the options, without taking into account upper case or accents. It is used to choose the ingredients of a product and the products of a kombo.
 
 ### Changed
 
@@ -148,6 +149,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `ApiError` of the client keeps the whole ProblemDetail of the answer.
 - The navigation bar opens its menu button below 992 px instead of 768 px, and the links are closer between 992 and 1199 px, so the six links of the administrator fit in one row; a link is never split in two lines.
 - Development guide (access rules, client folders and pages, tests), analysis (permissions), OpenAPI documentation and Postman collection updated with the management of products and kombos.
+- Customers open the settings of their account from a *Mi perfil* link at the end of the navigation bar, as employees and the administrator do; the *Configuración* button of *Mis pedidos* was removed, and the settings page is called *Mi perfil*.
+- A long user name wraps next to the profile picture, which keeps its size, in the navigation bar, *Mis pedidos*, *Mi perfil* and the user edit page.
 
 ## Phase 2 - 2026-10-29
 

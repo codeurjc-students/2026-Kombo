@@ -26,18 +26,18 @@ export default function ProfileSettingsPage() {
   return (
     <div className="profile-settings">
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
-        <h1 className="page-title mb-0">Configuración</h1>
-        {/* Only customers have a profile page (with their orders) to go back to */}
+        <h1 className="page-title mb-0">Mi perfil</h1>
+        {/* Only customers have a page with their orders to go back to */}
         {user.role === 'CUSTOMER' && (
           <Button as={Link} to="/profile" variant="outline-ink">
-            Volver al perfil
+            Volver a mis pedidos
           </Button>
         )}
       </div>
       <section className="panel" aria-label="Tu cuenta">
         <div className="settings-header settings-avatar">
           <UserAvatar user={user} />
-          <div>
+          <div className="user-name-text">
             <p className="h4 mb-0">
               {user.name} {user.surname}
             </p>

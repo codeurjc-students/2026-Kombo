@@ -124,10 +124,11 @@ class ProfileSettingsE2E extends E2ETestSupport {
                 "El correo electrónico o la contraseña no son correctos."));
     }
 
+    // From the "Mi perfil" link of the menu, as for the employees and the administrator
     private void openSettings() {
         driver.get(BASE_URL + "/profile");
-        click(By.linkText("Configuración"));
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("h1"), "Configuración"));
+        clickInNavbar(By.linkText("Mi perfil"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("h1"), "Mi perfil"));
     }
 
     // The settings are grouped in tabs: "Perfil" is open at first
