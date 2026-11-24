@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../services/httpClient';
 import { createCombo, getAdminProduct, getAdminProducts, updateCombo } from '../services/productService';
-import { ADMIN, renderApp } from '../test-utils';
+import { ADMIN, chooseOption, renderApp } from '../test-utils';
 
 vi.mock('../services/productService', async (importOriginal) => ({
   ...(await importOriginal()),
@@ -54,10 +54,10 @@ describe('ComboFormPage', () => {
     type('Nombre', 'Kombo doble');
     type('Precio', '12');
     fireEvent.click(screen.getByRole('button', { name: 'Añadir producto' }));
-    fireEvent.change(screen.getByLabelText('Producto 1'), { target: { value: '1' } });
+    chooseOption('Producto 1', 'Hamburguesa');
     type('Unidades del producto 1', '2');
     fireEvent.click(screen.getByRole('button', { name: 'Añadir producto' }));
-    fireEvent.change(screen.getByLabelText('Producto 2'), { target: { value: '2' } });
+    chooseOption('Producto 2', 'Refresco');
     expect(screen.getByText(/15,00/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
@@ -85,7 +85,7 @@ describe('ComboFormPage', () => {
       'src',
       '/api/v1/admin/products/7/image?v=3',
     );
-    expect(screen.getByLabelText('Producto 2')).toHaveValue('2');
+    expect(screen.getByLabelText('Producto 2').value).toMatch(/^Refresco \(2,00/);
     type('Unidades del producto 2', '2');
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
 
@@ -107,7 +107,7 @@ describe('ComboFormPage', () => {
     type('Nombre', 'Kombo');
     type('Precio', '5');
     fireEvent.click(screen.getByRole('button', { name: 'Añadir producto' }));
-    fireEvent.change(screen.getByLabelText('Producto 1'), { target: { value: '1' } });
+    chooseOption('Producto 1', 'Hamburguesa');
     fireEvent.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(screen.getByText('Un kombo tiene al menos 2 unidades.')).toBeInTheDocument();
     expect(createCombo).not.toHaveBeenCalled();

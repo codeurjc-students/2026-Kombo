@@ -65,16 +65,17 @@ describe('ProfilePage', () => {
   ])('sends %s straight to the settings of their account, without order history', async (_, user) => {
     const { router } = renderApp('/profile', { user });
 
-    expect(await screen.findByRole('heading', { name: 'Configuración' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Mi perfil' })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe('/profile/settings');
     expect(getMyOrders).not.toHaveBeenCalled();
   });
 
-  it('links to the settings of the account', async () => {
+  it('leaves the settings of the account to the "Mi perfil" link of the menu, as for the other roles', async () => {
     getMyOrders.mockResolvedValue({ content: [], page: { number: 0, totalPages: 0 } });
     renderApp('/profile', { user: CUSTOMER });
-    expect(screen.getByRole('button', { name: 'Configuración' })).toHaveAttribute('href', '/profile/settings');
     await screen.findByText(/Todavía no has hecho ningún pedido/);
+    expect(screen.queryByRole('button', { name: 'Configuración' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Mi perfil' })).toHaveAttribute('href', '/profile/settings');
   });
 
   it('shows the profile picture of the user', async () => {

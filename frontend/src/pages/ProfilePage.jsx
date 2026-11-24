@@ -28,7 +28,7 @@ export default function ProfilePage() {
         <section className="panel" aria-labelledby="profile-title">
           <div className="profile-header">
             <UserAvatar user={user} />
-            <div>
+            <div className="user-name-text">
               <h1 id="profile-title" className="h3 mb-1">
                 {user.name} {user.surname}
               </h1>
@@ -53,9 +53,6 @@ export default function ProfilePage() {
               </>
             )}
           </dl>
-          <Button as={Link} to="/profile/settings" variant="outline-ink" className="mt-3">
-            Configuración
-          </Button>
         </section>
       </Col>
       <Col lg={8}>

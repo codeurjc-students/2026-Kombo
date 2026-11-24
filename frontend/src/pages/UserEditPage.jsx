@@ -66,7 +66,7 @@ export default function UserEditPage() {
       <section className="panel" aria-label="Cuenta del usuario">
         <div className="settings-header settings-avatar">
           <UserAvatar user={user} imageUrl={(imageId) => userImageUrl(user.id, imageId)} />
-          <div>
+          <div className="user-name-text">
             <p className="h4 mb-0">
               {user.name} {user.surname}
             </p>

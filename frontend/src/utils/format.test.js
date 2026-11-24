@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMinutes, formatTime, minutesSince } from './format';
+import { formatMinutes, formatTime, minutesSince, normalizeForSearch } from './format';
 
 describe('format', () => {
   const now = new Date('2026-11-21T12:00:00');
@@ -19,5 +19,10 @@ describe('format', () => {
 
   it('writes the time of a date', () => {
     expect(formatTime('2026-11-21T09:05:00')).toBe('9:05');
+  });
+
+  it('removes the accents and the upper case of a text to search it', () => {
+    expect(normalizeForSearch(' Jamón SERRANO ')).toBe('jamon serrano');
+    expect(normalizeForSearch('Pingüino')).toBe('pinguino');
   });
 });

@@ -56,7 +56,7 @@ describe('ProfileSettingsPage', () => {
     const { router } = renderApp('/profile/settings', { user: USER });
     type('Nombre', 'Otra');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Volver al perfil' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Volver a mis pedidos' }));
 
     expect(router.state.location.pathname).toBe('/profile');
     expect(updateMyProfile).not.toHaveBeenCalled();
@@ -65,8 +65,8 @@ describe('ProfileSettingsPage', () => {
   it('has no profile page to go back to for employees and the administrator', () => {
     renderApp('/profile/settings', { user: EMPLOYEE });
 
-    expect(screen.getByRole('heading', { name: 'Configuración' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Volver al perfil' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Mi perfil' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Volver a mis pedidos' })).not.toBeInTheDocument();
   });
 
   it('saves only the personal data and reads the session again', async () => {

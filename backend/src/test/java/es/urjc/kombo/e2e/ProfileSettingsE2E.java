@@ -28,7 +28,7 @@ class ProfileSettingsE2E extends E2ETestSupport {
         click(By.xpath("//button[normalize-space()='Guardar datos']"));
 
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("main"), "Tus datos se han guardado."));
-        click(By.linkText("Volver al perfil"));
+        click(By.linkText("Volver a mis pedidos"));
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("profile-title"), "Ana María"));
         assertThat(driver.findElement(By.tagName("main")).getText()).contains("611222333");
     }
@@ -43,7 +43,7 @@ class ProfileSettingsE2E extends E2ETestSupport {
 
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("main"),
                 "Escribe un teléfono de 9 a 15 cifras."));
-        click(By.linkText("Volver al perfil"));
+        click(By.linkText("Volver a mis pedidos"));
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("profile-title"), "Ana"));
         assertThat(driver.findElement(By.tagName("main")).getText()).doesNotContain("123");
     }
@@ -124,10 +124,11 @@ class ProfileSettingsE2E extends E2ETestSupport {
                 "El correo electrónico o la contraseña no son correctos."));
     }
 
+    // From the "Mi perfil" link of the menu, as for the employees and the administrator
     private void openSettings() {
         driver.get(BASE_URL + "/profile");
-        click(By.linkText("Configuración"));
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("h1"), "Configuración"));
+        clickInNavbar(By.linkText("Mi perfil"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("h1"), "Mi perfil"));
     }
 
     // The settings are grouped in tabs: "Perfil" is open at first

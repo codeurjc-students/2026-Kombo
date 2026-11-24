@@ -47,3 +47,8 @@ export function formatTime(value) {
 export function orderLinesSummary(order) {
   return order.lines.map((line) => `${line.quantity} × ${line.productName ?? line.product.name}`).join(', ');
 }
+
+// Text without accents and in lower case, so a search finds "Pan de hamburguesa" when "HAMBURGUÉSA" is written
+export function normalizeForSearch(text) {
+  return String(text).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}

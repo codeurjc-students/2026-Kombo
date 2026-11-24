@@ -8,9 +8,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 
-// A real Chrome browser: the administrator creates a product from the products page, sees it in the menu,
-// deactivates it (in grey, out of the menu) and cannot deactivate a product of an active kombo: a window lists
-// those kombos, with a link to change each one.
+// A real Chrome browser: the administrator creates a product from the products page (looking for its ingredient
+// by writing part of its name), sees it in the menu, deactivates it (in grey, out of the menu) and cannot
+// deactivate a product of an active kombo: a window lists those kombos, with a link to change each one.
 // What is created is left deactivated, so the menu of the other tests does not change.
 class ProductManagementE2E extends E2ETestSupport {
 
@@ -26,8 +26,11 @@ class ProductManagementE2E extends E2ETestSupport {
         driver.findElement(By.id("product-price")).sendKeys("6,75");
         new Select(driver.findElement(By.id("product-category"))).selectByVisibleText("Hamburguesas");
         click(By.xpath("//button[normalize-space()='Añadir ingrediente']"));
-        new Select(driver.findElement(By.cssSelector("select[aria-label='Ingrediente 1']")))
-                .selectByVisibleText("Pan de hamburguesa");
+        // The ingredient is found by writing part of its name, without upper case or accents
+        WebElement ingredient = driver.findElement(By.cssSelector("[role='combobox'][aria-label='Ingrediente 1']"));
+        ingredient.click();
+        ingredient.sendKeys("PAN DE HAMBURGUÉSA");
+        click(By.xpath("//li[@role='option' and normalize-space()='Pan de hamburguesa']"));
         click(By.xpath("//button[normalize-space()='Guardar']"));
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("body"), name + " se ha guardado."));
 

@@ -194,6 +194,14 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
   font-weight: 800;
   font-size: 0.85rem;
   margin-right: 0.4rem;
+  /* Keeps its size next to a long name */
+  flex-shrink: 0;
+}
+
+/* Name next to a profile picture: a long name wraps (also inside a long word) instead of squashing the picture */
+.user-name-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .nav-user {
@@ -206,7 +214,10 @@ h1, h2, h3, .h1, .h2, .h3, .display-font {
 .nav-user-name {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+  max-width: 16rem;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .role-badge {
@@ -1009,4 +1020,46 @@ img.user-avatar {
 
 .unit-label {
   min-width: 4rem;
+}
+
+/* SearchableSelect: a select where the user can also write to filter the options */
+.searchable-select {
+  position: relative;
+}
+
+.searchable-select-list {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  right: 0;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: var(--kombo-white);
+  border: 1px solid var(--kombo-line);
+  border-radius: var(--kombo-radius-control);
+  box-shadow: 0 0.5rem 1.5rem rgba(29, 43, 58, 0.12);
+}
+
+.searchable-select-list li {
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.searchable-select-list li.is-active,
+.searchable-select-list li[aria-selected='true'] {
+  background: var(--kombo-teal-soft);
+}
+
+.searchable-select-list .searchable-select-empty {
+  color: var(--bs-secondary-color);
+  cursor: default;
+}
+
+.nav-user-name .role-badge {
+  flex-shrink: 0;
 }
