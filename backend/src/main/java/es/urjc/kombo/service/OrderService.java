@@ -1,5 +1,6 @@
 package es.urjc.kombo.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -131,7 +132,37 @@ public class OrderService {
             }
             order.setDeliveredAt(LocalDateTime.now(ZoneId.systemDefault()));
         }
+        // The restaurant cancels without a fee: a paid order is given back in full
+        if (status == Order.OrderStatus.CANCELLED) {
+            order.setCancellationFee(BigDecimal.ZERO);
+        }
         order.setStatus(status);
+    }
+
+    // A customer cancels one of their orders while it is in preparation or ready; the only change they can send is
+    // the status CANCELLED (403 for anything else and for the orders of other users, 409 for any other status).
+    // A paid order that is already ready keeps a fee (the percentage of the total in the settings) and gives back
+    // the rest; an order in preparation, or one that is not paid yet, keeps nothing.
+    @Transactional
+    public OrderDTO cancelByCustomer(long id, OrderUpdateDTO changes, KomboUserDetails currentUser) {
+        if (changes.status() != Order.OrderStatus.CANCELLED || changes.paid() != null) {
+            throw new AccessDeniedException("A customer can only cancel their orders");
+        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order " + id + " not found"));
+        if (!isOwner(order, currentUser)) {
+            throw new AccessDeniedException("Order " + id + " belongs to another user");
+        }
+        Order.OrderStatus status = order.getStatus();
+        if (status != Order.OrderStatus.IN_PREPARATION && status != Order.OrderStatus.READY) {
+            throw new OrderStatusException("Order " + id + " cannot be cancelled when it is " + status);
+        }
+        BigDecimal fee = status == Order.OrderStatus.READY && order.isPaid()
+                ? settingsService.findSettings().cancellationFeeFor(order.getTotal())
+                : BigDecimal.ZERO;
+        order.setCancellationFee(fee);
+        order.setStatus(Order.OrderStatus.CANCELLED);
+        return orderMapper.toDTO(order);
     }
 
     private static boolean canChange(Order.OrderStatus from, Order.OrderStatus to) {
@@ -142,16 +173,17 @@ public class OrderService {
         };
     }
 
-    // The name is always required. Customers and anonymous users also give an email and a phone; an employee who
-    // places a counter order may leave them empty.
+    // The name is always required. Customers and anonymous users also give an email; an employee who places a
+    // counter order may leave it empty. The phone is required for home deliveries, whoever places the order, and
+    // optional for the orders collected or eaten at the restaurant.
     private static void setContactData(Order order, OrderRequestDTO request, boolean counterOrder) {
         String email = blankToNull(request.customerEmail());
         String phone = blankToNull(request.customerPhone());
         if (!counterOrder && email == null) {
             throw new InvalidOrderException("customerEmail: is required");
         }
-        if (!counterOrder && phone == null) {
-            throw new InvalidOrderException("customerPhone: is required");
+        if (request.deliveryType() == Order.DeliveryType.DELIVERY && phone == null) {
+            throw new InvalidOrderException("customerPhone: is required for home deliveries");
         }
         order.setCustomerName(request.customerName().trim());
         order.setCustomerEmail(email);

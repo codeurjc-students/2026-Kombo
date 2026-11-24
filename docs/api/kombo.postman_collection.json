@@ -1532,6 +1532,44 @@
           "response": []
         },
         {
+          "name": "Place a home delivery without phone (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lines\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 1\n    }\n  ],\n  \"deliveryType\": \"DELIVERY\",\n  \"paymentMethod\": \"CASH\",\n  \"customerName\": \"Ana Martín\",\n  \"customerEmail\": \"ana@example.com\",\n  \"customerPhone\": \"\",\n  \"deliveryAddress\": \"Calle Mayor 1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            },
+            "description": "The phone is required for home deliveries and optional for the other delivery types."
+          },
+          "response": []
+        },
+        {
           "name": "Get an order",
           "request": {
             "method": "GET",
@@ -1758,6 +1796,45 @@
             "description": "Employees and administrator. IN_PREPARATION → READY → DELIVERED, or CANCELLED before it is delivered. 409 for a change that is not possible (for example, delivering an order that is not paid), 400 without status or paid."
           },
           "response": []
+        },
+        {
+          "name": "Cancel my order (customer)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CANCELLED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "A customer cancels one of their orders while it is in preparation or ready. A paid order that is already ready keeps the cancellation fee of the settings (cancellationFee); otherwise nothing is kept. Log in as customer@kombo.com first. 403 for the orders of other users or any other change, 409 for other statuses."
+          },
+          "response": []
         }
       ]
     },
@@ -1765,7 +1842,7 @@
       "name": "Settings",
       "item": [
         {
-          "name": "Get the delivery cost",
+          "name": "Get the settings",
           "request": {
             "method": "GET",
             "header": [
@@ -1790,7 +1867,7 @@
           "response": []
         },
         {
-          "name": "Change the delivery cost (administrator)",
+          "name": "Change the settings (administrator)",
           "request": {
             "method": "PUT",
             "header": [
@@ -1805,7 +1882,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"deliveryCost\": 2.50\n}",
+              "raw": "{\n  \"deliveryCost\": 2.50,\n  \"cancellationFeePercent\": 80\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -12,8 +12,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 // Order sent by the checkout: the cart, how it is delivered, how it is paid and the contact data.
-// The delivery address is only required for home deliveries, and the email and the phone are optional only in the
-// counter orders of the employees (both checked in OrderService).
+// The delivery address and the phone are required only for home deliveries, and the email is optional only in the
+// counter orders of the employees (checked in OrderService).
 public record OrderRequestDTO(
         @NotEmpty @Size(max = 50) List<@Valid @NotNull OrderLineRequestDTO> lines,
         @NotNull Order.DeliveryType deliveryType,

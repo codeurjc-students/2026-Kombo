@@ -212,7 +212,8 @@ function Checkout() {
                   </Form.Group>
                   <Form.Group as={Col} md={5} className="mb-3" controlId="checkout-phone">
                     <Form.Label>
-                      Teléfono {isCounter && <span className="text-secondary small">(opcional)</span>}
+                      Teléfono{' '}
+                      {form.deliveryType !== 'DELIVERY' && <span className="text-secondary small">(opcional)</span>}
                     </Form.Label>
                     <Form.Control type="tel" autoComplete="tel" {...field('phone')} />
                     <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>

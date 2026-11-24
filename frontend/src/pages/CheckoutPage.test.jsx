@@ -36,7 +36,7 @@ function type(label, value) {
 function fillContactAndCard() {
   type('Nombre', 'Ana Pérez');
   type('Correo electrónico', 'ana@example.com');
-  type('Teléfono', '600123456');
+  type(/^Teléfono/, '600123456');
   type('Número de tarjeta', '4111 1111 1111 1111');
   type('Caducidad', '12/99');
   type('CVV', '123');
@@ -136,7 +136,7 @@ describe('CheckoutPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Cambiar' }));
     expect(screen.getByLabelText('Nombre')).toHaveValue('Lucía García');
-    type('Teléfono', '699999999');
+    type(/^Teléfono/, '699999999');
     fireEvent.click(screen.getByLabelText('Efectivo'));
     submit();
 
@@ -144,14 +144,24 @@ describe('CheckoutPage', () => {
     expect(createOrder.mock.calls[0][0].customerPhone).toBe('699999999');
   });
 
-  it('opens the contact form when the saved data of the customer is not complete', () => {
+  it('lets a customer without a phone collect the order at the restaurant', async () => {
     renderApp('/checkout', { user: { ...CUSTOMER, phone: null } });
+    fireEvent.click(screen.getByLabelText('Efectivo'));
+    submit();
+
+    await screen.findByRole('heading', { name: 'Pedido confirmado' });
+    expect(createOrder.mock.calls[0][0]).toMatchObject({ deliveryType: 'TAKE_AWAY', customerPhone: '' });
+  });
+
+  it('opens the contact form when a home delivery has no phone', () => {
+    renderApp('/checkout', { user: { ...CUSTOMER, phone: null } });
+    fireEvent.click(screen.getByLabelText(/A domicilio/));
     fireEvent.click(screen.getByLabelText('Efectivo'));
 
     submit();
 
     expect(screen.getByText('Escribe un teléfono de 9 a 15 cifras.')).toBeInTheDocument();
-    expect(screen.getByLabelText('Teléfono')).toHaveClass('is-invalid');
+    expect(screen.getByLabelText(/^Teléfono/)).toHaveClass('is-invalid');
     expect(createOrder).not.toHaveBeenCalled();
   });
 

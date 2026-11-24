@@ -1,6 +1,7 @@
-import { useCallback } from 'react';
-import { Badge, Button, Col, Row } from 'react-bootstrap';
+import { useCallback, useState } from 'react';
+import { Alert, Badge, Button, Col, Row } from 'react-bootstrap';
 import { Link, Navigate } from 'react-router';
+import CancelOrderButton from '../components/CancelOrderButton';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import UserAvatar from '../components/UserAvatar';
@@ -8,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import usePagedList from '../hooks/usePagedList';
 import useRepeatOrder from '../hooks/useRepeatOrder';
 import { getMyOrders } from '../services/orderService';
+import { paymentStatus } from '../utils/delivery';
 import { ORDER_STATUS, ROLE_LABELS, formatDateTime, formatPrice, orderLinesSummary } from '../utils/format';
 
 // Orders shown at a time in the profile
@@ -62,15 +64,22 @@ export default function ProfilePage() {
   );
 }
 
-// The last orders of the customer, 4 at a time, with a link to their detail and a "Repetir pedido" button
+// The last orders of the customer, 4 at a time, with a link to their detail, a "Repetir pedido" button and a
+// "Cancelar pedido" button while they are in preparation or ready
 function RecentOrders() {
   const fetchPage = useCallback((page) => getMyOrders({ page, size: RECENT_ORDERS }), []);
-  const { items: orders, loading, error, hasMore, loadMore, retry } = usePagedList(fetchPage);
+  const { items: orders, loading, error, hasMore, loadMore, retry, refresh } = usePagedList(fetchPage);
+  const [message, setMessage] = useState(null);
   const repeatOrder = useRepeatOrder();
 
   return (
     <section className="panel" aria-labelledby="orders-title">
       <h2 id="orders-title" className="h3 mb-3">Mis pedidos</h2>
+      {message && (
+        <Alert variant="success" dismissible onClose={() => setMessage(null)}>
+          {message}
+        </Alert>
+      )}
       {error && <ErrorState message="No hemos podido cargar tus pedidos." onRetry={retry} />}
       {loading && orders.length === 0 && <LoadingState label="Cargando tus pedidos…" />}
       {!loading && !error && orders.length === 0 && (
@@ -96,9 +105,24 @@ function RecentOrders() {
               </div>
               <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
                 <span className="small text-secondary">{orderLinesSummary(order)}</span>
-                <Button variant="outline-ink" size="sm" className="order-card-action" onClick={() => repeatOrder(order)}>
-                  Repetir pedido
-                </Button>
+                <div className="d-flex flex-wrap gap-2">
+                  <CancelOrderButton
+                    order={order}
+                    className="order-card-action"
+                    onCancelled={(cancelled) => {
+                      setMessage(`Pedido nº ${cancelled.orderNumber} cancelado. ${paymentStatus(cancelled)}.`);
+                      refresh();
+                    }}
+                  />
+                  <Button
+                    variant="outline-ink"
+                    size="sm"
+                    className="order-card-action"
+                    onClick={() => repeatOrder(order)}
+                  >
+                    Repetir pedido
+                  </Button>
+                </div>
               </div>
             </li>
           );

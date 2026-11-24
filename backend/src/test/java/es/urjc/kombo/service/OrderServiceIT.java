@@ -159,6 +159,26 @@ class OrderServiceIT {
         assertThat(stored.getDeliveredAt()).isNotNull();
     }
 
+    @Test
+    @Transactional
+    void aCustomerCancelsAReadyOrderAndTheFeeIsStored() {
+        User customer = userRepository.save(new User("Ana", null, "cancel-test@example.com", null, "hash",
+                User.Role.CUSTOMER));
+        KomboUserDetails session = new KomboUserDetails(customer);
+        // 2 x 9.00 + 2.50 of delivery = 20.50, paid by card; the default fee is 80% (16.40)
+        OrderDTO placed = orderService.create(request(Order.DeliveryType.DELIVERY, 2), session);
+        orderService.update(placed.id(), new OrderUpdateDTO(Order.OrderStatus.READY, null));
+
+        OrderDTO cancelled = orderService.cancelByCustomer(placed.id(),
+                new OrderUpdateDTO(Order.OrderStatus.CANCELLED, null), session);
+        orderRepository.flush();
+
+        Order stored = orderRepository.findById(placed.id()).orElseThrow();
+        assertThat(stored.getStatus()).isEqualTo(Order.OrderStatus.CANCELLED);
+        assertThat(stored.getCancellationFee()).isEqualByComparingTo("16.40");
+        assertThat(cancelled.cancellationFee()).isEqualByComparingTo("16.40");
+    }
+
     private OrderRequestDTO request(Order.DeliveryType deliveryType, int quantity) {
         return new OrderRequestDTO(List.of(new OrderLineRequestDTO(burger.getId(), quantity)), deliveryType,
                 "Calle Tulipán s/n", Order.PaymentMethod.CARD, "Ana", "ana@example.com", "600123456");

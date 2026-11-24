@@ -70,6 +70,10 @@ public class Order {
     private BigDecimal deliveryCost = BigDecimal.ZERO;
     private BigDecimal total = BigDecimal.ZERO;
 
+    // Money of a cancelled order that the restaurant keeps (null while the order is not cancelled). The rest of a
+    // paid order is given back to the customer.
+    private BigDecimal cancellationFee;
+
     protected Order() {
     }
 
@@ -174,6 +178,10 @@ public class Order {
         return total;
     }
 
+    public BigDecimal getCancellationFee() {
+        return cancellationFee;
+    }
+
     //setters
     public void setDeliveryAddress(String deliveryAddress) {
         this.deliveryAddress = deliveryAddress;
@@ -201,6 +209,10 @@ public class Order {
 
     public void setDeliveredAt(LocalDateTime deliveredAt) {
         this.deliveredAt = deliveredAt;
+    }
+
+    public void setCancellationFee(BigDecimal cancellationFee) {
+        this.cancellationFee = cancellationFee;
     }
     
 }

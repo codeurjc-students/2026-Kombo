@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, Col, Row } from 'react-bootstrap';
 import { Link, useParams } from 'react-router';
+import CancelOrderButton from '../components/CancelOrderButton';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import OrderSummary from '../components/OrderSummary';
@@ -9,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import useRepeatOrder from '../hooks/useRepeatOrder';
 import { ApiError } from '../services/httpClient';
 import { getOrder } from '../services/orderService';
-import { DELIVERY_TYPES, PAYMENT_METHODS } from '../utils/delivery';
+import { DELIVERY_TYPES, paymentStatus } from '../utils/delivery';
 import { ORDER_STATUS, formatDateTime, formatPrice } from '../utils/format';
 import NotFoundPage from './NotFoundPage';
 
@@ -49,10 +50,11 @@ export default function OrderDetailPage() {
     const retry = () => setRequest((current) => ({ ...current, attempt: current.attempt + 1 }));
     return <ErrorState message="No hemos podido cargar el pedido." onRetry={retry} />;
   }
-  return <OrderDetail order={order} />;
+  const onCancelled = (cancelled) => setResult((current) => ({ ...current, order: cancelled }));
+  return <OrderDetail order={order} onCancelled={onCancelled} />;
 }
 
-function OrderDetail({ order }) {
+function OrderDetail({ order, onCancelled }) {
   const { user } = useAuth();
   const repeatOrder = useRepeatOrder();
   const status = ORDER_STATUS[order.status] ?? { label: order.status, bg: 'secondary' };
@@ -81,9 +83,7 @@ function OrderDetail({ order }) {
               </div>
               <div>
                 <dt>Pago</dt>
-                <dd>
-                  {PAYMENT_METHODS[order.paymentMethod]?.label} ({order.paid ? 'pagado' : 'pendiente de pago'})
-                </dd>
+                <dd>{paymentStatus(order)}</dd>
               </div>
             </dl>
             <h2 className="h5 mt-4">Productos</h2>
@@ -123,6 +123,7 @@ function OrderDetail({ order }) {
                 <p className="small text-secondary mt-2 mb-0">
                   Se añaden al carrito con el precio actual de cada producto.
                 </p>
+                <CancelOrderButton order={order} onCancelled={onCancelled} className="w-100 mt-3" />
               </>
             )}
           </OrderSummary>

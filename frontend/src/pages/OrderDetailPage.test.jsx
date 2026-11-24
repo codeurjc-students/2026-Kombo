@@ -2,10 +2,12 @@ import { fireEvent, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CART_STORAGE_KEY } from '../context/CartProvider';
 import { ApiError } from '../services/httpClient';
-import { getOrder } from '../services/orderService';
+import { cancelOrder, getOrder } from '../services/orderService';
+import { getSettings } from '../services/settingsService';
 import { CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
-vi.mock('../services/orderService', () => ({ getOrder: vi.fn(), getMyOrders: vi.fn() }));
+vi.mock('../services/orderService', () => ({ getOrder: vi.fn(), getMyOrders: vi.fn(), cancelOrder: vi.fn() }));
+vi.mock('../services/settingsService', () => ({ getSettings: vi.fn() }));
 
 // Order as returned by GET /api/v1/orders/{id}. The burger costs 9,00 € now: the line keeps the 8,50 € paid.
 const ORDER = {
@@ -40,6 +42,8 @@ function amount(testId) {
 describe('OrderDetailPage', () => {
   beforeEach(() => {
     getOrder.mockReset().mockResolvedValue(ORDER);
+    cancelOrder.mockReset();
+    getSettings.mockResolvedValue({ deliveryCost: 2.5, freeDeliveryThreshold: 25, cancellationFeePercent: 80 });
   });
 
   it('shows the products with the price paid, the delivery, the payment and the totals', async () => {
@@ -50,7 +54,7 @@ describe('OrderDetailPage', () => {
     expect(screen.getByText('Entregado')).toBeInTheDocument();
     expect(screen.getByText('A domicilio')).toBeInTheDocument();
     expect(screen.getByText('Calle Mayor 1')).toBeInTheDocument();
-    expect(screen.getByText('Efectivo (pagado)')).toBeInTheDocument();
+    expect(screen.getByText('Efectivo - Pagado')).toBeInTheDocument();
     const rows = within(screen.getByRole('table')).getAllByRole('row').map((row) => row.textContent.replaceAll(' ', ' '));
     expect(rows.slice(1)).toEqual(['Hamburguesa clásica28,50 €17,00 €', 'Agua11,50 €1,50 €']);
     expect(amount('summary-subtotal')).toBe('18,50 €');
@@ -75,6 +79,57 @@ describe('OrderDetailPage', () => {
 
     await screen.findByRole('heading', { name: 'Pedido nº 1007' });
     expect(screen.queryByRole('button', { name: 'Repetir pedido' })).not.toBeInTheDocument();
+  });
+
+  it('lets the customer cancel a ready order paying the fee of the settings', async () => {
+    getOrder.mockResolvedValue({ ...ORDER, status: 'READY', paymentMethod: 'CARD' });
+    cancelOrder.mockResolvedValue({ ...ORDER, status: 'CANCELLED', paymentMethod: 'CARD', cancellationFee: 16.8 });
+    renderApp('/orders/7', { user: CUSTOMER });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancelar pedido' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    // 80% of 21,00 € is 16,80 €; 4,20 € are given back
+    expect(await dialog.findByText(/se cobra el 80 % \(16,80.€\) y se te devolverán 4,20.€/)).toBeInTheDocument();
+    fireEvent.click(dialog.getByRole('button', { name: 'Sí, cancelar el pedido' }));
+
+    expect(await screen.findByText('Cancelado')).toBeInTheDocument();
+    expect(cancelOrder).toHaveBeenCalledWith(7);
+    expect(screen.getByText(/Tarjeta - Devuelto 4,20.€ \(cobrado 16,80.€\)/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Cancelar pedido' })).not.toBeInTheDocument();
+  });
+
+  it('gives back everything for an order in preparation and keeps the order when the server says no', async () => {
+    getOrder.mockResolvedValue({ ...ORDER, status: 'IN_PREPARATION' });
+    cancelOrder.mockRejectedValue(new ApiError(409, 'Order 7 cannot be cancelled'));
+    renderApp('/orders/7', { user: CUSTOMER });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancelar pedido' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText(/Se te devolverá todo el importe \(21,00.€\)/)).toBeInTheDocument();
+    fireEvent.click(dialog.getByRole('button', { name: 'Sí, cancelar el pedido' }));
+
+    expect(await dialog.findByText(/Este pedido ya no se puede cancelar/)).toBeInTheDocument();
+    fireEvent.click(dialog.getByRole('button', { name: 'Volver' }));
+    expect(screen.getByText('En preparación')).toBeInTheDocument();
+  });
+
+  it('does not show wrong amounts when the settings have no cancellation percentage', async () => {
+    getSettings.mockResolvedValue({ deliveryCost: 2.5, freeDeliveryThreshold: 25 });
+    getOrder.mockResolvedValue({ ...ORDER, status: 'READY', paymentMethod: 'CARD' });
+    renderApp('/orders/7', { user: CUSTOMER });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Cancelar pedido' }));
+    const dialog = within(await screen.findByRole('dialog'));
+
+    expect(await dialog.findByText(/se cobra un gasto de cancelación y se te devolverá el resto/)).toBeInTheDocument();
+    expect(dialog.queryByText(/NaN|undefined/)).not.toBeInTheDocument();
+  });
+
+  it('does not offer to cancel a delivered order', async () => {
+    renderApp('/orders/7', { user: CUSTOMER });
+
+    await screen.findByRole('heading', { name: 'Pedido nº 1007' });
+    expect(screen.queryByRole('button', { name: 'Cancelar pedido' })).not.toBeInTheDocument();
   });
 
   it('shows 403 for the order of another user', async () => {

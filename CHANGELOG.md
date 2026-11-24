@@ -94,6 +94,10 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - REST API of the administrator: `GET /api/v1/admin/products` (also the deactivated ones, filters `active` and `combo`), `GET`, `PUT` and `PATCH /api/v1/admin/products/{id}` (`{ "active" }`), `POST /api/v1/admin/products`, `POST /api/v1/admin/combos`, `PUT /api/v1/admin/combos/{id}`, `PUT` and `GET /api/v1/admin/products/{id}/image` and `GET /api/v1/admin/ingredients`. A product in an active kombo cannot be deactivated, and a kombo with a deactivated product cannot be activated (409 with their ids and names in the `products` property).
 - Tests (the six types) of the management of products and kombos: `ProductServiceTest`, `ImageServiceTest`, `ProductServiceIT`, `AdminProductApiIT`, `AdminProductsPage.test.jsx`, `ProductFormPage.test.jsx`, `ComboFormPage.test.jsx`, the service, HTTP client and validation tests of the client, `productService.integration.test.js` and `ProductManagementE2E`.
 - `SearchableSelect` component: a drop-down list where the administrator can also write to filter the options, without taking into account upper case or accents. It is used to choose the ingredients of a product and the products of a kombo.
+- Cancellation of orders by the customer: a *Cancelar pedido* button in *Mis pedidos* and in the order detail, with a confirmation window that says how much is given back, for orders in preparation (everything is given back) or ready (the restaurant keeps a percentage of a paid order). `PATCH /api/v1/orders/{id}` accepts `{ "status": "CANCELLED" }` from the customer of the order (403 for other orders or changes, 409 for other statuses).
+- `cancellationFee` in the orders: money of a cancelled order that the restaurant keeps (0 when it was in preparation, not paid or cancelled by the restaurant), for the cash register closing.
+- Cancellation fee percentage in the settings (80 % by default), changed by the administrator in *Ajustes* (`cancellationFeePercent` in `GET` and `PUT /api/v1/settings`).
+- Tests of the cancellation and the phone rule: `OrderServiceTest`, `SettingsServiceTest`, `OrderServiceIT`, `OrderApiIT`, `delivery.test.js`, the page and service tests of the client, `orderService.integration.test.js` and `OrderHistoryE2E`.
 
 ### Changed
 
@@ -151,6 +155,9 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - Development guide (access rules, client folders and pages, tests), analysis (permissions), OpenAPI documentation and Postman collection updated with the management of products and kombos.
 - Customers open the settings of their account from a *Mi perfil* link at the end of the navigation bar, as employees and the administrator do; the *Configuración* button of *Mis pedidos* was removed, and the settings page is called *Mi perfil*.
 - A long user name wraps next to the profile picture, which keeps its size, in the navigation bar, *Mis pedidos*, *Mi perfil* and the user edit page.
+- The phone of an order is only required for home deliveries, for every user (also counter orders of the employees); it is optional to eat in or take away, in the client and in the server.
+- The payment of an order is shown as *Tarjeta - Pagado*, *Efectivo - Pendiente de pago*, *Tarjeta - Devuelto* (or the money given back and the fee), or *Efectivo - No cobrado* in the order detail, *Mis pedidos* and the order dashboard.
+- `PUT /api/v1/settings` requires `cancellationFeePercent` (0 to 100) besides `deliveryCost`.
 
 ## Phase 2 - 2026-10-29
 

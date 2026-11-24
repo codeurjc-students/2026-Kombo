@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from './httpClient';
-import { FINISHED_STATUSES, PENDING_STATUSES, createOrder, getOrders, startOfToday, updateOrder } from './orderService';
+import {
+  FINISHED_STATUSES,
+  PENDING_STATUSES,
+  cancelOrder,
+  createOrder,
+  getOrders,
+  startOfToday,
+  updateOrder,
+} from './orderService';
+import { getSettings } from './settingsService';
 import { getProductPage } from './productService';
 import { startCustomerSession, startSession } from '../test-session';
 
@@ -52,6 +61,28 @@ describe('orderService for the order dashboard with the real REST API', () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const none = await getOrders({ statuses: FINISHED_STATUSES, since: startOfToday(tomorrow) });
     expect(none.content).toEqual([]);
+  });
+
+  it('lets a customer order without a phone to take away and cancel the order while it is in preparation', async () => {
+    const settings = await getSettings();
+    expect(settings.cancellationFeePercent).toBeGreaterThanOrEqual(0);
+    await startCustomerSession('client-cancel');
+    const order = await createOrder({
+      lines: [{ productId: await waterId(), quantity: 1 }],
+      deliveryType: 'TAKE_AWAY',
+      paymentMethod: 'CARD',
+      customerName: 'Ana',
+      customerEmail: 'client-cancel@example.com',
+      customerPhone: '',
+    });
+    expect(order).toMatchObject({ customerPhone: null, paid: true, status: 'IN_PREPARATION' });
+
+    const cancelled = await cancelOrder(order.id);
+    expect(cancelled).toMatchObject({ status: 'CANCELLED', paid: true, cancellationFee: 0 });
+
+    const again = await cancelOrder(order.id).catch((err) => err);
+    expect(again).toBeInstanceOf(ApiError);
+    expect(again.status).toBe(409);
   });
 
   it('does not show the dashboard to customers', async () => {
