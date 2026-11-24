@@ -41,7 +41,7 @@ describe('Order history with the real REST API', () => {
     fireEvent.click(link);
 
     expect(await screen.findByRole('heading', { name: `Pedido nº ${order.orderNumber}` })).toBeInTheDocument();
-    expect(screen.getByText('Efectivo (pendiente de pago)')).toBeInTheDocument();
+    expect(screen.getByText('Efectivo - Pendiente de pago')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Repetir pedido' })).toBeInTheDocument();
   });
 

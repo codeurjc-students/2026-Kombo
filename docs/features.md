@@ -56,6 +56,8 @@
 **Registered user**
 - Repeat the last order from the profile.
 
+- Cancel an order from *Mis pedidos* while it is in preparation (everything is given back) or ready (the restaurant keeps a percentage of a paid order, set by the administrator).
+
 **Employee**
 - Inventory view, with the ingredients highlighted in red if their stock is low.
 

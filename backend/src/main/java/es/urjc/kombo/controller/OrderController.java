@@ -26,6 +26,7 @@ import es.urjc.kombo.dto.OrderDTO;
 import es.urjc.kombo.dto.OrderRequestDTO;
 import es.urjc.kombo.dto.OrderUpdateDTO;
 import es.urjc.kombo.model.Order;
+import es.urjc.kombo.model.User;
 import es.urjc.kombo.security.KomboUserDetails;
 import es.urjc.kombo.service.OrderService;
 import jakarta.validation.Valid;
@@ -65,11 +66,17 @@ public class OrderController {
         return new PagedModel<>(orderService.findByStatus(status, since, pageable));
     }
 
-    // Changes the status of an order or marks a cash order as paid. Answers 400 if the body is not valid and 409 if
-    // the order cannot change that way (see OrderService.update).
+    // Employees and the administrator change the status of an order or mark a cash order as paid; a customer can
+    // only cancel one of their orders, with { "status": "CANCELLED" }. Answers 400 if the body is not valid, 403 if
+    // a customer sends another change or the order of another user, and 409 if the order cannot change that way
+    // (see OrderService.update and OrderService.cancelByCustomer).
     @PatchMapping("/{id}")
-    @PreAuthorize(STAFF)
-    public OrderDTO updateOrder(@PathVariable long id, @RequestBody OrderUpdateDTO changes) {
+    @PreAuthorize("isAuthenticated()")
+    public OrderDTO updateOrder(@PathVariable long id, @RequestBody OrderUpdateDTO changes,
+            @AuthenticationPrincipal KomboUserDetails user) {
+        if (user.getRole() == User.Role.CUSTOMER) {
+            return orderService.cancelByCustomer(id, changes, user);
+        }
         return orderService.update(id, changes);
     }
 

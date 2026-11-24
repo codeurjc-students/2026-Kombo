@@ -23,6 +23,8 @@ public record OrderDTO(
         LocalDateTime deliveredAt,
         BigDecimal subtotal,
         BigDecimal deliveryCost,
-        BigDecimal total
+        BigDecimal total,
+        // Only in cancelled orders: the money the restaurant keeps; a paid order gives back the rest of the total
+        BigDecimal cancellationFee
 ) {
 }

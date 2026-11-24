@@ -30,7 +30,7 @@ Compared to the first version of the analysis, two entities have been added. **C
 
 - Image - User (1:1): each user has an associated image and an image belongs to one user.
 
-- Settings has no relations: it is a single row with the values of the restaurant that the administrator can change (the delivery cost).
+- Settings has no relations: it is a single row with the values of the restaurant that the administrator can change (the delivery cost and the cancellation fee).
 
 - Image - Product (1:1): each product has an associated image and an image belongs to one product.
 
@@ -113,7 +113,8 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 - Status: in preparation, ready, delivered or cancelled.
 - Payment method: card or cash.
 - Paid: boolean that indicates whether the order has been paid.
-- Customer name, email and phone: data of the checkout form.
+- Cancellation fee: money of a cancelled order that the restaurant keeps (a percentage of the total if the customer cancels a paid order that is already ready, 0 otherwise); the rest of a paid order is given back.
+- Customer name, email and phone: data of the checkout form. The phone is only required for home deliveries.
 - Creation date.
 - Delivery date.
 - Delivery cost: only for home deliveries with a subtotal below 25 €, taken from Settings.
@@ -129,6 +130,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 **Settings**
 - Id: identifier.
 - Delivery cost: cost of home deliveries (2,50 € by default), changed by the administrator.
+- Cancellation fee percentage: part of the total kept when a customer cancels a paid order that is already ready (80 % by default), changed by the administrator.
 
 
 
@@ -143,6 +145,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | Check out without filling in the data form | | X | | |
 | Download the PDF ticket of their own order | X | X | | |
 | View their order history and repeat the last one | | X | | |
+| Cancel their own order while it is in preparation or ready (paying the cancellation fee if it is ready and paid) | | X | | |
 | Manage their profile (personal data, password and picture) | | X | X | X |
 | Delete their account | | X | X | |
 | Manage their saved addresses | | X | | |
@@ -152,7 +155,7 @@ The ingredients used by a combo are the sum of the ingredients of its products, 
 | View the ingredient inventory | | | X | X |
 | View the cash register closing | | | X | X |
 | Manage products and kombos (create, edit, deactivate and activate again, picture) | | | | X |
-| Change the delivery cost | | | | X |
+| Change the delivery cost and the cancellation fee | | | | X |
 | Manage ingredients and restock | | | | X |
 | Manage employees and customers: create, see, change and delete their accounts | | | | X |
 | View the dashboard and the sales reports | | | | X |

@@ -3,10 +3,11 @@ import { Alert, Button, Form, InputGroup, Spinner } from 'react-bootstrap';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
 import useSettings from '../hooks/useSettings';
-import { updateDeliveryCost } from '../services/settingsService';
+import { updateSettings } from '../services/settingsService';
 import { formatPrice } from '../utils/format';
 
-// Administrator: change the delivery cost of home deliveries
+// Administrator: change the delivery cost of home deliveries and the percentage of the total that the restaurant
+// keeps when a customer cancels a paid order that is already ready
 export default function AdminSettingsPage() {
   const { settings, error } = useSettings();
 
@@ -22,6 +23,7 @@ export default function AdminSettingsPage() {
 // The form starts with the stored values
 function SettingsForm({ settings }) {
   const [deliveryCost, setDeliveryCost] = useState(Number(settings.deliveryCost).toFixed(2));
+  const [feePercent, setFeePercent] = useState(String(settings.cancellationFeePercent));
   const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -30,11 +32,20 @@ function SettingsForm({ settings }) {
     setSaving(true);
     setResult(null);
     try {
-      const saved = await updateDeliveryCost(Number(deliveryCost));
+      const saved = await updateSettings({
+        deliveryCost: Number(deliveryCost),
+        cancellationFeePercent: Number(feePercent),
+      });
       setDeliveryCost(Number(saved.deliveryCost).toFixed(2));
-      setResult({ variant: 'success', text: `Gastos de envío guardados: ${formatPrice(saved.deliveryCost)}.` });
+      setFeePercent(String(saved.cancellationFeePercent));
+      setResult({
+        variant: 'success',
+        text:
+          `Ajustes guardados: envío de ${formatPrice(saved.deliveryCost)} y gasto de cancelación del ` +
+          `${saved.cancellationFeePercent} %.`,
+      });
     } catch {
-      setResult({ variant: 'danger', text: 'No hemos podido guardar los gastos de envío.' });
+      setResult({ variant: 'danger', text: 'No hemos podido guardar los ajustes.' });
     } finally {
       setSaving(false);
     }
@@ -62,6 +73,25 @@ function SettingsForm({ settings }) {
           </InputGroup>
           <Form.Text id="settings-delivery-cost-help">
             Los pedidos a domicilio de {formatPrice(settings.freeDeliveryThreshold)} o más no pagan envío.
+          </Form.Text>
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="settings-cancellation-fee">
+          <Form.Label>Gasto de cancelación de un pedido listo</Form.Label>
+          <InputGroup>
+            <Form.Control
+              type="number"
+              required
+              min="0"
+              max="100"
+              step="1"
+              aria-describedby="settings-cancellation-fee-help"
+              value={feePercent}
+              onChange={(event) => setFeePercent(event.target.value)}
+            />
+            <InputGroup.Text>%</InputGroup.Text>
+          </InputGroup>
+          <Form.Text id="settings-cancellation-fee-help">
+            Parte del total que se queda el restaurante si el cliente cancela un pedido pagado que ya está listo.
           </Form.Text>
         </Form.Group>
         <Button type="submit" variant="primary" disabled={saving}>

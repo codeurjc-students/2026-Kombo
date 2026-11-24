@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiFetch } from './httpClient';
 import {
   PENDING_STATUSES,
+  cancelOrder,
   createOrder,
   getMyOrders,
   getOrder,
@@ -10,7 +11,7 @@ import {
   startOfToday,
   updateOrder,
 } from './orderService';
-import { getSettings, updateDeliveryCost } from './settingsService';
+import { getSettings, updateSettings } from './settingsService';
 
 vi.mock('./httpClient', () => ({ apiFetch: vi.fn() }));
 
@@ -65,11 +66,20 @@ describe('orderService and settingsService', () => {
     expect(orderLinesFromCart(items)).toEqual([{ productId: 1, quantity: 2 }]);
   });
 
-  it('reads and changes the delivery cost', async () => {
+  it('reads and changes the settings', async () => {
     await getSettings();
-    await updateDeliveryCost(3.2);
+    await updateSettings({ deliveryCost: 3.2, cancellationFeePercent: 80 });
 
     expect(apiFetch).toHaveBeenNthCalledWith(1, '/api/v1/settings');
-    expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/settings', { method: 'PUT', body: { deliveryCost: 3.2 } });
+    expect(apiFetch).toHaveBeenNthCalledWith(2, '/api/v1/settings', {
+      method: 'PUT',
+      body: { deliveryCost: 3.2, cancellationFeePercent: 80 },
+    });
+  });
+
+  it('cancels an order of the customer with PATCH and the status CANCELLED', async () => {
+    await cancelOrder(7);
+
+    expect(apiFetch).toHaveBeenCalledWith('/api/v1/orders/7', { method: 'PATCH', body: { status: 'CANCELLED' } });
   });
 });

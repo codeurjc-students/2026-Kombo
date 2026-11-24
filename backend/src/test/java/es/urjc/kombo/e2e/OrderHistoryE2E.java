@@ -7,7 +7,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-// A real Chrome browser: the sample customer sees their last orders in the profile, opens one and repeats it
+// A real Chrome browser: the sample customer sees their last orders in the profile, opens one and repeats it, and a
+// new customer without a phone places a take away order and cancels it from *Mis pedidos*
 class OrderHistoryE2E extends E2ETestSupport {
 
     private static final By ORDER_CARDS = By.cssSelector("[aria-label='Últimos pedidos'] li");
@@ -51,5 +52,33 @@ class OrderHistoryE2E extends E2ETestSupport {
         wait.until(ExpectedConditions.urlMatches(".*/cart$"));
         wait.until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector(".toast"), "Hemos añadido al carrito"));
         assertThat(driver.findElement(CART_COUNT).getText()).isNotEqualTo("0");
+    }
+
+    @Test
+    void aNewCustomerWithoutAPhoneOrdersToTakeAwayAndCancelsTheOrder() {
+        signUpNewCustomer("ui-cancel", "secret-password");
+        driver.get(BASE_URL);
+        click(By.linkText("Agua"));
+        click(By.xpath("//button[normalize-space()='Añadir al carrito +']"));
+        wait.until(ExpectedConditions.textToBe(CART_COUNT, "1"));
+
+        // Take away (the default) paid in cash: the phone is optional
+        driver.get(BASE_URL + "/checkout");
+        click(By.id("payment-CASH"));
+        click(By.xpath("//button[starts-with(normalize-space(), 'Confirmar y pagar')]"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.id("confirmation-title"),
+                "Pedido confirmado"));
+
+        // Mis pedidos: the order in preparation can be cancelled after the confirmation
+        driver.get(BASE_URL + "/profile");
+        wait.until(ExpectedConditions.numberOfElementsToBe(ORDER_CARDS, 1));
+        click(By.xpath("//*[@aria-label='Últimos pedidos']//button[normalize-space()='Cancelar pedido']"));
+        By dialog = By.cssSelector("div[role='dialog']");
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(dialog, "No se te cobrará nada."));
+        click(By.xpath("//div[@role='dialog']//button[normalize-space()='Sí, cancelar el pedido']"));
+
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(By.tagName("main"), "cancelado"));
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(ORDER_CARDS, "Cancelado"));
+        assertThat(driver.findElements(By.xpath("//button[normalize-space()='Cancelar pedido']"))).isEmpty();
     }
 }

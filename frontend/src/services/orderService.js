@@ -42,6 +42,12 @@ export function updateOrder(id, changes) {
   return apiFetch(`${ORDERS_PATH}/${id}`, { method: 'PATCH', body: changes });
 }
 
+// A customer cancels one of their orders in preparation or ready (409 for any other status). Returns the order with
+// its cancellationFee: the money the restaurant keeps (a percentage of a paid order that was already ready).
+export function cancelOrder(id) {
+  return apiFetch(`${ORDERS_PATH}/${id}`, { method: 'PATCH', body: { status: 'CANCELLED' } });
+}
+
 // Order history of the logged in user, the most recent first
 export function getMyOrders({ page = 0, size = 4 } = {}) {
   return apiFetch(`/api/v1/users/me/orders?${new URLSearchParams({ page, size })}`);

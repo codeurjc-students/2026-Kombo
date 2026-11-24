@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -227,15 +228,39 @@ class OrderServiceTest {
     }
 
     @Test
-    void customersAndAnonymousUsersGiveTheirEmailAndPhone() {
+    void customersAndAnonymousUsersGiveTheirEmail() {
         when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
         OrderRequestDTO withoutEmail = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
                 Order.DeliveryType.EAT_IN, null, Order.PaymentMethod.CASH, "Ana", " ", "600123456");
-        OrderRequestDTO withoutPhone = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
-                Order.DeliveryType.EAT_IN, null, Order.PaymentMethod.CASH, "Ana", "ana@example.com", null);
 
         assertThatThrownBy(() -> orderService.create(withoutEmail, null)).hasMessage("customerEmail: is required");
-        assertThatThrownBy(() -> orderService.create(withoutPhone, null)).hasMessage("customerPhone: is required");
+    }
+
+    @Test
+    void thePhoneIsOptionalForOrdersCollectedOrEatenAtTheRestaurant() {
+        when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
+        for (Order.DeliveryType deliveryType : List.of(Order.DeliveryType.EAT_IN, Order.DeliveryType.TAKE_AWAY)) {
+            OrderRequestDTO withoutPhone = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
+                    deliveryType, null, Order.PaymentMethod.CASH, "Ana", "ana@example.com", " ");
+
+            assertThat(placeOrder(withoutPhone, null).getCustomerPhone()).isNull();
+        }
+    }
+
+    @Test
+    void thePhoneIsRequiredForHomeDeliveriesWhoeverPlacesTheOrder() {
+        when(productRepository.findByIdAndActiveTrue(5L)).thenReturn(Optional.of(product(5L, "Test Burger", "8.50")));
+        OrderRequestDTO withoutPhone = new OrderRequestDTO(List.of(new OrderLineRequestDTO(5L, 1)),
+                Order.DeliveryType.DELIVERY, "Calle Mayor 1", Order.PaymentMethod.CASH, "Ana", "ana@example.com", null);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
+        KomboUserDetails customer = new KomboUserDetails(owner);
+        KomboUserDetails employee = new KomboUserDetails(user(3L, User.Role.EMPLOYEE));
+
+        for (KomboUserDetails currentUser : Arrays.asList(null, customer, employee)) {
+            assertThatThrownBy(() -> orderService.create(withoutPhone, currentUser))
+                    .isInstanceOf(InvalidOrderException.class)
+                    .hasMessage("customerPhone: is required for home deliveries");
+        }
     }
 
     // Dashboard of the employees
@@ -339,6 +364,104 @@ class OrderServiceTest {
 
         assertThatThrownBy(() -> orderService.update(10L, empty)).isInstanceOf(InvalidOrderException.class);
         assertThatThrownBy(() -> orderService.update(99L, ready)).isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    // Cancellation by the employees and by the customers
+
+    @Test
+    void theRestaurantCancelsWithoutAFee() {
+        order.setPaid(true);
+        order.setStatus(Order.OrderStatus.READY);
+
+        orderService.update(10L, new OrderUpdateDTO(Order.OrderStatus.CANCELLED, null));
+
+        assertThat(order.getStatus()).isEqualTo(Order.OrderStatus.CANCELLED);
+        assertThat(order.getCancellationFee()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void aCustomerCancelsAnOrderInPreparationWithoutAFee() {
+        order.setPaid(true);
+
+        orderService.cancelByCustomer(10L, cancel(), new KomboUserDetails(owner));
+
+        assertThat(order.getStatus()).isEqualTo(Order.OrderStatus.CANCELLED);
+        assertThat(order.getCancellationFee()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void aCustomerWhoCancelsAPaidReadyOrderPaysThePercentageOfTheSettings() {
+        Order ready = readyOrderOf(new BigDecimal("12.35"), true);
+        Settings settings = new Settings();
+        settings.setCancellationFeePercent(80);
+        when(settingsService.findSettings()).thenReturn(settings);
+
+        orderService.cancelByCustomer(12L, cancel(), new KomboUserDetails(owner));
+
+        assertThat(ready.getStatus()).isEqualTo(Order.OrderStatus.CANCELLED);
+        // 80% of 12.35 is 9.88
+        assertThat(ready.getCancellationFee()).isEqualByComparingTo("9.88");
+    }
+
+    @Test
+    void aReadyOrderThatIsNotPaidKeepsNothing() {
+        Order ready = readyOrderOf(new BigDecimal("12.35"), false);
+
+        orderService.cancelByCustomer(12L, cancel(), new KomboUserDetails(owner));
+
+        assertThat(ready.getStatus()).isEqualTo(Order.OrderStatus.CANCELLED);
+        assertThat(ready.getCancellationFee()).isEqualByComparingTo("0");
+    }
+
+    @Test
+    void aCustomerOnlyCancelsTheirOwnOrders() {
+        KomboUserDetails other = new KomboUserDetails(otherCustomer);
+        OrderUpdateDTO cancel = cancel();
+
+        assertThatThrownBy(() -> orderService.cancelByCustomer(10L, cancel, other))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThat(order.getStatus()).isEqualTo(Order.OrderStatus.IN_PREPARATION);
+    }
+
+    @Test
+    void aCustomerCannotSendOtherChanges() {
+        KomboUserDetails customer = new KomboUserDetails(owner);
+        OrderUpdateDTO ready = new OrderUpdateDTO(Order.OrderStatus.READY, null);
+        OrderUpdateDTO cancelAndPay = new OrderUpdateDTO(Order.OrderStatus.CANCELLED, true);
+
+        assertThatThrownBy(() -> orderService.cancelByCustomer(10L, ready, customer))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThatThrownBy(() -> orderService.cancelByCustomer(10L, cancelAndPay, customer))
+                .isInstanceOf(AccessDeniedException.class);
+        assertThat(order.getStatus()).isEqualTo(Order.OrderStatus.IN_PREPARATION);
+    }
+
+    @Test
+    void aDeliveredOrCancelledOrderCannotBeCancelledByTheCustomer() {
+        KomboUserDetails customer = new KomboUserDetails(owner);
+        OrderUpdateDTO cancel = cancel();
+        for (Order.OrderStatus status : List.of(Order.OrderStatus.DELIVERED, Order.OrderStatus.CANCELLED)) {
+            order.setStatus(status);
+
+            assertThatThrownBy(() -> orderService.cancelByCustomer(10L, cancel, customer))
+                    .isInstanceOf(OrderStatusException.class);
+        }
+        assertThatThrownBy(() -> orderService.cancelByCustomer(99L, cancel, customer))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    private static OrderUpdateDTO cancel() {
+        return new OrderUpdateDTO(Order.OrderStatus.CANCELLED, null);
+    }
+
+    // A ready order of the owner with the id 12 and that total
+    private Order readyOrderOf(BigDecimal total, boolean paid) {
+        Order ready = new Order(owner, Order.DeliveryType.TAKE_AWAY, Order.PaymentMethod.CARD);
+        ReflectionTestUtils.setField(ready, "total", total);
+        ready.setPaid(paid);
+        ready.setStatus(Order.OrderStatus.READY);
+        when(orderRepository.findById(12L)).thenReturn(Optional.of(ready));
+        return ready;
     }
 
     // Places the order with a delivery cost of 3.00 and returns the order that was saved (with the id 42)

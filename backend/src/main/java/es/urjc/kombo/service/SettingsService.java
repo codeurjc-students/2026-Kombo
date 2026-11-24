@@ -25,6 +25,7 @@ public class SettingsService {
     public SettingsDTO update(SettingsUpdateDTO update) {
         Settings settings = findSettings();
         settings.setDeliveryCost(update.deliveryCost());
+        settings.setCancellationFeePercent(update.cancellationFeePercent());
         return toDTO(settings);
     }
 
@@ -35,6 +36,7 @@ public class SettingsService {
     }
 
     private static SettingsDTO toDTO(Settings settings) {
-        return new SettingsDTO(settings.getDeliveryCost(), Settings.FREE_DELIVERY_THRESHOLD);
+        return new SettingsDTO(settings.getDeliveryCost(), Settings.FREE_DELIVERY_THRESHOLD,
+                settings.getCancellationFeePercent());
     }
 }

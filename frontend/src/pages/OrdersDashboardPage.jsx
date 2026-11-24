@@ -7,7 +7,7 @@ import useNow from '../hooks/useNow';
 import usePagedList from '../hooks/usePagedList';
 import { ApiError } from '../services/httpClient';
 import { FINISHED_STATUSES, PENDING_STATUSES, getOrders, startOfToday, updateOrder } from '../services/orderService';
-import { DELIVERY_TYPES, PAYMENT_METHODS } from '../utils/delivery';
+import { DELIVERY_TYPES, paymentStatus } from '../utils/delivery';
 import {
   ORDER_STATUS,
   formatDateTime,
@@ -179,9 +179,7 @@ function OrderCard({ order, onChange, now }) {
       <p className="small mb-2 mt-1">{orderLinesSummary(order)}</p>
       {order.deliveryAddress && <p className="small text-secondary mb-2">Entrega en {order.deliveryAddress}</p>}
       <div className="d-flex flex-wrap align-items-center gap-2">
-        <span className={`small ${order.paid ? 'text-success' : 'text-danger'}`}>
-          {PAYMENT_METHODS[order.paymentMethod]?.label} · {order.paid ? 'Pagado' : 'Pendiente de pago'}
-        </span>
+        <span className={`small ${paymentClass(order)}`}>{paymentStatus(order)}</span>
         {onChange && (
           <div className="d-flex flex-wrap gap-2 ms-auto">
             {working && <Spinner animation="border" size="sm" role="status" aria-label="Guardando" />}
@@ -255,4 +253,12 @@ function WaitingTime({ order, now }) {
       {formatMinutes(minutes)}
     </span>
   );
+}
+
+// Green when it is paid, red when it is still to be paid and grey when the order was cancelled
+function paymentClass(order) {
+  if (order.status === 'CANCELLED') {
+    return 'text-secondary';
+  }
+  return order.paid ? 'text-success' : 'text-danger';
 }

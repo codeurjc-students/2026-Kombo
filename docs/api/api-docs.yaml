@@ -872,7 +872,13 @@ components:
           type: number
           maximum: 99.99
           minimum: 0.00
+        cancellationFeePercent:
+          type: integer
+          format: int32
+          maximum: 100
+          minimum: 0
       required:
+      - cancellationFeePercent
       - deliveryCost
     SettingsDTO:
       type: object
@@ -881,6 +887,9 @@ components:
           type: number
         freeDeliveryThreshold:
           type: number
+        cancellationFeePercent:
+          type: integer
+          format: int32
     IngredientQuantityDTO:
       type: object
       properties:
@@ -1156,6 +1165,8 @@ components:
         deliveryCost:
           type: number
         total:
+          type: number
+        cancellationFee:
           type: number
     OrderLineDTO:
       type: object

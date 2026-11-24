@@ -1,10 +1,14 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CART_STORAGE_KEY } from '../context/CartProvider';
-import { getMyOrders } from '../services/orderService';
+import { cancelOrder, getMyOrders } from '../services/orderService';
+import { getSettings } from '../services/settingsService';
 import { ADMIN, CUSTOMER, EMPLOYEE, renderApp } from '../test-utils';
 
-vi.mock('../services/orderService', () => ({ getMyOrders: vi.fn(), getOrder: vi.fn() }));
+vi.mock('../services/orderService', () => ({ getMyOrders: vi.fn(), getOrder: vi.fn(), cancelOrder: vi.fn() }));
+vi.mock('../services/settingsService', () => ({
+  getSettings: vi.fn().mockResolvedValue({ deliveryCost: 2.5, freeDeliveryThreshold: 25, cancellationFeePercent: 80 }),
+}));
 
 const order = (id, status) => ({
   id,
@@ -37,6 +41,32 @@ describe('ProfilePage', () => {
 
     expect(await screen.findByText('Entregado')).toBeInTheDocument();
     expect(getMyOrders).toHaveBeenLastCalledWith({ page: 1, size: 4 });
+  });
+
+  it('cancels an order in preparation after the confirmation and reads the orders again', async () => {
+    const unpaid = { ...order(2, 'IN_PREPARATION'), paymentMethod: 'CASH', paid: false };
+    getMyOrders
+      .mockResolvedValueOnce({ content: [unpaid, order(1, 'DELIVERED')], page: { number: 0, totalPages: 1 } })
+      .mockResolvedValueOnce({
+        content: [{ ...unpaid, status: 'CANCELLED', cancellationFee: 0 }, order(1, 'DELIVERED')],
+        page: { number: 0, totalPages: 1 },
+      });
+    cancelOrder.mockResolvedValue({ ...unpaid, status: 'CANCELLED', cancellationFee: 0 });
+    renderApp('/profile', { user: CUSTOMER });
+
+    // Only the order in preparation can be cancelled
+    const card = within((await screen.findByRole('link', { name: 'Pedido nº 1002' })).closest('li'));
+    const delivered = within(screen.getByRole('link', { name: 'Pedido nº 1001' }).closest('li'));
+    expect(delivered.queryByRole('button', { name: 'Cancelar pedido' })).not.toBeInTheDocument();
+    fireEvent.click(card.getByRole('button', { name: 'Cancelar pedido' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(dialog.getByText('No se te cobrará nada.')).toBeInTheDocument();
+    fireEvent.click(dialog.getByRole('button', { name: 'Sí, cancelar el pedido' }));
+
+    expect(await screen.findByText('Pedido nº 1002 cancelado. Efectivo - No cobrado.')).toBeInTheDocument();
+    expect(cancelOrder).toHaveBeenCalledWith(2);
+    expect(await screen.findByText('Cancelado')).toBeInTheDocument();
+    expect(getSettings).toHaveBeenCalled();
   });
 
   it('repeats an order: its products go to the cart', async () => {

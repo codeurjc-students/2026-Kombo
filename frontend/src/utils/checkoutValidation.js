@@ -9,8 +9,9 @@ const EXPIRY = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
 const CVV = /^[0-9]{3}$/;
 
 // form: { deliveryType, address, name, email, phone, paymentMethod, cardNumber, cardExpiry, cardCvv }
-// counter: an employee places the order at the counter. Only the name of the customer is required (the email and
-// the phone are checked if they are written) and a card is paid with the card reader, so there are no card data.
+// counter: an employee places the order at the counter. The email is not required (it is checked if it is written)
+// and a card is paid with the card reader, so there are no card data.
+// The phone is required for home deliveries, whoever places the order; otherwise it is checked if it is written.
 export function validateCheckout(form, today = new Date(), { counter = false } = {}) {
   const errors = {};
   if (!form.name.trim()) {
@@ -21,7 +22,7 @@ export function validateCheckout(form, today = new Date(), { counter = false } =
     errors.email = 'Escribe un correo electrónico válido.';
   }
   const phone = form.phone.trim();
-  if ((!counter || phone) && !PHONE.test(phone)) {
+  if ((form.deliveryType === 'DELIVERY' || phone) && !PHONE.test(phone)) {
     errors.phone = 'Escribe un teléfono de 9 a 15 cifras.';
   }
   if (form.deliveryType === 'DELIVERY' && !form.address.trim()) {

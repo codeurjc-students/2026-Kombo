@@ -35,6 +35,18 @@ describe('validateCheckout', () => {
     });
   });
 
+  it('requires the phone only for home deliveries, also in counter orders', () => {
+    expect(validateCheckout({ ...VALID, phone: ' ' }, TODAY)).toEqual({});
+    expect(validateCheckout({ ...VALID, deliveryType: 'EAT_IN', phone: '' }, TODAY)).toEqual({});
+
+    const delivery = { ...VALID, deliveryType: 'DELIVERY', address: 'Calle Mayor 1', phone: '' };
+    const phoneError = { phone: 'Escribe un teléfono de 9 a 15 cifras.' };
+    expect(validateCheckout(delivery, TODAY)).toEqual(phoneError);
+    expect(validateCheckout({ ...delivery, email: '', paymentMethod: 'CASH' }, TODAY, { counter: true })).toEqual(
+      phoneError,
+    );
+  });
+
   it('requires the address only for home deliveries', () => {
     expect(validateCheckout({ ...VALID, deliveryType: 'DELIVERY' }, TODAY)).toEqual({
       address: 'Escribe la dirección de entrega.',

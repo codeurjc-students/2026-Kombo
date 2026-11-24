@@ -159,7 +159,7 @@ describe('OrdersDashboardPage', () => {
     renderApp('/orders', { user: EMPLOYEE });
 
     const unpaid = await card(1002);
-    expect(unpaid.getByText('Efectivo · Pendiente de pago')).toBeInTheDocument();
+    expect(unpaid.getByText('Efectivo - Pendiente de pago')).toBeInTheDocument();
     expect(unpaid.getByText('Cóbralo antes de entregarlo.')).toBeInTheDocument();
     expect(unpaid.queryByRole('button', { name: 'Entregar' })).not.toBeInTheDocument();
     fireEvent.click(unpaid.getByRole('button', { name: 'Cobrar en efectivo' }));
