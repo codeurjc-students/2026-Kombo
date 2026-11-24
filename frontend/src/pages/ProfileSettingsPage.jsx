@@ -16,7 +16,7 @@ import {
 import { validatePasswordChange } from '../utils/profileValidation';
 
 // Settings of the account of the logged in user. Each section is saved on its own, so changing one thing
-// does not require filling in the others; "Volver al perfil" leaves without saving anything.
+// does not require filling in the others; "Volver a mis pedidos" leaves without saving anything.
 // Only customers keep addresses, and the account of the administrator cannot be deleted.
 // A header with the picture, the name and the email, and a tab for each group of settings. A tab is rendered
 // the first time it is opened and then kept, so moving between tabs does not lose what was written.
