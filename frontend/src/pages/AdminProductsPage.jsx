@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Alert, Badge, Button, Col, Modal, Row, Spinner } from 'react-bootstrap';
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Badge, Button, Col, Form, InputGroup, Modal, Row, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router';
 import ErrorState from '../components/ErrorState';
 import LoadingState from '../components/LoadingState';
@@ -8,10 +8,13 @@ import { ApiError } from '../services/httpClient';
 import {
   CATEGORY_LABELS,
   adminProductImageUrl,
+  getAdminProduct,
   getAdminProducts,
   setProductActive,
+  updateCombo,
 } from '../services/productService';
 import { formatPrice } from '../utils/format';
+import { parsePrice, validatePrice } from '../utils/productValidation';
 
 // Management of the menu by the administrator: every product and kombo, the deactivated ones in grey. Products are
 // never deleted (the orders keep them): they are deactivated and leave the menu until they are activated again.
@@ -84,51 +87,190 @@ export default function AdminProductsPage() {
           {loading ? 'Cargando…' : 'Más resultados'}
         </Button>
       )}
-      {blocked && <CombosOfProductModal {...blocked} onClose={() => setBlocked(null)} />}
+      {blocked && (
+        <CombosOfProductModal
+          {...blocked}
+          onClose={() => setBlocked(null)}
+          onKomboChanged={(saved) => setChanged((current) => ({ ...current, [saved.id]: saved }))}
+          onDeactivateProduct={() => {
+            setBlocked(null);
+            toggleActive(blocked.product);
+          }}
+        />
+      )}
     </section>
   );
 }
 
-// A product in active kombos cannot be deactivated: the window lists those kombos with a link to change each one
-// (to remove the product from it). It closes when one is opened; pressing "Desactivar" again shows the kombos that
-// still include the product.
-function CombosOfProductModal({ product, combos, onClose }) {
+// A product in active kombos cannot be deactivated: the window lists those kombos. In each one the administrator
+// can remove the product right there ("Quitar", with the new price of the kombo) or open the kombo ("Modificar").
+// A kombo that would keep fewer than 2 units cannot lose the product: it can be deactivated instead. When no kombo
+// is left, the product can be deactivated from the window. onKomboChanged receives each kombo saved here.
+function CombosOfProductModal({ product, combos, onClose, onKomboChanged, onDeactivateProduct }) {
+  const [state, setState] = useState({ kombos: null, error: null });
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(combos.map((combo) => getAdminProduct(combo.id)))
+      .then((kombos) => !cancelled && setState({ kombos, error: null }))
+      .catch((error) => !cancelled && setState({ kombos: null, error }));
+    return () => {
+      cancelled = true;
+    };
+  }, [combos, attempt]);
+
+  function removeRow(saved) {
+    setState((current) => ({ ...current, kombos: current.kombos.filter((kombo) => kombo.id !== saved.id) }));
+    onKomboChanged(saved);
+  }
+
+  const { kombos, error } = state;
   return (
-    <Modal show onHide={onClose} centered>
+    <Modal show onHide={onClose} centered size="lg">
       <Modal.Header closeButton>
         <Modal.Title as="h2" className="h4">
           CONFLICTO
         </Modal.Title>
       </Modal.Header>
       <Modal.Body className="small">
-        <p>
-          {product.name} no se puede desactivar porque está en{' '}
-          {combos.length === 1 ? 'este kombo activo' : 'estos kombos activos'}. Quítalo del kombo o desactiva el
-          kombo antes.
-        </p>
-        <ul className="list-unstyled d-grid gap-2 mb-0" aria-label={`Kombos con ${product.name}`}>
-          {combos.map((combo) => (
-            <li key={combo.id} className="d-flex align-items-center justify-content-between gap-2 order-item">
-              <span className="fw-semibold">{combo.name}</span>
-              <Button
-                as={Link}
-                to={`/admin/combos/${combo.id}`}
-                variant="outline-ink"
-                size="sm"
-                aria-label={`Modificar ${combo.name}`}
-              >
-                Modificar
-              </Button>
-            </li>
-          ))}
-        </ul>
+        {error && (
+          <ErrorState message="No hemos podido cargar los kombos." onRetry={() => setAttempt((n) => n + 1)} />
+        )}
+        {!error && !kombos && <LoadingState label="Cargando los kombos…" />}
+        {kombos && kombos.length > 0 && (
+          <>
+            <p>
+              {product.name} no se puede desactivar porque está en{' '}
+              {kombos.length === 1 ? 'este kombo activo' : 'estos kombos activos'}. Quítalo del kombo (puedes
+              cambiar su precio a la vez) o desactiva el kombo antes.
+            </p>
+            <ul className="list-unstyled d-grid gap-2 mb-0" aria-label={`Kombos con ${product.name}`}>
+              {kombos.map((kombo) => (
+                <KomboOfProductRow key={kombo.id} kombo={kombo} product={product} onSaved={removeRow} />
+              ))}
+            </ul>
+          </>
+        )}
+        {kombos && kombos.length === 0 && (
+          <p className="mb-0">{product.name} ya no está en ningún kombo activo: ya puedes desactivarlo.</p>
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="outline-ink" onClick={onClose}>
           Cerrar
         </Button>
+        {kombos && kombos.length === 0 && (
+          <Button variant="danger" onClick={onDeactivateProduct}>
+            Desactivar {product.name}
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
+  );
+}
+
+// A kombo of the window: its name with its price next to it (it can be changed when the product is removed), the
+// units of the product in it, and the buttons on the right (the action on the product above "Modificar")
+function KomboOfProductRow({ kombo, product, onSaved }) {
+  const [price, setPrice] = useState(() => Number(kombo.price).toFixed(2).replace('.', ','));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const units = kombo.products.find((item) => item.product.id === product.id)?.quantity ?? 0;
+  const remaining = kombo.products.reduce((total, item) => total + item.quantity, 0) - units;
+  const canRemove = remaining >= 2;
+  const priceError = validatePrice(price);
+
+  async function save(action) {
+    setSaving(true);
+    setError(null);
+    try {
+      onSaved(await action());
+    } catch {
+      setError(`No hemos podido cambiar ${kombo.name}. Inténtalo de nuevo.`);
+      setSaving(false);
+    }
+  }
+
+  function remove() {
+    if (priceError) {
+      return;
+    }
+    save(() =>
+      updateCombo(kombo.id, {
+        name: kombo.name,
+        price: parsePrice(price),
+        description: kombo.description ?? '',
+        products: kombo.products
+          .filter((item) => item.product.id !== product.id)
+          .map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+      }),
+    );
+  }
+
+  return (
+    <li className="order-item kombo-row" aria-label={kombo.name}>
+      <div className="kombo-row-info">
+        <div className="d-flex flex-wrap align-items-center gap-2">
+          <span className="fw-semibold">{kombo.name}</span>
+          {canRemove ? (
+            <InputGroup size="sm" className="kombo-row-price">
+              <Form.Control
+                aria-label={`Precio de ${kombo.name}`}
+                value={price}
+                inputMode="decimal"
+                isInvalid={Boolean(priceError)}
+                onChange={(event) => setPrice(event.target.value)}
+              />
+              <InputGroup.Text>€</InputGroup.Text>
+            </InputGroup>
+          ) : (
+            <span className="text-secondary">{formatPrice(kombo.price)}</span>
+          )}
+        </div>
+        <span className="text-secondary">
+          {units} × {product.name}
+        </span>
+        {!canRemove && <span className="text-danger">Se queda con menos de 2 productos</span>}
+        {canRemove && priceError && <span className="text-danger">{priceError}</span>}
+        {error && <span className="text-danger">{error}</span>}
+      </div>
+      {/* The action on the product first, and the link to the whole kombo below */}
+      <div className="kombo-row-actions">
+        {canRemove ? (
+          <Button
+            variant="outline-danger"
+            size="sm"
+            disabled={saving || Boolean(priceError)}
+            onClick={remove}
+            aria-label={`Quitar ${product.name} de ${kombo.name}`}
+          >
+            {saving && <Spinner animation="border" size="sm" className="me-2" aria-hidden="true" />}
+            Quitar
+          </Button>
+        ) : (
+          <Button
+            variant="outline-danger"
+            size="sm"
+            disabled={saving}
+            onClick={() => save(() => setProductActive(kombo.id, false))}
+            aria-label={`Desactivar kombo ${kombo.name}`}
+          >
+            {saving && <Spinner animation="border" size="sm" className="me-2" aria-hidden="true" />}
+            Desactivar kombo
+          </Button>
+        )}
+        <Button
+          as={Link}
+          to={`/admin/combos/${kombo.id}`}
+          variant="outline-ink"
+          size="sm"
+          aria-label={`Modificar ${kombo.name}`}
+        >
+          Modificar
+        </Button>
+      </div>
+    </li>
   );
 }
 

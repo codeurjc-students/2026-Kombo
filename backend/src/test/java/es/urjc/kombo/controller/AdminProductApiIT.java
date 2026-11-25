@@ -192,6 +192,35 @@ class AdminProductApiIT {
         given().when().get("/api/v1/products/{id}", burger).then().statusCode(200);
     }
 
+    // The window of the client removes a product from its kombo with PUT, changing the price at the same time, and
+    // then deactivates the product; a kombo cannot keep fewer than 2 units
+    @Test
+    void aProductRemovedFromItsKomboWithANewPriceCanBeDeactivated() {
+        String admin = adminToken();
+        long sauce = createProduct(admin, "Salsa de prueba", "Sides");
+        long drink = createProduct(admin, "Refresco de prueba", "Drinks");
+        int combo = given().cookie(JwtService.COOKIE_NAME, admin).contentType(ContentType.JSON)
+                .body(comboBody("Kombo de salsa", 4.0, sauce, 1, drink, 2))
+                .when().post("/api/v1/admin/combos")
+                .then().statusCode(201).extract().path("id");
+        createdCombos.add((long) combo);
+
+        given().cookie(JwtService.COOKIE_NAME, admin).contentType(ContentType.JSON)
+                .body("{\"name\":\"Kombo de salsa\",\"price\":3.5,\"products\":[{\"productId\":%d,\"quantity\":1}]}"
+                        .formatted(drink))
+                .when().put("/api/v1/admin/combos/{id}", combo)
+                .then().statusCode(400);
+        given().cookie(JwtService.COOKIE_NAME, admin).contentType(ContentType.JSON)
+                .body("{\"name\":\"Kombo de salsa\",\"price\":3.5,\"products\":[{\"productId\":%d,\"quantity\":2}]}"
+                        .formatted(drink))
+                .when().put("/api/v1/admin/combos/{id}", combo)
+                .then().statusCode(200)
+                .body("price", equalTo(3.5f))
+                .body("products.product.id", contains((int) drink));
+
+        changeActive(admin, sauce, false);
+    }
+
     // 10 MB for the pictures of products and kombos; the profile pictures keep their limit of 1 MB (UserApiIT)
     @Test
     void thePictureOfAProductCanHaveMoreThan1MegabyteButNotMoreThan10() {

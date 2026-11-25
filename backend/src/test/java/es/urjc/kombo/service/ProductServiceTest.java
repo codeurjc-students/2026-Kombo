@@ -291,6 +291,26 @@ class ProductServiceTest {
     }
 
     @Test
+    void aProductRemovedFromItsKomboWithANewPriceCanBeDeactivated() {
+        Product burger = burger();
+        Product drink = drink();
+        Combo kombo = new Combo("Kombo clásico", PRICE, null, "Combos");
+        kombo.addProduct(burger, 1);
+        kombo.addProduct(drink, 2);
+        when(comboRepository.findById(3L)).thenReturn(Optional.of(kombo));
+        when(productRepository.findByIdAndActiveTrue(2L)).thenReturn(Optional.of(drink));
+
+        productService.updateCombo(3L, new ComboRequestDTO("Kombo clásico", new BigDecimal("3.50"), null,
+                List.of(new ComboItemRequestDTO(2L, 2))));
+
+        assertThat(kombo.getPrice()).isEqualByComparingTo("3.50");
+        assertThat(kombo.getProducts()).containsOnlyKeys(drink);
+        when(productRepository.findById(1L)).thenReturn(Optional.of(burger));
+        when(comboRepository.findActiveCombosWith(burger)).thenReturn(List.of());
+        assertThat(productService.changeActive(1L, false).active()).isFalse();
+    }
+
+    @Test
     void aProductIsDeactivatedAndActivatedAgain() {
         Product drink = drink();
         when(productRepository.findById(2L)).thenReturn(Optional.of(drink));

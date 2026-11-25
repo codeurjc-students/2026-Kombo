@@ -61,7 +61,7 @@ gantt
     section Phase 4 - Version 0.2
     Profile link, long names and searchable lists    :done, f4e, 2026-11-24, 1d
     Order phone, refunds and cancellation            :done, f4f, 2026-11-24, 1d
-    Removing products from kombos                    :f4g, after f4f, 1d
+    Removing products from kombos                    :done, f4g, 2026-11-25, 1d
     Open kombos and sizes                            :f4h, after f4g, 4d
     Search, filters and customisation                :f4a, 2026-11-23, 5d
     Recommendation algorithm and PDF ticket          :f4b, after f4a, 5d

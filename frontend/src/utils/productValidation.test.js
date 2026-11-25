@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parsePrice, validateCombo, validateProduct } from './productValidation';
+import { parsePrice, validateCombo, validatePrice, validateProduct } from './productValidation';
 
 const PRODUCT = { name: 'Hamburguesa', price: '6,50', description: '', category: 'Burgers', ingredients: [] };
 const COMBO = { name: 'Kombo', price: '8.90', description: '', products: [{ productId: '1', quantity: '2' }] };
@@ -61,5 +61,15 @@ describe('validateCombo', () => {
     expect(validateCombo({ ...COMBO, products: [{ productId: '1', quantity: '0' }] }).products).toBe(
       'Las unidades de cada producto son un número entero de 1 a 20.',
     );
+  });
+});
+
+describe('validatePrice', () => {
+  it('accepts a price greater than 0 with at most 2 decimals', () => {
+    expect(validatePrice('7,50')).toBeNull();
+    expect(validatePrice(' 12 ')).toBeNull();
+    expect(validatePrice('0')).toMatch(/mayor que 0/);
+    expect(validatePrice('7,505')).toMatch(/2 decimales/);
+    expect(validatePrice('')).not.toBeNull();
   });
 });

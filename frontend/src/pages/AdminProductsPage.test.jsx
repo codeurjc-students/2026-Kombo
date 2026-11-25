@@ -1,13 +1,15 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../services/httpClient';
-import { getAdminProducts, setProductActive } from '../services/productService';
+import { getAdminProduct, getAdminProducts, setProductActive, updateCombo } from '../services/productService';
 import { ADMIN, EMPLOYEE, renderApp } from '../test-utils';
 
 vi.mock('../services/productService', async (importOriginal) => ({
   ...(await importOriginal()),
+  getAdminProduct: vi.fn(),
   getAdminProducts: vi.fn(),
   setProductActive: vi.fn(),
+  updateCombo: vi.fn(),
 }));
 
 const BURGER = {
@@ -34,6 +36,38 @@ const KOMBO = {
   ingredients: [],
   products: [{ product: { id: 1, name: 'Hamburguesa clásica' }, quantity: 2 }],
 };
+
+const DRINK = { id: 5, name: 'Refresco' };
+// Kombos of the burger as read by the window: the classic one keeps 2 units without it, the family one only 1
+const CLASSIC = {
+  ...KOMBO,
+  price: 9.9,
+  description: 'Menú',
+  products: [
+    { product: { id: 1, name: 'Hamburguesa clásica' }, quantity: 1 },
+    { product: DRINK, quantity: 2 },
+  ],
+};
+const FAMILY = {
+  ...KOMBO,
+  id: 4,
+  name: 'Kombo familiar',
+  price: 20,
+  products: [
+    { product: { id: 1, name: 'Hamburguesa clásica' }, quantity: 2 },
+    { product: DRINK, quantity: 1 },
+  ],
+};
+
+// The burger cannot be deactivated: it is in the active kombos
+function burgerInKombos(...kombos) {
+  setProductActive.mockRejectedValueOnce(
+    new ApiError(409, 'The product is in active combos', {
+      products: kombos.map((kombo) => ({ id: kombo.id, name: kombo.name })),
+    }),
+  );
+  getAdminProduct.mockImplementation((id) => Promise.resolve(kombos.find((kombo) => kombo.id === id)));
+}
 
 function card(name) {
   return screen.getByRole('article', { name });
@@ -82,21 +116,14 @@ describe('AdminProductsPage', () => {
   });
 
   it('lists the active kombos of a product that cannot be deactivated, with a link to change each one', async () => {
-    setProductActive.mockRejectedValue(
-      new ApiError(409, 'The product is in active combos: Kombo clásico, Kombo familiar', {
-        products: [
-          { id: 3, name: 'Kombo clásico' },
-          { id: 4, name: 'Kombo familiar' },
-        ],
-      }),
-    );
+    burgerInKombos(CLASSIC, FAMILY);
     const { router } = renderApp('/admin/products', { user: ADMIN });
 
     fireEvent.click(await screen.findByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
 
     const dialog = within(await screen.findByRole('dialog'));
     expect(dialog.getByRole('heading', { name: 'CONFLICTO' })).toBeInTheDocument();
-    expect(dialog.getByText(/Hamburguesa clásica no se puede desactivar porque está en estos kombos activos/))
+    expect(await dialog.findByText(/Hamburguesa clásica no se puede desactivar porque está en estos kombos activos/))
       .toBeInTheDocument();
     expect(dialog.getByText('Kombo clásico')).toBeInTheDocument();
     expect(dialog.getByText('Kombo familiar')).toBeInTheDocument();
@@ -110,21 +137,86 @@ describe('AdminProductsPage', () => {
   });
 
   it('closes the list of kombos and shows it again when the product is deactivated again', async () => {
-    setProductActive.mockRejectedValue(
-      new ApiError(409, 'The product is in active combos: Kombo clásico', {
-        products: [{ id: 3, name: 'Kombo clásico' }],
-      }),
-    );
+    burgerInKombos(CLASSIC);
     renderApp('/admin/products', { user: ADMIN });
 
     fireEvent.click(await screen.findByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
-    expect(within(await screen.findByRole('dialog')).getByText(/está en este kombo activo/)).toBeInTheDocument();
+    expect(await within(await screen.findByRole('dialog')).findByText(/está en este kombo activo/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cerrar' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
+    burgerInKombos(CLASSIC);
     fireEvent.click(screen.getByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(setProductActive).toHaveBeenCalledTimes(2);
+  });
+
+  it('removes the product from a kombo with a new price and then deactivates the product', async () => {
+    burgerInKombos(CLASSIC);
+    updateCombo.mockResolvedValue({ ...CLASSIC, price: 7.5, products: [CLASSIC.products[1]] });
+    renderApp('/admin/products', { user: ADMIN });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    expect(await dialog.findByText('1 × Hamburguesa clásica')).toBeInTheDocument();
+    const price = dialog.getByLabelText('Precio de Kombo clásico');
+    expect(price).toHaveValue('9,90');
+    fireEvent.change(price, { target: { value: '7,50' } });
+    fireEvent.click(dialog.getByRole('button', { name: 'Quitar Hamburguesa clásica de Kombo clásico' }));
+
+    expect(await dialog.findByText(/ya no está en ningún kombo activo/)).toBeInTheDocument();
+    expect(updateCombo).toHaveBeenCalledWith(3, {
+      name: 'Kombo clásico',
+      price: 7.5,
+      description: 'Menú',
+      products: [{ productId: 5, quantity: 2 }],
+    });
+    // The card of the kombo shows its new products
+    expect(within(card('Kombo clásico')).getByText('2 × Refresco')).toBeInTheDocument();
+
+    setProductActive.mockResolvedValueOnce({ ...BURGER, active: false });
+    fireEvent.click(dialog.getByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
+    expect(await screen.findByText('Hamburguesa clásica ya no sale en la carta.')).toBeInTheDocument();
+    expect(card('Hamburguesa clásica')).toHaveClass('is-inactive');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('offers to deactivate a kombo that would keep fewer than 2 products, and checks the price', async () => {
+    burgerInKombos(CLASSIC, FAMILY);
+    setProductActive.mockResolvedValueOnce({ ...FAMILY, active: false });
+    renderApp('/admin/products', { user: ADMIN });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    const family = within(await dialog.findByRole('listitem', { name: 'Kombo familiar' }));
+    expect(family.getByText('Se queda con menos de 2 productos')).toBeInTheDocument();
+    expect(family.queryByRole('button', { name: /Quitar/ })).not.toBeInTheDocument();
+
+    // A wrong price cannot be saved
+    fireEvent.change(dialog.getByLabelText('Precio de Kombo clásico'), { target: { value: '0' } });
+    expect(dialog.getByText(/Escribe un precio mayor que 0/)).toBeInTheDocument();
+    expect(dialog.getByRole('button', { name: 'Quitar Hamburguesa clásica de Kombo clásico' })).toBeDisabled();
+
+    fireEvent.click(family.getByRole('button', { name: 'Desactivar kombo Kombo familiar' }));
+    await waitFor(() => expect(dialog.queryByRole('listitem', { name: 'Kombo familiar' })).not.toBeInTheDocument());
+    expect(setProductActive).toHaveBeenLastCalledWith(4, false);
+    expect(dialog.getByRole('listitem', { name: 'Kombo clásico' })).toBeInTheDocument();
+    expect(updateCombo).not.toHaveBeenCalled();
+  });
+
+  it('shows an error when a kombo of the window cannot be loaded or changed', async () => {
+    burgerInKombos(CLASSIC);
+    getAdminProduct.mockRejectedValueOnce(new Error('offline'));
+    updateCombo.mockRejectedValue(new Error('offline'));
+    renderApp('/admin/products', { user: ADMIN });
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Desactivar Hamburguesa clásica' }));
+    const dialog = within(await screen.findByRole('dialog'));
+    fireEvent.click(await dialog.findByRole('button', { name: 'Reintentar' }));
+    fireEvent.click(await dialog.findByRole('button', { name: 'Quitar Hamburguesa clásica de Kombo clásico' }));
+
+    expect(await dialog.findByText('No hemos podido cambiar Kombo clásico. Inténtalo de nuevo.')).toBeInTheDocument();
+    expect(dialog.getByRole('listitem', { name: 'Kombo clásico' })).toBeInTheDocument();
   });
 
   it('explains why a kombo with a deactivated product cannot be activated, and other errors', async () => {
