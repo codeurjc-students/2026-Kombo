@@ -215,6 +215,21 @@ class ProductServiceIT {
     }
 
     @Test
+    void aProductRemovedFromItsKomboWithANewPriceCanBeDeactivated() {
+        // The kombo keeps 2 units of the drink, with the price written by the administrator
+        productService.updateCombo(menu.getId(), new ComboRequestDTO("Test Menu", new BigDecimal("3.50"), "Drinks",
+                List.of(new ComboItemRequestDTO(drink.getId(), 2))));
+
+        productService.changeActive(burger.getId(), false);
+
+        // Read again from the database (the products of the kombo are loaded lazily)
+        AdminProductDTO stored = productService.findForManagement(menu.getId());
+        assertThat(stored.price()).isEqualByComparingTo("3.50");
+        assertThat(stored.products()).extracting(item -> item.product().id()).containsExactly(drink.getId());
+        assertThat(productRepository.findById(burger.getId()).orElseThrow().isActive()).isFalse();
+    }
+
+    @Test
     void theManagementListsActiveAndInactiveProductsAndKombos() {
         PageRequest page = PageRequest.of(0, 10, Sort.by("name"));
 

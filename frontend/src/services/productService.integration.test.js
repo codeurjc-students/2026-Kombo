@@ -7,6 +7,7 @@ import {
   adminProductImageUrl,
   createCombo,
   createProduct,
+  getAdminProduct,
   getAdminProducts,
   getIngredients,
   getProduct,
@@ -89,6 +90,35 @@ describe('productService for the management of products with the real REST API',
     expect((await getProduct(burger.id).catch((err) => err)).status).toBe(404);
     const inactive = await getAdminProducts({ active: false, size: 100 });
     expect(inactive.content.map((product) => product.id)).toContain(burger.id);
+  });
+
+  it('removes a product from its kombo with a new price, as the window of the products page does', async () => {
+    await startSession('admin@kombo.com', 'admin');
+    const sauce = await newProduct(`Salsa test ${Date.now()}`, 'Sides');
+    const drink = await newProduct(`Bebida test ${Date.now()}`, 'Drinks');
+    const combo = await createCombo({
+      name: `Kombo test ${Date.now()}`,
+      price: 4,
+      description: '',
+      products: [
+        { productId: sauce.id, quantity: 1 },
+        { productId: drink.id, quantity: 2 },
+      ],
+    });
+    created.push(combo);
+    const kombo = await getAdminProduct(combo.id);
+
+    const changed = await updateCombo(kombo.id, {
+      name: kombo.name,
+      price: 3.5,
+      description: kombo.description ?? '',
+      products: kombo.products
+        .filter((item) => item.product.id !== sauce.id)
+        .map((item) => ({ productId: item.product.id, quantity: item.quantity })),
+    });
+
+    expect(changed).toMatchObject({ price: 3.5, products: [{ product: expect.objectContaining({ id: drink.id }) }] });
+    expect((await setProductActive(sauce.id, false)).active).toBe(false);
   });
 
   it('is only for the administrator', async () => {

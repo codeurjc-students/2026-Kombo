@@ -14,6 +14,15 @@ export function parsePrice(text) {
   return Number(text.trim().replace(',', '.'));
 }
 
+// Message for a wrong price (written as text), or null when it is valid
+export function validatePrice(text) {
+  const price = text.trim();
+  if (!PRICE.test(price) || parsePrice(price) <= 0 || parsePrice(price) > MAX_PRICE) {
+    return 'Escribe un precio mayor que 0, con 2 decimales como máximo (por ejemplo 6,50).';
+  }
+  return null;
+}
+
 function validateCommon(form) {
   const errors = {};
   const name = form.name.trim();
@@ -22,9 +31,9 @@ function validateCommon(form) {
   } else if (name.length > MAX_NAME) {
     errors.name = `El nombre tiene como máximo ${MAX_NAME} caracteres.`;
   }
-  const price = form.price.trim();
-  if (!PRICE.test(price) || parsePrice(price) <= 0 || parsePrice(price) > MAX_PRICE) {
-    errors.price = 'Escribe un precio mayor que 0, con 2 decimales como máximo (por ejemplo 6,50).';
+  const priceError = validatePrice(form.price);
+  if (priceError) {
+    errors.price = priceError;
   }
   if (form.description.trim().length > MAX_DESCRIPTION) {
     errors.description = `La descripción tiene como máximo ${MAX_DESCRIPTION} caracteres.`;

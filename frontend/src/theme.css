@@ -1063,3 +1063,29 @@ img.user-avatar {
 .nav-user-name .role-badge {
   flex-shrink: 0;
 }
+
+/* Kombos of the window of a product that cannot be deactivated: the name and the price on the left, the buttons
+   one above the other on the right */
+.kombo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kombo-row-info {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.kombo-row-price {
+  width: 7rem;
+  flex: 0 0 auto;
+}
+
+.kombo-row-actions {
+  display: grid;
+  gap: 0.4rem;
+  flex: 0 0 8.5rem;
+}

@@ -98,6 +98,7 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - `cancellationFee` in the orders: money of a cancelled order that the restaurant keeps (0 when it was in preparation, not paid or cancelled by the restaurant), for the cash register closing.
 - Cancellation fee percentage in the settings (80 % by default), changed by the administrator in *Ajustes* (`cancellationFeePercent` in `GET` and `PUT /api/v1/settings`).
 - Tests of the cancellation and the phone rule: `OrderServiceTest`, `SettingsServiceTest`, `OrderServiceIT`, `OrderApiIT`, `delivery.test.js`, the page and service tests of the client, `orderService.integration.test.js` and `OrderHistoryE2E`.
+- Tests of the removal of a product from its kombos: `ProductServiceTest`, `ProductServiceIT`, `AdminProductApiIT`, `AdminProductsPage.test.jsx`, `productValidation.test.js`, `productService.integration.test.js` and `ProductManagementE2E`.
 
 ### Changed
 
@@ -158,6 +159,8 @@ Phase 3 - Version 0.1 (in progress). These changes will be published in the rele
 - The phone of an order is only required for home deliveries, for every user (also counter orders of the employees); it is optional to eat in or take away, in the client and in the server.
 - The payment of an order is shown as *Tarjeta - Pagado*, *Efectivo - Pendiente de pago*, *Tarjeta - Devuelto* (or the money given back and the fee), or *Efectivo - No cobrado* in the order detail, *Mis pedidos* and the order dashboard.
 - `PUT /api/v1/settings` requires `cancellationFeePercent` (0 to 100) besides `deliveryCost`.
+- The window shown when a product in active kombos cannot be deactivated lets the administrator remove the product from each kombo right there (*Quitar*, with a new price for the kombo), shows *Se queda con menos de 2 productos* with a *Desactivar kombo* button for a kombo that would keep fewer than 2 units, and deactivates the product from the window when no kombo is left. It uses the existing `PUT /api/v1/admin/combos/{id}` and `PATCH /api/v1/admin/products/{id}`.
+- `validatePrice` of the client is shared by the product and kombo forms and that window.
 
 ## Phase 2 - 2026-10-29
 
